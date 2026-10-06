@@ -1,0 +1,7 @@
+/* Base styles from the design's <helmet>. */
+body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#10151e;background:#f6f4ef;-webkit-font-smoothing:antialiased;}
+a{color:#a8863d;text-decoration:none;} a:hover{color:#10151e;}
+input,select,textarea,button{font-family:inherit;}
+::placeholder{color:#a39d8f;}
+/* Settings → Interaction audit: outline every interactive element. */
+[data-audit="on"] button,[data-audit="on"] select,[data-audit="on"] input,[data-audit="on"] textarea,[data-audit="on"] [data-click]{outline:1px dashed #a8863d;outline-offset:2px;}
