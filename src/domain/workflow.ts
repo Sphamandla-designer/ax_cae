@@ -60,6 +60,9 @@ export function researchCheck(db: Db, c: Company): Check & { inProgress: boolean
     missing.push("Source evidence or your confirmation that you verified the details");
   if (r && r.facts.some((f) => f.confidence === "Observed" && !f.source && f.sourceType !== "demo"))
     missing.push("A source for every Observed fact");
+  // The description feeds every later step, so it must be sourced unless you confirm it yourself.
+  if (desc && desc.status !== "Unknown" && !desc.source && desc.sourceType !== "demo" && r?.mode !== "demo" && r?.verification?.type !== "manual")
+    missing.push("A source for the company description, or your confirmation that you verified it");
   const ok = !!r && r.status === "complete" && missing.length === 0;
   return { ok, missing: r?.status === "complete" || missing.length ? missing : ["Complete research"], inProgress: !!r && !ok };
 }
@@ -207,7 +210,15 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
   if (accepted && !isClient) return mk("Record won outcome", "Proposal accepted — record the win", "outcome");
 
   const s = Object.fromEntries(steps13(db, c, today).map((d) => [d.key, d]));
-  if (!s.research.done) return mk("Research company", s.research.missing[0] || "Research not complete", "research");
+  if (!s.research.done) {
+    const r = currentResearch(db, cid);
+    const desc = factOf(r, "description");
+    const failed = r?.lastError && r.lastError.code !== "PARTIAL" ? r.lastError.code : null;
+    // Research already retrieved or entered: the next step is to review and complete it, not to research again.
+    if (r && r.status === "draft" && (r.mode === "automated" || (desc && desc.status !== "Unknown")))
+      return mk("Review and complete research", s.research.missing.filter((m) => m !== "Complete research")[0] || "Check the facts, then complete research", "research");
+    return mk("Research company", failed ? `Automated research failed (${failed}) — retry or research manually` : s.research.missing[0] || "Research not complete", "research");
+  }
   if (!s.assessment.done) return mk("Assess digital experience", s.assessment.missing[0], "assessment");
   if (!s.opportunity.done) return mk("Identify primary opportunity", s.opportunity.missing[0], "opportunity");
   if (!s.contacts.done) return mk("Identify decision-maker", s.contacts.missing[0], "contacts");
@@ -341,7 +352,7 @@ export function whyNow(db: Db, cid: string) {
   if (sig.length) return { text: sig[0].label, conf: sig[0].confidence };
   const worst = validScansOf(db, cid).slice().sort((a, b) => sevRank(b.severity) - sevRank(a.severity))[0];
   if (worst && sevRank(worst.severity) >= 3) return { text: worst.severity.toLowerCase() + " problem in " + worst.category.toLowerCase(), conf: worst.confidence };
-  return { text: "No urgency signal recorded", conf: "Assumption" };
+  return { text: "No urgency signal recorded", conf: null };
 }
 
 /** Profile completeness: required items for the current stage vs. recommended items. */

@@ -427,7 +427,8 @@ export function applyResearchResult(db: Db, cid: string, result: ResearchResult,
     .filter((f) => FIELD_NAMES.includes(f.field) && t(f.value))
     .map((f) => ({
       field: f.field,
-      value: f.field === "website" ? (normalizeWebsite(f.value) as any).url || t(f.value) : t(f.value),
+      // Keep exactly what was observed (e.g. http:// when the site has no working https).
+      value: t(f.value),
       // Provider facts are only Observed when they carry the page they came from.
       status: "Unverified",
       confidence: f.source ? (CONFIDENCES.includes(f.confidence) ? f.confidence : "Indicated") : "Assumption",

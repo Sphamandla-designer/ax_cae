@@ -70,17 +70,20 @@ export function draftMessage(db: Db, cid: string, variant: Variant, contactId?: 
   const offer = st?.entryOffer ? lc(stripDot(st.entryOffer)) : "a short write-up of what I found";
   const ask = st?.cta ? lc(stripDot(st.cta)) : "a 15-minute call";
   const notDm = !contact!.decisionMaker;
+  // An Indicated finding is a hypothesis: the message must say so, never present it as something seen.
+  const seen = scan!.confidence === "Observed";
+  const noticed = seen ? "noticed" : "it looks like there may be";
 
   let text = "";
   if (variant === "LinkedIn") {
     text =
-      `Hi ${first} — I was looking at ${c.name}'s ${cat} and noticed ${problem} (${evidence}).\n\n` +
+      `Hi ${first} — I was looking at ${c.name}'s ${cat} and ${noticed} ${problem} (${evidence}).\n\n` +
       (oppLine ? `It looks like there's a contained fix: ${lc(oppLine)}.\n\n` : "") +
       `I've put together ${offer}. Happy to send it over if useful.`;
   } else if (variant === "Email") {
     text =
       `Subject: ${c.name} — ${scan!.category.toLowerCase()}\n\nHi ${first},\n\n` +
-      `While reviewing ${c.name}'s ${cat} I noticed ${problem}. What I saw: ${evidence}.\n\n` +
+      `While reviewing ${c.name}'s ${cat} ${seen ? "I noticed" : "it looked like there may be"} ${problem}. ${seen ? "What I saw" : "What suggests it"}: ${evidence}.\n\n` +
       (opp?.consequence ? `If that holds up, it may be costing ${lc(stripDot(opp.consequence))}.\n\n` : "") +
       (oppLine ? `The opportunity as I see it: ${lc(oppLine)}.` + (value ? ` ${value}.` : "") + "\n\n" : value ? value + ".\n\n" : "") +
       `I'd rather show than tell, so I've prepared ${offer}. Would ${ask} be useful?\n\n— AX-Channels`;

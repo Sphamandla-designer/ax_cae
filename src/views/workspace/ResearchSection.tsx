@@ -49,6 +49,8 @@ function FactsTable({ r }: { r: Research }) {
               </>
             ) : f.sourceType === "demo" ? (
               "Source: demo dataset (fictional)"
+            ) : r.mode === "automated" ? (
+              `Source: none given by ${r.provider} — treated as an assumption${f.retrievedAt ? " · received " + fdatetime(f.retrievedAt) : ""}`
             ) : (
               "Source: entered manually — no source URL"
             )}
@@ -107,20 +109,20 @@ export default function ResearchSection({ d }: { d: DetailModel }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
       {d.provider.automated ? (
-        <Notice kind="info" title="Live research connected">
-          {d.provider.label}. Results are retrieved from the company's public pages; every fact keeps its source. Review them before completing.
+        <Notice kind="info" title="Automated research configured">
+          {d.provider.label}. Availability is checked when you run research. Results come from the company's public pages; every fact keeps its source. Review them before completing.
         </Notice>
       ) : (
         <Notice
           kind="warn"
-          title="Live company research is not configured."
+          title="Automated research unavailable"
           actions={
             <Button kind="secondary" small onClick={d.openSettings}>
               Configure research provider
             </Button>
           }
         >
-          {d.provider.problem ? d.provider.problem + " " : ""}Enter or verify company information manually. Manual research is recorded as manual — it is never labelled automated.
+          Reason: {(d.provider.problem || "research provider not configured").replace(/\.$/, "")}. Action: configure a research provider, or research manually — manual research is recorded as manual and never labelled automated.
         </Notice>
       )}
 
@@ -164,7 +166,7 @@ export default function ResearchSection({ d }: { d: DetailModel }) {
             </>
           }
         >
-          {err.message} {help.detail} No research was added. ({fdatetime(err.at)})
+          {err.message.includes(help.detail) ? err.message : err.message + " " + help.detail} No research was added. ({fdatetime(err.at)})
         </Notice>
       ) : null}
       {r?.lastError?.code === "PARTIAL" ? <Notice kind="warn" title="Partial research">{r.lastError.message} Fill the gaps manually or leave them Unknown.</Notice> : null}
@@ -211,7 +213,9 @@ export default function ResearchSection({ d }: { d: DetailModel }) {
           aside={
             <span style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
               {modeBadge(r)}
-              <Badge value={r.status === "complete" ? "Verified" : "Unverified"} title={r.status === "complete" ? "Research complete" : "Draft — not complete"} />
+              {r.lastError?.code === "PARTIAL" ? <Badge value="Partial" /> : null}
+              {r.lastError && r.lastError.code !== "PARTIAL" && !r.facts.some((f) => f.value && f.status !== "Unknown" && f.field !== "name" && f.field !== "website") ? <Badge value="Failed" title={"Last attempt failed: " + r.lastError.code} /> : null}
+              <Badge value={r.status === "complete" ? "Complete" : "Draft"} />
             </span>
           }
         >
@@ -242,7 +246,7 @@ export default function ResearchSection({ d }: { d: DetailModel }) {
 
       {r && r.status === "draft" && !editing ? (
         <Card title="Complete research">
-          {check.missing.length ? (
+          {check.missing.some((m) => m !== "Complete research") ? (
             <div style={{ fontSize: "12.5px", color: C.redDark, marginBottom: "8px" }}>
               Still missing:
               <ul style={{ margin: "4px 0 0", paddingLeft: "18px" }}>

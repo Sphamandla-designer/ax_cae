@@ -45,20 +45,45 @@ Research runs through one function, `researchCompany({ companyName, website, loc
 key, secret, token or password, and require `https` (except `localhost`). Put provider credentials on
 the server, in environment variables.
 
+### Standalone (offline) vs. connected to the research proxy
+
+| | Standalone HTML, no proxy | Connected to the research proxy |
+| --- | --- | --- |
+| Research screen says | **Automated research unavailable** — Reason: research provider not configured. Action: configure a research provider, or research manually. | **Automated research configured** (availability is checked when you run research) |
+| "Research company" button | Not shown | Shown |
+| How facts are recorded | You enter them, with source URLs; recorded as *manual* | Retrieved from the company's public pages; each fact keeps its source URL, retrieval time and a quote |
+| Everything else (workflow, outreach, follow-ups, pipeline, storage) | Works fully offline | Same |
+
+There is no silent fallback: if the proxy is down or misconfigured, research fails with a named error and
+nothing is added.
+
 ### Connect live research
 
 1. Start the reference proxy (Node 18+, no dependencies) on a machine with internet access:
 
    ```bash
-   node server/research-proxy.mjs                       # http://localhost:8787/research
-   PORT=9000 ALLOWED_ORIGIN=https://cae.example node server/research-proxy.mjs
+   node server/research-proxy.mjs                                   # http://127.0.0.1:8787/research
+   ALLOWED_ORIGIN=null node server/research-proxy.mjs               # only the standalone file (file:// sends Origin "null")
+   ALLOWED_ORIGIN=https://cae.example PORT=9000 node server/research-proxy.mjs
    ```
 
-   It fetches the home page plus up to three About / Services / Contact pages, respects robots.txt,
-   blocks private and internal addresses (SSRF protection), rate-limits requests, and returns only what
-   the pages say: JSON-LD organisation data, meta description, social and contact links, and site
-   signals (viewport, copyright year). Every fact carries its source URL and a supporting quote.
-   Optional variable: `PAGE_TIMEOUT_MS` (default 12000).
+   | Variable | Default | Meaning |
+   | --- | --- | --- |
+   | `PORT` | 8787 | Port |
+   | `HOST` | 127.0.0.1 | Listen address. The default accepts requests from this computer only. Use `0.0.0.0` only behind your own authentication. |
+   | `ALLOWED_ORIGIN` | `*` | Comma-separated browser origins allowed to call the proxy; others get HTTP 403. `null` = the standalone file. |
+   | `PAGE_TIMEOUT_MS` / `TOTAL_TIMEOUT_MS` | 12000 / 20000 | Per-page and whole-run time limits |
+   | `ALLOW_PRIVATE`, `HOST_OVERRIDES` | off | **Testing only.** Never set these in real use. |
+
+   What it does: fetches the home page (https, falling back to http once if https is unavailable) plus up to
+   three About / Services / Contact pages, honours robots.txt, and returns only what the pages say:
+   JSON-LD organisation data, meta description, social and contact links, and site observations
+   (https, viewport, copyright year). Every fact carries its source URL, retrieval time and a supporting quote.
+
+   Safety: only public http(s) sites on ports 80/443. Every connection, **including each redirect**, is
+   checked after DNS resolution, so loopback, private, link-local, carrier-grade NAT and cloud-metadata
+   addresses are refused. IP-address URLs, credentials in URLs and non-web schemes are refused. Limits:
+   20 requests per minute per client, 10 kB request bodies, 1.5 MB per page, 5 redirects.
 2. Point the CAE at it, either:
    - **Settings → Research provider → Proxy**, endpoint `http://localhost:8787/research`, or
    - edit the `window.CAE_CONFIG` block near the end of the HTML file:
@@ -118,6 +143,8 @@ returned without a source is downgraded to Assumption.
 | `src/views/` | Screens, the prospect workspace sections (`workspace/`), modals and UI primitives. |
 
 ## QA
+
+The final validation evidence (research cases, security tests, workflow checks) is in `docs/VALIDATION.md`.
 
 - Settings → QA → **Run self-test**: 56 checks on an isolated workspace (the live workspace is
   verified untouched afterwards).

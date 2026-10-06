@@ -6,22 +6,34 @@
 // and a supporting quote. It never guesses: anything it cannot find is simply not returned and the
 // CAE shows it as Unknown.
 //
-//   node server/research-proxy.mjs                 # http://localhost:8787/research
+//   node server/research-proxy.mjs                 # http://localhost:8787/research (this machine only)
 //   PORT=9000 ALLOWED_ORIGIN=https://cae.example node server/research-proxy.mjs
+//   HOST=0.0.0.0 …                                  # listen on the network (put it behind your own auth)
+//
+// Safety: only public http(s) sites on ports 80/443 are fetched. Every connection — including each
+// redirect hop — is checked after DNS resolution, so private, loopback, link-local and cloud-metadata
+// addresses are refused (no SSRF). Requests from a browser origin other than ALLOWED_ORIGIN are refused.
 //
 // Then in the CAE: Settings → Research provider → Proxy, endpoint http://localhost:8787/research
 // (or set window.CAE_CONFIG in the HTML file). Secrets for any paid provider you add belong here,
 // in environment variables — never in the HTML.
 import http from "node:http";
+import https from "node:https";
 import dns from "node:dns/promises";
 import net from "node:net";
+import zlib from "node:zlib";
 
 const PORT = Number(process.env.PORT || 8787);
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
+const HOST = process.env.HOST || "127.0.0.1";
+// "*" (default) allows any browser origin; otherwise a comma-separated list, e.g. "https://cae.example,null"
+// ("null" is what a page opened from file:// sends).
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || "*").split(",").map((s) => s.trim()).filter(Boolean);
 const ALLOW_PRIVATE = process.env.ALLOW_PRIVATE === "1"; // only for local testing
-// Local testing only: map a hostname to another origin, e.g. {"acme.test":"http://localhost:8901"}.
-const HOST_OVERRIDES = JSON.parse(process.env.HOST_OVERRIDES || "{}");
+// Local testing only (needs ALLOW_PRIVATE=1): map a hostname to another origin, e.g. {"acme.test":"http://localhost:8901"}.
+const HOST_OVERRIDES = ALLOW_PRIVATE ? JSON.parse(process.env.HOST_OVERRIDES || "{}") : {};
 const PAGE_TIMEOUT = Number(process.env.PAGE_TIMEOUT_MS || 12000);
+// The whole research run must finish before the CAE's own timeout (25s by default).
+const TOTAL_TIMEOUT = Number(process.env.TOTAL_TIMEOUT_MS || 20000);
 const MAX_BYTES = 1_500_000;
 const UA = "AX-Channels-CAE-Research/1.0 (+company research; respects robots.txt)";
 const PROVIDER = "AX research proxy";
@@ -44,11 +56,45 @@ function normalize(input) {
 }
 
 function isPrivate(ip) {
+  ip = ip.toLowerCase();
+  const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) ip = mapped[1];
   if (net.isIPv4(ip)) {
-    const [a, b] = ip.split(".").map(Number);
-    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224;
+    const [a, b, c] = ip.split(".").map(Number);
+    return (
+      a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 100 && b >= 64 && b <= 127) || // carrier-grade NAT
+      (a === 169 && b === 254) || // link-local, cloud metadata
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 192 && b === 0 && c === 0) ||
+      (a === 198 && (b === 18 || b === 19))
+    );
   }
-  return ip === "::1" || ip.startsWith("fc") || ip.startsWith("fd") || ip.startsWith("fe80");
+  return ip === "::" || ip === "::1" || /^(fc|fd|fe[89ab]|ff)/.test(ip) || ip.startsWith("::ffff:") || ip.startsWith("64:ff9b:");
+}
+
+/** Refuse anything but a public http(s) page on a standard port. Runs for the start URL and every redirect. */
+function checkTarget(u) {
+  if (u.protocol !== "http:" && u.protocol !== "https:") throw new Fail("BLOCKED", "Only http and https pages can be researched.");
+  if (u.username || u.password) throw new Fail("BLOCKED", "Addresses with credentials cannot be researched.");
+  if (ALLOW_PRIVATE) return;
+  const host = u.hostname.replace(/^\[|\]$/g, "");
+  if (net.isIP(host)) throw new Fail("BLOCKED", "IP addresses cannot be researched — use the company's domain name.");
+  if (!HOST_RE.test(host)) throw new Fail("INVALID_DOMAIN", `"${host}" is not a valid public domain.`);
+  if (u.port && u.port !== "80" && u.port !== "443") throw new Fail("BLOCKED", "Only standard web ports (80 and 443) can be researched.");
+}
+
+/** DNS lookup used for every connection: the address actually connected to is the one checked. */
+function guardedLookup(hostname, options, cb) {
+  dns.lookup(hostname, { all: true }).then(
+    (addrs) => {
+      if (!ALLOW_PRIVATE && addrs.some((a) => isPrivate(a.address))) return cb(Object.assign(new Error("private address"), { code: "EPRIVATE" }));
+      if (options && options.all) cb(null, addrs);
+      else cb(null, addrs[0].address, addrs[0].family);
+    },
+    (err) => cb(err),
+  );
 }
 
 const decode = (s) =>
@@ -76,37 +122,87 @@ class Fail extends Error {
   }
 }
 
-async function fetchPage(url) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), PAGE_TIMEOUT);
+/** One HTTP GET without following redirects. Body capped at MAX_BYTES; total time capped at timeoutMs. */
+function request(u, timeoutMs, accept) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (fn, v) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(v);
+    };
+    const req = (u.protocol === "https:" ? https : http).get(u, { headers: { "User-Agent": UA, Accept: accept, "Accept-Encoding": "gzip, deflate, br" }, lookup: guardedLookup }, (res) => {
+      const head = { status: res.statusCode || 0, headers: res.headers };
+      if (head.status >= 300 && head.status < 400) {
+        res.resume();
+        return finish(resolve, { ...head, body: "" });
+      }
+      const enc = String(res.headers["content-encoding"] || "").toLowerCase();
+      const stream = enc === "gzip" ? res.pipe(zlib.createGunzip()) : enc === "deflate" ? res.pipe(zlib.createInflate()) : enc === "br" ? res.pipe(zlib.createBrotliDecompress()) : res;
+      const chunks = [];
+      let size = 0;
+      const done = () => finish(resolve, { ...head, body: Buffer.concat(chunks).toString("utf8") });
+      stream.on("data", (c) => {
+        size += c.length;
+        if (size <= MAX_BYTES) chunks.push(c);
+        else {
+          done();
+          req.destroy();
+        }
+      });
+      stream.on("end", done);
+      stream.on("error", (e) => finish(reject, e));
+    });
+    const timer = setTimeout(() => {
+      req.destroy();
+      finish(reject, Object.assign(new Error("timeout"), { code: "ETIMEOUT" }));
+    }, Math.max(1, timeoutMs));
+    req.on("error", (e) => finish(reject, e));
+  });
+}
+
+/** GET with redirects followed by hand (max 5), each hop re-checked. */
+async function get(url, timeoutMs, accept = "text/html,application/xhtml+xml") {
+  let u = new URL(url);
+  for (let hop = 0; hop <= 5; hop++) {
+    checkTarget(u);
+    const r = await request(u, timeoutMs, accept);
+    if (r.status >= 300 && r.status < 400 && r.headers.location) {
+      u = new URL(r.headers.location, u);
+      continue;
+    }
+    return { ...r, url: u.toString() };
+  }
+  throw new Fail("SITE_UNAVAILABLE", "The site redirected too many times.");
+}
+
+async function fetchPage(url, deadline) {
+  const timeout = Math.min(PAGE_TIMEOUT, deadline - Date.now());
+  if (timeout <= 0) throw new Fail("TIMEOUT", "Research ran out of time.", true);
   try {
-    const res = await fetch(url, { redirect: "follow", signal: ctrl.signal, headers: { "User-Agent": UA, Accept: "text/html,application/xhtml+xml" } });
+    const res = await get(url, timeout);
     if (res.status === 401 || res.status === 403 || res.status === 451) throw new Fail("BLOCKED", `The site refused access (HTTP ${res.status}).`);
     if (res.status === 429) throw new Fail("RATE_LIMITED", "The site is rate limiting requests (HTTP 429).", true);
-    if (!res.ok) throw new Fail("HTTP_ERROR", `The site answered HTTP ${res.status}.`, res.status >= 500);
-    const type = res.headers.get("content-type") || "";
+    if (res.status < 200 || res.status >= 300) throw new Fail("HTTP_ERROR", `The site answered HTTP ${res.status}.`, res.status >= 500);
+    const type = String(res.headers["content-type"] || "");
     if (!/html|xml/i.test(type)) throw new Fail("EMPTY_RESULT", `The page is not HTML (${type || "unknown type"}).`);
-    const buf = await res.arrayBuffer();
-    return { url: res.url || String(url), html: new TextDecoder().decode(buf.slice(0, MAX_BYTES)), status: res.status, at: new Date().toISOString() };
+    return { url: res.url, html: res.body, status: res.status, at: new Date().toISOString() };
   } catch (e) {
     if (e instanceof Fail) throw e;
-    if (e.name === "AbortError") throw new Fail("TIMEOUT", `The site did not respond within ${PAGE_TIMEOUT / 1000}s.`, true);
-    const code = e.cause?.code || e.code || "";
-    if (code === "ENOTFOUND" || code === "EAI_AGAIN") throw new Fail("DNS_FAILURE", "The domain does not resolve (DNS lookup failed).");
+    const code = e.code || e.cause?.code || "";
+    if (code === "ETIMEOUT") throw new Fail("TIMEOUT", `The site did not respond within ${Math.round(timeout / 1000)}s.`, true);
+    if (code === "EPRIVATE") throw new Fail("BLOCKED", "The domain points to a private or internal address, which cannot be researched.");
+    if (code === "ENOTFOUND" || code === "EAI_AGAIN" || code === "ENODATA") throw new Fail("DNS_FAILURE", "The domain does not resolve (DNS lookup failed).");
     throw new Fail("SITE_UNAVAILABLE", `The site could not be reached (${code || e.message}).`, true);
-  } finally {
-    clearTimeout(timer);
   }
 }
 
 async function robotsAllows(origin) {
   try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 5000);
-    const res = await fetch(origin + "/robots.txt", { signal: ctrl.signal, headers: { "User-Agent": UA } });
-    clearTimeout(timer);
-    if (!res.ok) return true;
-    const lines = (await res.text()).split(/\r?\n/).map((l) => l.replace(/#.*/, "").trim());
+    const res = await get(origin + "/robots.txt", 5000, "text/plain");
+    if (res.status < 200 || res.status >= 300) return true;
+    const lines = res.body.split(/\r?\n/).map((l) => l.replace(/#.*/, "").trim());
     let applies = false;
     for (const l of lines) {
       const [k, ...rest] = l.split(":");
@@ -152,19 +248,20 @@ async function research({ companyName, website }) {
   let start = normalize(website);
   if (!start) throw new Fail("INVALID_DOMAIN", `"${website}" is not a valid website address.`);
   if (HOST_OVERRIDES[start.hostname.replace(/^www\./, "")]) start = new URL(HOST_OVERRIDES[start.hostname.replace(/^www\./, "")]);
-  if (!ALLOW_PRIVATE) {
-    try {
-      const addrs = await dns.lookup(start.hostname, { all: true });
-      if (addrs.some((a) => isPrivate(a.address))) throw new Fail("BLOCKED", "Private or internal addresses cannot be researched.");
-    } catch (e) {
-      if (e instanceof Fail) throw e;
-      if (e.code === "ENOTFOUND") throw new Fail("DNS_FAILURE", "The domain does not resolve (DNS lookup failed).");
-      // other resolver errors: let fetch report the real failure
-    }
+  checkTarget(start);
+  const deadline = Date.now() + TOTAL_TIMEOUT;
+  // Fetch the home page first so DNS, private-address and reachability failures are reported as such.
+  let home;
+  try {
+    home = await fetchPage(start.toString(), deadline);
+  } catch (e) {
+    // Some company sites still have no working https: try plain http once (recorded in the observations).
+    if (!(e instanceof Fail && e.code === "SITE_UNAVAILABLE" && start.protocol === "https:")) throw e;
+    const plain = new URL(start);
+    plain.protocol = "http:";
+    home = await fetchPage(plain.toString(), deadline);
   }
-  if (!(await robotsAllows(start.origin))) throw new Fail("BLOCKED", "The site's robots.txt disallows automated access.");
-
-  const home = await fetchPage(start.toString());
+  if (!(await robotsAllows(new URL(home.url).origin))) throw new Fail("BLOCKED", "The site's robots.txt disallows automated access.");
   const homeUrl = new URL(home.url);
   const facts = [];
   const sources = [{ url: home.url, title: clean(home.html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || ""), retrievedAt: home.at, sourceType: "website" }];
@@ -215,7 +312,7 @@ async function research({ companyName, website }) {
   for (const [kind, l] of wanted) {
     let page;
     try {
-      page = await fetchPage(l.url);
+      page = await fetchPage(l.url, deadline);
     } catch {
       continue; // a missing secondary page does not fail the research
     }
@@ -270,7 +367,8 @@ async function research({ companyName, website }) {
   // Structured data (application/ld+json) is not rendering code, so it does not count as JavaScript.
   const scripts = (home.html.match(/<script\b(?![^>]*application\/ld\+json)/gi) || []).length;
   const jsOnly = text.length < 200 && scripts > 0;
-  const meaningful = facts.filter((f) => !["website", "websiteObservations", "mobileObservations"].includes(f.field));
+  // A name guessed from the page title alone ("Under construction", "Home") is not company information.
+  const meaningful = facts.filter((f) => !["website", "websiteObservations", "mobileObservations"].includes(f.field) && !(f.field === "name" && f.confidence === "Indicated"));
   if (jsOnly && !meaningful.length) throw new Fail("JS_ONLY", "The home page renders its content with JavaScript, so there is almost no readable text.");
   if (!meaningful.length) throw new Fail("EMPTY_RESULT", "The site was reached but published no usable company information (no description, structured data or about page).");
 
@@ -293,16 +391,20 @@ async function research({ companyName, website }) {
 const hits = new Map();
 function limited(ip) {
   const now = Date.now();
+  if (hits.size > 5000) for (const [k, v] of hits) if (!v.some((t) => now - t < 60000)) hits.delete(k);
   const recent = (hits.get(ip) || []).filter((t) => now - t < 60000);
   recent.push(now);
   hits.set(ip, recent);
   return recent.length > 20;
 }
 
-function send(res, status, body) {
+const originAllowed = (origin) => ALLOWED_ORIGINS.includes("*") || origin === undefined || ALLOWED_ORIGINS.includes(origin);
+
+function sendJson(res, status, body, origin) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes("*") ? "*" : originAllowed(origin) && origin ? origin : ALLOWED_ORIGINS[0],
+    Vary: "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept",
     "Cache-Control": "no-store",
@@ -311,30 +413,36 @@ function send(res, status, body) {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === "OPTIONS") return send(res, 204, {});
-  if (req.method === "GET" && req.url === "/health") return send(res, 200, { ok: true, provider: PROVIDER });
-  if (req.method !== "POST" || !req.url.startsWith("/research")) return send(res, 404, { success: false, code: "PROVIDER_ERROR", error: "Use POST /research", retryable: false });
-  if (limited(req.socket.remoteAddress)) return send(res, 429, { success: false, code: "RATE_LIMITED", error: "Too many research requests — wait a minute.", retryable: true });
+  const origin = req.headers.origin;
+  const send = (status, body) => sendJson(res, status, body, origin);
+  if (!originAllowed(origin)) return send(403, { success: false, code: "PROVIDER_ERROR", error: `Origin ${origin} is not allowed by this research proxy (ALLOWED_ORIGIN).`, retryable: false });
+  if (req.method === "OPTIONS") return send(204, {});
+  if (req.method === "GET" && req.url === "/health") return send(200, { ok: true, provider: PROVIDER });
+  if (req.method !== "POST" || !req.url.startsWith("/research")) return send(404, { success: false, code: "PROVIDER_ERROR", error: "Use POST /research", retryable: false });
+  if (limited(req.socket.remoteAddress)) return send(429, { success: false, code: "RATE_LIMITED", error: "Too many research requests — wait a minute.", retryable: true });
+  if (!/application\/json/i.test(req.headers["content-type"] || "")) return send(415, { success: false, code: "PROVIDER_ERROR", error: "Send the request as application/json.", retryable: false });
   let raw = "";
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 10000) return send(res, 413, { success: false, code: "PROVIDER_ERROR", error: "Request too large", retryable: false });
+    if (raw.length > 10000) return send(413, { success: false, code: "PROVIDER_ERROR", error: "Request too large", retryable: false });
   }
   let input;
   try {
     input = JSON.parse(raw);
   } catch {
-    return send(res, 400, { success: false, code: "PROVIDER_ERROR", error: "Request body must be JSON.", retryable: false });
+    return send(400, { success: false, code: "PROVIDER_ERROR", error: "Request body must be JSON.", retryable: false });
   }
+  if (!input || typeof input !== "object" || typeof input.website !== "string") return send(400, { success: false, code: "INVALID_DOMAIN", error: "The request must include a website.", retryable: false });
   try {
-    const result = await research(input || {});
+    const result = await research(input);
     console.log(new Date().toISOString(), "ok", input.website, result.facts.length, "facts");
-    send(res, 200, result);
+    send(200, result);
   } catch (e) {
     const f = e instanceof Fail ? e : new Fail("PROVIDER_ERROR", "Unexpected error: " + e.message, true);
     console.log(new Date().toISOString(), "fail", input?.website, f.code, f.message);
-    send(res, 200, { success: false, code: f.code, error: f.message, retryable: f.retryable });
+    send(200, { success: false, code: f.code, error: f.message, retryable: f.retryable });
   }
 });
 
-server.listen(PORT, () => console.log(`CAE research proxy on http://localhost:${PORT}/research (origin ${ALLOWED_ORIGIN})`));
+server.requestTimeout = 60000;
+server.listen(PORT, HOST, () => console.log(`CAE research proxy on http://${HOST}:${PORT}/research (origins ${ALLOWED_ORIGINS.join(", ")})`));

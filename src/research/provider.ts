@@ -69,7 +69,7 @@ export const ERROR_HELP: Record<ResearchErrorCode, { title: string; detail: stri
   DNS_FAILURE: { title: "Domain not found", detail: "The domain does not resolve — it may be misspelt or no longer registered.", retryable: false },
   SITE_UNAVAILABLE: { title: "Website unavailable", detail: "We couldn't reach this company's website.", retryable: true },
   HTTP_ERROR: { title: "Website returned an error", detail: "The site responded with an HTTP error.", retryable: true },
-  BLOCKED: { title: "Website blocked automated access", detail: "The site refused the request (for example a bot wall).", retryable: false },
+  BLOCKED: { title: "Automated access refused", detail: "This address cannot be researched automatically. Open the website yourself and research manually.", retryable: false },
   JS_ONLY: { title: "Website needs JavaScript", detail: "The page has almost no readable content without running scripts.", retryable: false },
   RATE_LIMITED: { title: "Rate limited", detail: "Too many research requests — wait a minute and retry.", retryable: true },
   PROVIDER_ERROR: { title: "Research provider error", detail: "The research service reported an internal error.", retryable: true },

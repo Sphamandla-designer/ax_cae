@@ -15,8 +15,8 @@ function ResearchProviderCard({ v }: { v: VM }) {
       title="Research provider"
       aside={
         <Badge
-          value={info.automated ? "Observed" : "Unknown"}
-          title={info.automated ? "Automated research available" : "Manual research only"}
+          value={info.automated ? "Configured" : "Not configured"}
+          title={info.automated ? "Automated research configured — availability is checked when research runs" : "Manual research only"}
         />
       }
     >
@@ -95,7 +95,7 @@ export default function SettingsView({ v }: { v: VM }) {
         title="Workspace"
         aside={
           <Badge
-            value={ws.active === "live" ? "Verified" : "DEMO"}
+            value={ws.active === "live" ? "Live" : "DEMO"}
             title={ws.active === "live" ? "Live workspace" : "Demo workspace"}
           />
         }
@@ -216,7 +216,7 @@ export default function SettingsView({ v }: { v: VM }) {
         style={{ gridColumn: "span 2" }}
         aside={
           <Badge
-            value={v.integrity.ok ? "Verified" : "Assumption"}
+            value={v.integrity.ok ? "Clean" : "Problems found"}
             title={v.integrity.ok ? "No integrity problems" : "Integrity problems found"}
           />
         }

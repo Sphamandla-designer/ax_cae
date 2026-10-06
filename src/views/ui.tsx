@@ -324,6 +324,16 @@ const CONF: Record<string, [string, string, string]> = {
   Unverified: [C.goldText, C.goldBg, "Not verified yet"],
   Unknown: [C.grey, C.lineSoft, "Not found — unknown"],
   DEMO: ["#5b4a8a", "#ece8f6", "Demo dataset — fictional"],
+  // Record and system states (not provenance).
+  Complete: [C.green, C.greenBg, "Complete"],
+  Draft: [C.goldText, C.goldBg, "Draft — not complete"],
+  Partial: [C.goldText, C.goldBg, "Partial — some information could not be retrieved"],
+  Failed: [C.redDark, C.redBg, "Failed — nothing was retrieved"],
+  Live: [C.green, C.greenBg, "Live workspace — real prospects"],
+  Configured: [C.green, C.greenBg, "Configured"],
+  "Not configured": [C.grey, C.lineSoft, "Not configured"],
+  Clean: [C.green, C.greenBg, "No problems found"],
+  "Problems found": [C.redDark, C.redBg, "Problems found"],
 };
 /** Text + colour badge (colour is never the only signal). */
 export function Badge({ value, title }: { value: string; title?: string }) {

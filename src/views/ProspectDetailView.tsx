@@ -125,7 +125,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
           ? "DEMO"
           : research?.verification?.type === "manual"
             ? "Verified"
-            : "Observed"
+            : research?.facts.find((f) => f.field === "description")?.confidence || "Indicated"
         : null,
     ],
     ["Recommended approach", strategy?.angle || "No strategy yet", strategy ? "Hypothesis" : null],

@@ -343,7 +343,7 @@ export function BriefModal({ db, cid, onClose }: { db: Db; cid: string; onClose:
             <>
               {factOf(r, "description")?.value}{" "}
               <Badge
-                value={r?.mode === "demo" ? "DEMO" : r?.verification?.type === "manual" ? "Verified" : "Observed"}
+                value={r?.mode === "demo" ? "DEMO" : r?.verification?.type === "manual" ? "Verified" : factOf(r, "description")?.confidence || "Indicated"}
               />
             </>
           ) : (

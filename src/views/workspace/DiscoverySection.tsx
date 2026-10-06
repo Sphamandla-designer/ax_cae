@@ -45,7 +45,8 @@ export default function DiscoverySection({ d }: { d: DetailModel }) {
           !form ? (
             <span style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               <Button small onClick={() => open("schedule")}>Schedule discovery</Button>
-              <Button small kind="secondary" onClick={() => open("held")}>Record discovery</Button>
+              {/* Recording discovery records the scheduled meeting (if any) rather than creating a second one. */}
+              <Button small kind="secondary" onClick={() => open("held", meetings.find((m) => m.status === "Scheduled"))}>Record discovery</Button>
             </span>
           ) : null
         }
