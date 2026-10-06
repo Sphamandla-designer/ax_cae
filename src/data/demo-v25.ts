@@ -23,7 +23,7 @@ export const DEFAULT_TARGETS = {newProspects:5, qualified:3, outreach:5, followU
 export const TOUCH_PURPOSES = {1:'Initial observation', 2:'New value / insight', 3:'Relevant proof or concept', 4:'Close the loop'};
 
 // Evidence confidence per scan record (Observed = directly confirmed, Indicated = strong signal, Assumption = unconfirmed)
-const scanConfidence = {
+const scanConfidence: Record<string, string> = {
   sc1:'Observed', sc2:'Observed', sc3:'Observed', sc4:'Observed', sc5:'Observed',
   sc6:'Observed', sc7:'Observed', sc8:'Indicated', sc9:'Observed',
   sc10:'Observed', sc11:'Observed', sc12:'Observed',
@@ -31,18 +31,18 @@ const scanConfidence = {
   sc16:'Observed', sc17:'Indicated', sc18:'Assumption',
   sc19:'Observed', sc20:'Observed', sc21:'Indicated'
 };
-const signalConfidence = {
+const signalConfidence: Record<string, string> = {
   sg1:'Observed', sg2:'Observed', sg3:'Indicated', sg4:'Observed', sg5:'Observed',
   sg6:'Indicated', sg7:'Indicated', sg8:'Observed', sg9:'Observed', sg10:'Indicated', sg11:'Observed'
 };
 // When each company entered its current stage (drives stall detection)
-const stageSince = {
+const stageSince: Record<string, string> = {
   c1:'2026-08-04', c2:'2026-07-29', c3:'2026-08-05', c4:'2026-07-24', c5:'2026-07-30',
   c6:'2026-08-07', c7:'2026-08-07', c8:'2026-08-08', c9:'2026-07-25', c10:'2026-07-02',
   c11:'2026-05-20', c12:'2026-03-15', c13:'2026-06-10'
 };
 // Prospects not yet ready to contact, with the blocking reason
-const notReady = {
+const notReady: Record<string, string> = {
   c7:'Insufficient research', c10:'No evidence of need'
 };
 
@@ -54,10 +54,10 @@ db.scans.push(
   {id:'sc24', companyId:'c8', category:'Digital brand / Trust', status:'Average', severity:'Medium', problem:'Consultancy brand does not read as a product company', evidence:'Same brand system used for both offerings', opportunity:'Product brand + design system', impact:'Harder to charge product pricing', confidence:'Indicated'},
   {id:'sc25', companyId:'c8', category:'Mobile experience', status:'Average', severity:'Low', problem:'Marketing site fine on mobile; product not mobile-targeted', evidence:'Responsive site; beta is desktop-first by design', opportunity:'None needed for launch', impact:'—', confidence:'Observed'}
 );
-db.scans = db.scans.map(s => ({...s, confidence: s.confidence || scanConfidence[s.id] || 'Assumption'}));
-db.signals = db.signals.map(s => ({...s, confidence: signalConfidence[s.id] || 'Assumption'}));
-db.companies = db.companies.map(c => ({...c, stageSince: stageSince[c.id] || c.dateDiscovered, notReadyReason: notReady[c.id] || null, overrideNotReady:false}));
-db.outreach = db.outreach.map(o => ({...o, purpose: TOUCH_PURPOSES[o.touch] || 'Initial observation', outcome: o.status, responseNotes: o.response || ''}));
+db.scans = db.scans.map((s: any) => ({...s, confidence: s.confidence || scanConfidence[s.id] || 'Assumption'}));
+db.signals = db.signals.map((s: any) => ({...s, confidence: signalConfidence[s.id] || 'Assumption'}));
+db.companies = db.companies.map((c: any) => ({...c, stageSince: stageSince[c.id] || c.dateDiscovered, notReadyReason: notReady[c.id] || null, overrideNotReady:false}));
+db.outreach = db.outreach.map((o: any) => ({...o, purpose: (TOUCH_PURPOSES as Record<number, string>)[o.touch] || 'Initial observation', outcome: o.status, responseNotes: o.response || ''}));
 db.targets = {...DEFAULT_TARGETS};
 // Structured outcome records for closed prospects (collected data — not automated learning)
 db.outcomes = [

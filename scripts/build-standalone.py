@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / 'dist'
-OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'CAE-V2.5.1-standalone.html'
+OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'CAE-V3-standalone.html'
 FONT_CSS = 'https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
 

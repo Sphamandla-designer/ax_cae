@@ -30,7 +30,7 @@ export const NEXT_ACTIONS_BY_STAGE = {
 const db = JSON.parse(JSON.stringify(v1));
 
 // --- Decision-maker intelligence: enrich existing contacts, add secondary contacts ---
-const contactExtras = {
+const contactExtras: Record<string, any> = {
   p1:{department:'Operations', role:'Decision Maker', influence:'High', relationship:'Warm — proposal in hand', lastContacted:'2026-08-04', preferredChannel:'Email', notes:'Championing the permit system internally. Wants board-ready numbers.'},
   p2:{department:'Executive', role:'Decision Maker', influence:'High', relationship:'Warm — discovery booked', lastContacted:'2026-07-29', preferredChannel:'LinkedIn', notes:'Direct, numbers-driven. Hates agency fluff.'},
   p3:{department:'Sales', role:'Influencer', influence:'Medium', relationship:'Cold — one touch, no reply', lastContacted:'2026-08-05', preferredChannel:'Email', notes:'Owner (MD) signs off — Pieter can open the door.'},
@@ -45,7 +45,7 @@ const contactExtras = {
   p12:{department:'Executive', role:'Decision Maker', influence:'High', relationship:'Client — strong', lastContacted:'2026-07-28', preferredChannel:'WhatsApp', notes:'Open to patient-app pitch after Q3 results.'},
   p13:{department:'Management', role:'Influencer', influence:'Medium', relationship:'Lost — revisit 2027', lastContacted:'2026-06-20', preferredChannel:'Email', notes:''}
 };
-db.contacts = db.contacts.map(c => ({...c, ...contactExtras[c.id]}));
+db.contacts = db.contacts.map((c: any) => ({...c, ...contactExtras[c.id]}));
 db.contacts.push(
   {id:'p14', companyId:'c1', name:'Annelie Fourie', title:'PA to Operations Director', email:'a.fourie@karooridge.co.za', phone:'+27 53 723 1180', linkedin:'—', decisionMaker:false, department:'Operations', role:'Gatekeeper', influence:'Medium', relationship:'Neutral — books Johan\u2019s calls', lastContacted:'2026-08-04', preferredChannel:'Phone', notes:'Best route to Johan\u2019s diary.'},
   {id:'p15', companyId:'c2', name:'Sizwe Mthembu', title:'Operations Manager', email:'sizwe@umzansifreight.co.za', phone:'+27 71 884 2209', linkedin:'linkedin.com/in/sizwemthembu', decisionMaker:false, department:'Operations', role:'Champion', influence:'Medium', relationship:'Positive — feels the pain daily', lastContacted:'2026-07-29', preferredChannel:'WhatsApp', notes:'Fields the status calls. Will champion the portal.'},
@@ -53,7 +53,7 @@ db.contacts.push(
 );
 
 // --- Opportunities: type taxonomy + matrix placement (impact from scores; complexity recorded) ---
-const oppExtras = {
+const oppExtras: Record<string, any> = {
   o1:{type:'Internal system', group:'Business Systems', complexity:'High'},
   o2:{type:'Customer portal', group:'Business Systems', complexity:'High'},
   o3:{type:'Website redesign', group:'Websites', complexity:'Low'},
@@ -64,7 +64,7 @@ const oppExtras = {
   o9:{type:'Intelligent dashboard', group:'AI & Automation', complexity:'High'},
   o12:{type:'Mobile app', group:'Product Design', complexity:'High'}
 };
-db.opportunities = db.opportunities.map(o => ({...o, ...oppExtras[o.id]}));
+db.opportunities = db.opportunities.map((o: any) => ({...o, ...oppExtras[o.id]}));
 db.opportunities.push(
   {id:'o1b', companyId:'c1', problems:['Poor dashboard experience'], opportunity:'Shift-ops reporting dashboard on existing production data — fast standalone win.', service:'Dashboard', type:'Dashboard', group:'Business Systems', valueBand:'Medium', estValue:150000, complexity:'Low', scores:{severity:4,impact:5,fit:5,budget:4,likelihood:4}},
   {id:'o7', companyId:'c7', problems:['Outdated website'], opportunity:'Vacancy listing page with unit specs and enquiry capture.', service:'Website', type:'Landing pages', group:'Websites', valueBand:'Low', estValue:45000, complexity:'Low', scores:{severity:2,impact:2,fit:3,budget:2,likelihood:2}},

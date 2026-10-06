@@ -1,4 +1,5 @@
 import { addDays, daysBetween } from "../lib/dates";
+import { migrateLegacy } from "./migrate";
 import * as demo from "./demo-v25";
 import type { Db } from "./types";
 
@@ -36,15 +37,16 @@ function shiftDates<T>(value: T, days: number): T {
   return value;
 }
 
+/** The demo workspace: fictional companies, every record flagged isDemo. */
 export function demoDb(today: string): Db {
-  return shiftDates(JSON.parse(JSON.stringify(demo.db)) as Db, daysBetween(demo.TODAY, today));
+  return migrateLegacy(shiftDates(demo.db, daysBetween(demo.TODAY, today)), true, today);
 }
 
-export function emptyDb(): Db {
-  const base = demoDb(demo.TODAY);
+/** An empty live workspace. Templates are product content and carry over; nothing else does. */
+export function emptyDb(targets = { ...demo.DEFAULT_TARGETS }): Db {
   return {
-    ...base,
     companies: [],
+    research: [],
     contacts: [],
     opportunities: [],
     outreach: [],
@@ -53,10 +55,14 @@ export function emptyDb(): Db {
     proposals: [],
     clients: [],
     activities: [],
+    templates: JSON.parse(JSON.stringify(demo.db.templates)),
     scans: [],
     signals: [],
     strategies: [],
     whys: [],
+    campaigns: [],
     outcomes: [],
+    targets,
+    notes: {},
   };
 }

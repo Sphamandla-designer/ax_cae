@@ -9,7 +9,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "strict": false,
+    "strict": true,
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client"]
   },

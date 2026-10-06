@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AX-Channels · Client Acquisition Engine</title>
+    <meta name="description" content="AX-Channels Client Acquisition Engine (CAE) V3" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap"
@@ -11,6 +12,16 @@
     />
   </head>
   <body>
+    <script>
+      // Research provider configuration. Edit this block in the standalone file to connect live research.
+      //   mode "manual" — no automated research (default). The CAE says so and you research by hand.
+      //   mode "proxy"  — POST to your research server, e.g. node server/research-proxy.mjs
+      //   mode "api"    — POST to a hosted, browser-safe endpoint implementing the same contract.
+      // Never put API keys or tokens here: anything secret belongs on the proxy server.
+      window.CAE_CONFIG = {
+        researchProvider: { mode: "manual", endpoint: "", timeoutMs: 25000 },
+      };
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
