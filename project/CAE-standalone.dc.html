@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<meta name="ext-resource-dependency" content="./cae-data.js" data-resource-id="caeData" />
+<template id="__bundler_thumbnail" data-bg-color="#0c1220">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0c1220"></rect>
+    <text x="600" y="380" text-anchor="middle" font-family="Georgia,serif" font-size="96" font-weight="600" fill="#ffffff">AX&#8212;Channels</text>
+    <text x="600" y="460" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="30" letter-spacing="12" fill="#a8863d">CLIENT ACQUISITION ENGINE</text>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#10151e;background:#f6f4ef;-webkit-font-smoothing:antialiased;}
+a{color:#a8863d;text-decoration:none;} a:hover{color:#10151e;}
+input,select,textarea,button{font-family:inherit;}
+::placeholder{color:#a39d8f;}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;overflow:hidden;background:#f6f4ef;">
+  <!-- SIDEBAR -->
+  <div style="width:230px;flex:none;background:#0c1220;color:#e8e6e0;display:flex;flex-direction:column;">
+    <div style="padding:22px 20px 18px 20px;border-bottom:1px solid rgba(255,255,255,.08);">
+      <div style="font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-weight:600;letter-spacing:.01em;color:#fff;">AX&#8212;Channels</div>
+      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#a8863d;margin-top:5px;">Client Acquisition Engine</div>
+    </div>
+    <div style="padding:14px 10px;display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="10">
+        <div onClick="{{ n.on }}" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:13.5px;color:{{ n.color }};background:{{ n.bg }};border-left:2px solid {{ n.edge }};" style-hover="color:#ffffff;">
+          <span>{{ n.label }}</span>
+          <sc-if value="{{ n.count }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:10.5px;background:#a8863d;color:#0c1220;font-weight:700;border-radius:9px;padding:1px 7px;">{{ n.count }}</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);">
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);">Signed in</div>
+      <div style="font-size:13px;color:#fff;margin-top:4px;">Sipho M. &#183; Business Dev</div>
+      <div style="margin-top:10px;display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#a8863d;border:1px solid rgba(168,134,61,.45);border-radius:3px;padding:3px 8px;">Demo data</div>
+    </div>
+  </div>
+  <!-- MAIN -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- TOPBAR -->
+    <div style="height:58px;flex:none;background:#fff;border-bottom:1px solid #e6e2d8;display:flex;align-items:center;gap:16px;padding:0 24px;position:relative;z-index:30;">
+      <div style="font-family:'Source Serif 4',Georgia,serif;font-size:17px;font-weight:600;">{{ viewTitle }}</div>
+      <div style="flex:1;"></div>
+      <div style="position:relative;width:300px;">
+        <input value="{{ search }}" onChange="{{ setSearch }}" placeholder="Search companies, contacts&#8230;" style="width:100%;box-sizing:border-box;border:1px solid #e6e2d8;border-radius:4px;padding:7px 12px;font-size:13px;background:#f6f4ef;outline:none;color:#10151e;" />
+        <sc-if value="{{ hasSearch }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:38px;left:0;right:0;background:#fff;border:1px solid #e6e2d8;border-radius:5px;box-shadow:0 8px 24px rgba(16,21,30,.08);overflow:hidden;">
+            <sc-for list="{{ searchResults }}" as="r" hint-placeholder-count="0">
+              <div onClick="{{ r.on }}" style="padding:9px 12px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;border-bottom:1px solid #f0ede4;" style-hover="background:#f6f4ef;">
+                <span style="font-weight:500;">{{ r.name }}</span><span style="color:#8a8474;font-size:12px;">{{ r.meta }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <div style="position:relative;">
+        <div onClick="{{ toggleBell }}" style="width:34px;height:34px;border:1px solid #e6e2d8;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fff;position:relative;" style-hover="background:#f6f4ef;">
+          <span style="font-size:15px;">&#9702;</span>
+          <sc-if value="{{ bellCount }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:-6px;right:-6px;background:#b0453c;color:#fff;font-size:10px;font-weight:700;border-radius:9px;padding:1px 5px;">{{ bellCount }}</span>
+          </sc-if>
+        </div>
+        <sc-if value="{{ showBell }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:42px;right:0;width:330px;background:#fff;border:1px solid #e6e2d8;border-radius:6px;box-shadow:0 10px 28px rgba(16,21,30,.1);overflow:hidden;">
+            <div style="padding:10px 14px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;border-bottom:1px solid #f0ede4;">Notifications</div>
+            <sc-for list="{{ bellItems }}" as="b" hint-placeholder-count="3">
+              <div onClick="{{ b.on }}" style="padding:10px 14px;border-bottom:1px solid #f0ede4;cursor:pointer;" style-hover="background:#f6f4ef;">
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:{{ b.color }};font-weight:600;">{{ b.tag }}</div>
+                <div style="font-size:13px;margin-top:3px;color:#10151e;">{{ b.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      <button onClick="{{ openAdd }}" style="background:#0c1220;color:#fff;border:none;border-radius:4px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;" style-hover="background:#a8863d;">+ Add prospect</button>
+    </div>
+    <!-- CONTENT -->
+    <div style="flex:1;overflow-y:auto;padding:24px;">
+
+      <!-- ============ DASHBOARD ============ -->
+      <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-size:13px;color:#6b6f78;">What should you do next to get a client &#8212; {{ todayLabel }}</div>
+          <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;">Find &#8594; Qualify &#8594; Diagnose &#8594; Outreach &#8594; Discovery &#8594; Proposal &#8594; Won</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="8">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:14px 16px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;font-weight:600;">{{ k.label }}</div>
+              <div style="font-family:'Source Serif 4',Georgia,serif;font-size:26px;font-weight:600;margin-top:6px;">{{ k.value }}</div>
+              <div style="font-size:11.5px;color:#8a8474;margin-top:2px;">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;margin-top:16px;padding:16px 18px;">
+          <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Acquisition pipeline</div>
+          <div style="display:flex;gap:6px;margin-top:14px;">
+            <sc-for list="{{ funnelStages }}" as="s" hint-placeholder-count="9">
+              <div onClick="{{ s.on }}" style="flex:1;text-align:center;padding:10px 4px;border-radius:4px;cursor:pointer;background:{{ s.bg }};border:1px solid {{ s.border }};" style-hover="border-color:#a8863d;">
+                <div style="font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;color:{{ s.fg }};">{{ s.count }}</div>
+                <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:{{ s.sub }};margin-top:3px;">{{ s.name }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:16px;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 18px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Today&#8217;s actions</span>
+                <span style="font-size:11.5px;color:#8a8474;">{{ actionCount }} items</span>
+              </div>
+              <sc-for list="{{ actions }}" as="a" hint-placeholder-count="5">
+                <div onClick="{{ a.on }}" style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #f0ede4;cursor:pointer;" style-hover="background:#faf9f5;">
+                  <span style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:{{ a.tagFg }};background:{{ a.tagBg }};border-radius:3px;padding:3px 7px;flex:none;width:74px;text-align:center;">{{ a.tag }}</span>
+                  <span style="font-size:13.5px;flex:1;">{{ a.text }}</span>
+                  <span style="font-size:12px;color:#8a8474;">{{ a.company }}</span>
+                  <span style="color:#a8863d;font-size:13px;">&#8594;</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 18px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Priority prospects</div>
+              <sc-for list="{{ priority }}" as="p" hint-placeholder-count="5">
+                <div onClick="{{ p.on }}" style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #f0ede4;cursor:pointer;" style-hover="background:#faf9f5;">
+                  <span style="width:26px;height:26px;border-radius:3px;background:{{ p.gradeBg }};color:{{ p.gradeFg }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none;">{{ p.grade }}</span>
+                  <span style="flex:1;min-width:0;">
+                    <span style="display:block;font-size:13.5px;font-weight:500;">{{ p.name }}</span>
+                    <span style="display:block;font-size:11.5px;color:#8a8474;margin-top:1px;">{{ p.meta }}</span>
+                  </span>
+                  <span style="font-size:12px;color:#6b6f78;text-align:right;">{{ p.next }}</span>
+                  <span style="font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:600;width:88px;text-align:right;">{{ p.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#0c1220;border-radius:6px;color:#e8e6e0;padding:16px 18px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Pipeline forecast</div>
+              <sc-for list="{{ forecast }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);">
+                  <span style="font-size:12.5px;color:rgba(255,255,255,.65);">{{ f.label }}</span>
+                  <span style="font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-weight:600;color:#fff;">{{ f.value }}</span>
+                </div>
+              </sc-for>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:10px;">Weighted = proposal value &#215; probability</div>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 18px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Recent activity</div>
+              <sc-for list="{{ activity }}" as="ac" hint-placeholder-count="6">
+                <div style="padding:10px 18px;border-bottom:1px solid #f0ede4;">
+                  <div style="display:flex;justify-content:space-between;">
+                    <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">{{ ac.kind }}</span>
+                    <span style="font-size:11px;color:#a39d8f;">{{ ac.when }}</span>
+                  </div>
+                  <div style="font-size:12.5px;margin-top:3px;color:#3a3f48;">{{ ac.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ PROSPECTS LIST ============ -->
+      <sc-if value="{{ isProspects }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <sc-for list="{{ savedViews }}" as="v" hint-placeholder-count="6">
+            <div onClick="{{ v.on }}" style="font-size:12px;padding:6px 12px;border-radius:14px;cursor:pointer;border:1px solid {{ v.border }};background:{{ v.bg }};color:{{ v.fg }};" style-hover="border-color:#a8863d;">{{ v.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;">
+          <select value="{{ fIndustry }}" onChange="{{ setFIndustry }}" style="border:1px solid #e6e2d8;border-radius:4px;padding:7px 10px;font-size:12.5px;background:#fff;color:#10151e;">
+            <sc-for list="{{ industryFilterOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+          <select value="{{ fStage }}" onChange="{{ setFStage }}" style="border:1px solid #e6e2d8;border-radius:4px;padding:7px 10px;font-size:12.5px;background:#fff;color:#10151e;">
+            <sc-for list="{{ stageFilterOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+          <select value="{{ fGrade }}" onChange="{{ setFGrade }}" style="border:1px solid #e6e2d8;border-radius:4px;padding:7px 10px;font-size:12.5px;background:#fff;color:#10151e;">
+            <sc-for list="{{ gradeFilterOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+          <select value="{{ fSource }}" onChange="{{ setFSource }}" style="border:1px solid #e6e2d8;border-radius:4px;padding:7px 10px;font-size:12.5px;background:#fff;color:#10151e;">
+            <sc-for list="{{ sourceFilterOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+          <div onClick="{{ clearFilters }}" style="font-size:12px;color:#a8863d;cursor:pointer;">Clear</div>
+          <div style="flex:1;"></div>
+          <div style="font-size:12.5px;color:#8a8474;">{{ prospectCount }} prospects</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:2fr 1.1fr 1.4fr 1fr 72px 1.1fr 1.5fr 100px;gap:10px;padding:10px 18px;border-bottom:1px solid #e6e2d8;background:#faf9f5;">
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Company</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Industry</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Contact</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Source</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Score</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Stage</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Next action</span>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;text-align:right;">Est. value</span>
+          </div>
+          <sc-for list="{{ prospects }}" as="p" hint-placeholder-count="8">
+            <div onClick="{{ p.on }}" style="display:grid;grid-template-columns:2fr 1.1fr 1.4fr 1fr 72px 1.1fr 1.5fr 100px;gap:10px;padding:12px 18px;border-bottom:1px solid #f0ede4;cursor:pointer;align-items:center;" style-hover="background:#faf9f5;">
+              <span style="font-size:13.5px;font-weight:500;">{{ p.name }}</span>
+              <span style="font-size:12.5px;color:#6b6f78;">{{ p.industry }}</span>
+              <span style="font-size:12.5px;color:#6b6f78;">{{ p.contact }}</span>
+              <span style="font-size:12.5px;color:#6b6f78;">{{ p.source }}</span>
+              <span><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:22px;height:22px;border-radius:3px;background:{{ p.gradeBg }};color:{{ p.gradeFg }};display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">{{ p.grade }}</span><span style="font-size:12px;color:#6b6f78;">{{ p.score }}</span></span></span>
+              <span><span style="font-size:11px;border:1px solid #e6e2d8;border-radius:3px;padding:3px 8px;color:#3a3f48;background:#faf9f5;">{{ p.stage }}</span></span>
+              <span style="font-size:12.5px;color:{{ p.nextColor }};">{{ p.next }}</span>
+              <span style="font-family:'Source Serif 4',Georgia,serif;font-size:13.5px;font-weight:600;text-align:right;">{{ p.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ PROSPECT DETAIL ============ -->
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ back }}" style="font-size:12.5px;color:#a8863d;cursor:pointer;margin-bottom:14px;">&#8592; Back to prospects</div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:20px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:240px;">
+            <div style="font-family:'Source Serif 4',Georgia,serif;font-size:26px;font-weight:600;">{{ sel.name }}</div>
+            <div style="font-size:12.5px;color:#8a8474;margin-top:4px;">{{ sel.meta }}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Lead score</div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:5px;justify-content:center;"><span style="width:28px;height:28px;border-radius:3px;background:{{ sel.gradeBg }};color:{{ sel.gradeFg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">{{ sel.grade }}</span><span style="font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;">{{ sel.score }}<span style="font-size:13px;color:#8a8474;">/25</span></span></div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Stage</div>
+            <select value="{{ sel.stage }}" onChange="{{ setSelStage }}" style="margin-top:6px;border:1px solid #e6e2d8;border-radius:4px;padding:6px 10px;font-size:12.5px;background:#faf9f5;color:#10151e;">
+              <sc-for list="{{ stageOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+            </select>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Priority</div>
+            <div style="margin-top:8px;font-size:12px;font-weight:600;color:{{ sel.prioFg }};">{{ sel.priority }}</div>
+          </div>
+        </div>
+        <div style="background:#0c1220;border-radius:6px;margin-top:14px;padding:16px 22px;display:flex;align-items:center;gap:18px;color:#fff;">
+          <div style="flex:1;">
+            <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a8863d;font-weight:700;">Next action</div>
+            <div style="font-family:'Source Serif 4',Georgia,serif;font-size:19px;font-weight:600;margin-top:4px;">{{ sel.next }}</div>
+          </div>
+          <div style="font-size:12.5px;color:{{ sel.nextDueColor }};">Due {{ sel.nextDue }}</div>
+          <button onClick="{{ completeNext }}" style="background:#a8863d;color:#0c1220;border:none;border-radius:4px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;" style-hover="background:#fff;">Mark done</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-top:16px;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 20px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Company overview</div>
+              <div style="font-size:13.5px;line-height:1.55;margin-top:10px;color:#3a3f48;">{{ sel.description }}</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;">
+                <sc-for list="{{ sel.facts }}" as="f" hint-placeholder-count="4">
+                  <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">{{ f.k }}</div><div style="font-size:12.5px;margin-top:3px;">{{ f.v }}</div></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 20px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Qualification &#183; {{ sel.score }}/25</div>
+              <sc-for list="{{ qualDims }}" as="d" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid #f0ede4;">
+                  <span style="font-size:13px;flex:1;">{{ d.label }}</span>
+                  <span style="display:flex;gap:5px;">
+                    <sc-for list="{{ d.dots }}" as="dot" hint-placeholder-count="5">
+                      <span onClick="{{ dot.on }}" title="{{ dot.n }}" style="width:16px;height:16px;border-radius:8px;cursor:pointer;border:1px solid {{ dot.border }};background:{{ dot.bg }};" style-hover="border-color:#a8863d;"></span>
+                    </sc-for>
+                  </span>
+                  <span style="font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:600;width:34px;text-align:right;">{{ d.val }}/5</span>
+                </div>
+              </sc-for>
+              <div style="font-size:11.5px;color:#8a8474;margin-top:10px;">20&#8211;25 = A &#183; 15&#8211;19 = B &#183; 10&#8211;14 = C &#183; 0&#8211;9 = Low priority</div>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Digital opportunity</span>
+                <sc-if value="{{ sel.hasOpp }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#8a8474;">Opportunity score <span style="font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:600;color:#10151e;">{{ sel.oppScore }}/25</span></span></sc-if>
+              </div>
+              <div style="margin-top:12px;">
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;margin-bottom:8px;">Current digital experience</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;">
+                  <sc-for list="{{ sel.digital }}" as="d" hint-placeholder-count="6">
+                    <div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;border-bottom:1px solid #f0ede4;padding:5px 0;"><span style="color:#8a8474;">{{ d.k }}</span><span style="text-align:right;">{{ d.v }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ sel.hasOpp }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px;">
+                  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Problems identified</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+                    <sc-for list="{{ sel.problems }}" as="pr" hint-placeholder-count="3">
+                      <span style="font-size:11.5px;background:#f6f0e0;color:#7a5f24;border-radius:3px;padding:4px 9px;">{{ pr }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;margin-top:14px;">Opportunity</div>
+                  <div style="font-size:13.5px;line-height:1.55;margin-top:5px;color:#3a3f48;">{{ sel.oppText }}</div>
+                  <div style="display:flex;gap:26px;margin-top:14px;flex-wrap:wrap;">
+                    <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Recommended service</div><div style="font-size:13px;margin-top:4px;font-weight:500;">{{ sel.service }}</div></div>
+                    <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Value band</div><div style="font-size:13px;margin-top:4px;">{{ sel.valueBand }}</div></div>
+                    <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;">Estimated value</div><div style="font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;margin-top:2px;">{{ sel.oppValue }}</div></div>
+                  </div>
+                </div>
+              </sc-if>
+              <button onClick="{{ genBrief }}" style="margin-top:16px;background:#0c1220;color:#fff;border:none;border-radius:4px;padding:9px 16px;font-size:12.5px;font-weight:500;cursor:pointer;" style-hover="background:#a8863d;">Generate opportunity brief</button>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 20px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Outreach history</div>
+              <sc-for list="{{ sel.outreach }}" as="o" hint-placeholder-count="2">
+                <div style="padding:12px 20px;border-bottom:1px solid #f0ede4;">
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#3a3f48;background:#f0ede4;border-radius:3px;padding:3px 7px;">{{ o.channel }}</span>
+                    <span style="font-size:11px;color:#8a8474;">{{ o.touchLabel }}</span>
+                    <span style="flex:1;"></span>
+                    <span style="font-size:11px;color:#8a8474;">{{ o.date }}</span>
+                    <span style="font-size:10.5px;font-weight:700;color:{{ o.statusFg }};">{{ o.status }}</span>
+                  </div>
+                  <div style="font-size:13px;margin-top:6px;color:#3a3f48;">{{ o.message }}</div>
+                  <sc-if value="{{ o.response }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;margin-top:4px;color:#2e7d5b;">&#8617; {{ o.response }}</div></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sel.noOutreach }}" hint-placeholder-val="{{ false }}"><div style="padding:14px 20px;font-size:12.5px;color:#8a8474;">No outreach yet &#8212; use a template to start Touch 1.</div></sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 20px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Notes</div>
+              <textarea value="{{ sel.note }}" onChange="{{ setNote }}" placeholder="Internal notes on this prospect&#8230;" style="width:100%;box-sizing:border-box;margin-top:10px;border:1px solid #e6e2d8;border-radius:4px;padding:10px 12px;font-size:13px;min-height:84px;resize:vertical;background:#faf9f5;color:#10151e;outline:none;"></textarea>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 20px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Contact</div>
+              <div style="margin-top:10px;">
+                <div style="font-size:14.5px;font-weight:600;">{{ sel.contactName }}</div>
+                <div style="font-size:12.5px;color:#6b6f78;margin-top:2px;">{{ sel.contactTitle }}</div>
+                <sc-if value="{{ sel.isDM }}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#2e7d5b;background:#e8f2ec;border-radius:3px;padding:3px 8px;margin-top:7px;">Decision-maker</div></sc-if>
+                <sc-if value="{{ sel.notDM }}" hint-placeholder-val="{{ false }}"><div style="display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#8a8474;background:#f0ede4;border-radius:3px;padding:3px 8px;margin-top:7px;">Not the decision-maker</div></sc-if>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:#3a3f48;">
+                  <span>{{ sel.contactEmail }}</span><span>{{ sel.contactPhone }}</span><span style="color:#8a8474;">{{ sel.contactLinkedin }}</span>
+                </div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 20px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Open tasks</div>
+              <sc-for list="{{ sel.tasks }}" as="t" hint-placeholder-count="2">
+                <div style="display:flex;gap:10px;padding:10px 20px;border-bottom:1px solid #f0ede4;align-items:center;">
+                  <span onClick="{{ t.on }}" style="width:16px;height:16px;border-radius:8px;border:1.5px solid #b8b2a2;cursor:pointer;flex:none;" style-hover="border-color:#a8863d;background:#f6f0e0;"></span>
+                  <span style="flex:1;font-size:13px;">{{ t.title }}</span>
+                  <span style="font-size:11px;color:{{ t.dueFg }};">{{ t.due }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sel.noTasks }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 20px;font-size:12.5px;color:#8a8474;">No open tasks.</div></sc-if>
+            </div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;">
+              <div style="padding:14px 20px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Activity timeline</div>
+              <sc-for list="{{ sel.acts }}" as="a" hint-placeholder-count="3">
+                <div style="padding:10px 20px;border-bottom:1px solid #f0ede4;">
+                  <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8a8474;font-weight:600;">{{ a.kind }} &#183; {{ a.when }}</div>
+                  <div style="font-size:12.5px;margin-top:3px;color:#3a3f48;">{{ a.text }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sel.noActs }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 20px;font-size:12.5px;color:#8a8474;">No activity yet.</div></sc-if>
+            </div>
+            <div style="background:#fff;border:1px dashed #d8d2c2;border-radius:6px;padding:16px 20px;text-align:center;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;font-weight:600;">Files &amp; attachments</div>
+              <div style="font-size:12.5px;color:#a39d8f;margin-top:6px;">Drop proposals, teardowns or research here</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ============ OPPORTUNITIES ============ -->
+      <sc-if value="{{ isOpps }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:#6b6f78;margin-bottom:14px;">Documented digital opportunities across the prospect base &#8212; total potential <span style="font-family:'Source Serif 4',Georgia,serif;font-weight:600;color:#10151e;">{{ oppTotal }}</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <sc-for list="{{ opps }}" as="o" hint-placeholder-count="6">
+            <div onClick="{{ o.on }}" style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 18px;cursor:pointer;" style-hover="border-color:#a8863d;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <span style="font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;">{{ o.company }}</span>
+                <span style="font-size:12px;color:#8a8474;">Opp score <span style="font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:600;color:#10151e;">{{ o.score }}/25</span></span>
+              </div>
+              <div style="font-size:13px;color:#3a3f48;margin-top:8px;line-height:1.5;">{{ o.text }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+                <sc-for list="{{ o.problems }}" as="pr" hint-placeholder-count="2"><span style="font-size:11px;background:#f6f0e0;color:#7a5f24;border-radius:3px;padding:3px 8px;">{{ pr }}</span></sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-top:1px solid #f0ede4;padding-top:10px;">
+                <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#3a3f48;">{{ o.service }}</span>
+                <span style="display:flex;gap:12px;align-items:baseline;"><span style="font-size:11px;color:{{ o.bandFg }};font-weight:700;">{{ o.band }}</span><span style="font-family:'Source Serif 4',Georgia,serif;font-size:15px;font-weight:600;">{{ o.value }}</span></span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ OUTREACH ============ -->
+      <sc-if value="{{ isOutreach }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#0c1220;border-radius:6px;padding:16px 20px;margin-bottom:16px;display:flex;gap:0;color:#fff;">
+          <sc-for list="{{ cadence }}" as="c" hint-placeholder-count="4">
+            <div style="flex:1;border-left:1px solid rgba(255,255,255,.1);padding:0 16px;">
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a8863d;font-weight:700;">{{ c.touch }}</div>
+              <div style="font-size:13px;margin-top:4px;">{{ c.label }}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">{{ c.timing }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;margin-bottom:16px;">
+          <div style="padding:14px 18px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;"><span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Follow-ups due today</span><span style="font-size:11.5px;color:#8a8474;">{{ dueCount }} due</span></div>
+          <sc-for list="{{ followUpsDue }}" as="f" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #f0ede4;">
+              <div style="flex:1;min-width:0;">
+                <div onClick="{{ f.onOpen }}" style="font-size:13.5px;font-weight:500;cursor:pointer;" style-hover="color:#a8863d;">{{ f.company }}</div>
+                <div style="font-size:12px;color:#8a8474;margin-top:2px;">{{ f.detail }}</div>
+              </div>
+              <button onClick="{{ f.onDone }}" style="border:1px solid #2e7d5b;color:#2e7d5b;background:#fff;border-radius:4px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;" style-hover="background:#e8f2ec;">Complete</button>
+              <button onClick="{{ f.onResched }}" style="border:1px solid #e6e2d8;color:#3a3f48;background:#fff;border-radius:4px;padding:6px 12px;font-size:11.5px;cursor:pointer;" style-hover="background:#f6f4ef;">Reschedule +3d</button>
+              <button onClick="{{ f.onSkip }}" style="border:1px solid #e6e2d8;color:#8a8474;background:#fff;border-radius:4px;padding:6px 12px;font-size:11.5px;cursor:pointer;" style-hover="background:#f6f4ef;">Skip</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noDue }}" hint-placeholder-val="{{ false }}"><div style="padding:14px 18px;font-size:12.5px;color:#8a8474;">Nothing due today. Check upcoming follow-ups below.</div></sc-if>
+        </div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid #f0ede4;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">All outreach</div>
+          <sc-for list="{{ allOutreach }}" as="o" hint-placeholder-count="8">
+            <div style="display:grid;grid-template-columns:1.6fr 90px 60px 2.4fr 90px 110px;gap:10px;padding:11px 18px;border-bottom:1px solid #f0ede4;align-items:center;">
+              <span onClick="{{ o.onOpen }}" style="font-size:13px;font-weight:500;cursor:pointer;" style-hover="color:#a8863d;">{{ o.company }}</span>
+              <span style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#3a3f48;background:#f0ede4;border-radius:3px;padding:3px 6px;text-align:center;">{{ o.channel }}</span>
+              <span style="font-size:11.5px;color:#8a8474;">{{ o.touchLabel }}</span>
+              <span style="font-size:12.5px;color:#6b6f78;">{{ o.message }}</span>
+              <span style="font-size:11.5px;color:#8a8474;">{{ o.date }}</span>
+              <span style="font-size:10.5px;font-weight:700;color:{{ o.statusFg }};text-align:right;">{{ o.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ PIPELINE ============ -->
+      <sc-if value="{{ isPipeline }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+          <div onClick="{{ setTabBoard }}" style="font-size:12.5px;padding:7px 14px;border-radius:4px;cursor:pointer;font-weight:600;background:{{ tabBoardBg }};color:{{ tabBoardFg }};border:1px solid #e6e2d8;">Board</div>
+          <div onClick="{{ setTabProps }}" style="font-size:12.5px;padding:7px 14px;border-radius:4px;cursor:pointer;font-weight:600;background:{{ tabPropsBg }};color:{{ tabPropsFg }};border:1px solid #e6e2d8;">Proposals</div>
+          <div style="flex:1;"></div>
+          <div style="font-size:12px;color:#8a8474;">Drag cards between stages</div>
+        </div>
+        <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:12px;overflow-x:auto;align-items:flex-start;padding-bottom:12px;">
+            <sc-for list="{{ cols }}" as="col" hint-placeholder-count="10">
+              <div onDragOver="{{ allowDrop }}" onDrop="{{ col.onDrop }}" style="width:216px;flex:none;background:#efece4;border-radius:6px;padding:10px;min-height:220px;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:2px 4px 10px 4px;">
+                  <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:{{ col.fg }};">{{ col.name }}</span>
+                  <span style="font-size:11px;color:#8a8474;">{{ col.count }} &#183; {{ col.total }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ col.cards }}" as="card" hint-placeholder-count="1">
+                    <div draggable="{{ true }}" onDragStart="{{ card.onDrag }}" onClick="{{ card.on }}" style="background:#fff;border:1px solid #e6e2d8;border-radius:5px;padding:11px 12px;cursor:grab;" style-hover="border-color:#a8863d;">
+                      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <span style="font-size:13px;font-weight:600;">{{ card.name }}</span>
+                        <span style="width:20px;height:20px;border-radius:3px;background:{{ card.gradeBg }};color:{{ card.gradeFg }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;flex:none;">{{ card.grade }}</span>
+                      </div>
+                      <div style="font-size:11.5px;color:#8a8474;margin-top:4px;">{{ card.service }}</div>
+                      <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:baseline;">
+                        <span style="font-family:'Source Serif 4',Georgia,serif;font-size:13.5px;font-weight:600;">{{ card.value }}</span>
+                        <span style="font-size:10.5px;color:{{ card.dueFg }};">{{ card.due }}</span>
+                      </div>
+                      <div style="font-size:11.5px;color:#3a3f48;margin-top:6px;border-top:1px solid #f0ede4;padding-top:6px;">{{ card.next }}</div>
+                      <sc-if value="{{ card.canConvert }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ card.onConvert }}" style="margin-top:8px;width:100%;background:#0c1220;color:#fff;border:none;border-radius:4px;padding:7px 0;font-size:11.5px;font-weight:600;cursor:pointer;" style-hover="background:#a8863d;">Convert to client</button>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isProps }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:14px 16px;"><div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;font-weight:600;">Open proposal value</div><div style="font-family:'Source Serif 4',Georgia,serif;font-size:24px;font-weight:600;margin-top:6px;">{{ pTotal }}</div></div>
+            <div style="background:#0c1220;border-radius:6px;padding:14px 16px;color:#fff;"><div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Weighted pipeline</div><div style="font-family:'Source Serif 4',Georgia,serif;font-size:24px;font-weight:600;margin-top:6px;">{{ wTotal }}</div></div>
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:14px 16px;"><div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;font-weight:600;">Accepted (won revenue)</div><div style="font-family:'Source Serif 4',Georgia,serif;font-size:24px;font-weight:600;margin-top:6px;color:#2e7d5b;">{{ wonTotal }}</div></div>
+          </div>
+          <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1.6fr 2fr 100px 90px 90px 100px 110px;gap:10px;padding:10px 18px;border-bottom:1px solid #e6e2d8;background:#faf9f5;">
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Prospect</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Project</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;text-align:right;">Value</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;text-align:center;">Prob.</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;text-align:right;">Weighted</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;">Expiry</span>
+              <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:700;text-align:right;">Status</span>
+            </div>
+            <sc-for list="{{ proposals }}" as="q" hint-placeholder-count="5">
+              <div style="display:grid;grid-template-columns:1.6fr 2fr 100px 90px 90px 100px 110px;gap:10px;padding:12px 18px;border-bottom:1px solid #f0ede4;align-items:center;">
+                <span onClick="{{ q.on }}" style="font-size:13px;font-weight:500;cursor:pointer;" style-hover="color:#a8863d;">{{ q.company }}</span>
+                <span style="font-size:12.5px;color:#6b6f78;">{{ q.project }}</span>
+                <span style="font-family:'Source Serif 4',Georgia,serif;font-size:13.5px;font-weight:600;text-align:right;">{{ q.value }}</span>
+                <span style="font-size:12.5px;text-align:center;color:#6b6f78;">{{ q.prob }}</span>
+                <span style="font-family:'Source Serif 4',Georgia,serif;font-size:13.5px;font-weight:600;text-align:right;color:#7a5f24;">{{ q.weighted }}</span>
+                <span style="font-size:12px;color:{{ q.expiryFg }};">{{ q.expiry }}</span>
+                <span style="font-size:10.5px;font-weight:700;color:{{ q.statusFg }};text-align:right;">{{ q.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ============ CLIENTS ============ -->
+      <sc-if value="{{ isClients }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+          <sc-for list="{{ clientStats }}" as="s" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:14px 16px;"><div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a8474;font-weight:600;">{{ s.label }}</div><div style="font-family:'Source Serif 4',Georgia,serif;font-size:24px;font-weight:600;margin-top:6px;">{{ s.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <sc-for list="{{ clients }}" as="c" hint-placeholder-count="2">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:18px 20px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <span onClick="{{ c.on }}" style="font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;cursor:pointer;" style-hover="color:#a8863d;">{{ c.name }}</span>
+                <span style="font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;color:#2e7d5b;">{{ c.revenue }}</span>
+              </div>
+              <div style="font-size:12px;color:#8a8474;margin-top:3px;">{{ c.meta }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+                <sc-for list="{{ c.services }}" as="s" hint-placeholder-count="2"><span style="font-size:11px;background:#f0ede4;color:#3a3f48;border-radius:3px;padding:3px 8px;">{{ s }}</span></sc-for>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid #f0ede4;padding-top:12px;">
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#a8863d;font-weight:700;">Growth opportunities</div>
+                <sc-for list="{{ c.growth }}" as="g" hint-placeholder-count="2">
+                  <div style="font-size:12.5px;margin-top:7px;color:#3a3f48;">&#8599; {{ g }}</div>
+                </sc-for>
+                <div style="font-size:11.5px;color:#8a8474;margin-top:10px;">{{ c.referral }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ TASKS ============ -->
+      <sc-if value="{{ isTasks }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ taskGroups }}" as="g" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;margin-bottom:16px;">
+            <div style="padding:13px 18px;border-bottom:1px solid #f0ede4;display:flex;justify-content:space-between;"><span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:{{ g.fg }};">{{ g.label }}</span><span style="font-size:11.5px;color:#8a8474;">{{ g.count }}</span></div>
+            <sc-for list="{{ g.items }}" as="t" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #f0ede4;">
+                <span onClick="{{ t.onDone }}" style="width:17px;height:17px;border-radius:9px;border:1.5px solid {{ t.circleBorder }};background:{{ t.circleBg }};cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;" style-hover="border-color:#a8863d;">{{ t.check }}</span>
+                <span style="flex:1;font-size:13.5px;color:{{ t.titleFg }};text-decoration:{{ t.deco }};">{{ t.title }}</span>
+                <span onClick="{{ t.onOpen }}" style="font-size:12px;color:#8a8474;cursor:pointer;" style-hover="color:#a8863d;">{{ t.company }}</span>
+                <span style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#3a3f48;background:#f0ede4;border-radius:3px;padding:3px 7px;">{{ t.type }}</span>
+                <span style="font-size:11px;font-weight:700;color:{{ t.prioFg }};width:52px;text-align:center;">{{ t.priority }}</span>
+                <span style="font-size:11.5px;color:{{ t.dueFg }};width:64px;text-align:right;">{{ t.due }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ g.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 18px;font-size:12.5px;color:#8a8474;">Nothing here.</div></sc-if>
+          </div>
+        </sc-for>
+      </sc-if>
+
+      <!-- ============ ANALYTICS ============ -->
+      <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <sc-for list="{{ anGroups }}" as="g" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 18px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">{{ g.label }}</div>
+              <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #f0ede4;">
+                  <span style="font-size:12.5px;color:#6b6f78;">{{ r.k }}</span>
+                  <span style="font-family:'Source Serif 4',Georgia,serif;font-size:16px;font-weight:600;">{{ r.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;margin-top:16px;padding:16px 20px;">
+          <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Stage conversion</div>
+          <sc-for list="{{ convFunnel }}" as="f" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:14px;padding:7px 0;">
+              <span style="width:110px;font-size:12.5px;color:#3a3f48;flex:none;">{{ f.stage }}</span>
+              <div style="flex:1;background:#f0ede4;border-radius:3px;height:20px;position:relative;">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{{ f.w }};background:#0c1220;border-radius:3px;"></div>
+              </div>
+              <span style="width:34px;font-family:'Source Serif 4',Georgia,serif;font-size:14px;font-weight:600;text-align:right;flex:none;">{{ f.count }}</span>
+              <span style="width:70px;font-size:11.5px;color:#8a8474;text-align:right;flex:none;">{{ f.pct }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px;">
+          <sc-for list="{{ breakdowns }}" as="bd" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 18px;">
+              <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">{{ bd.label }}</div>
+              <sc-for list="{{ bd.rows }}" as="r" hint-placeholder-count="4">
+                <div style="padding:8px 0;border-bottom:1px solid #f0ede4;">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;"><span>{{ r.k }}</span><span style="color:#8a8474;">{{ r.meta }}</span></div>
+                  <div style="background:#f0ede4;border-radius:2px;height:6px;margin-top:6px;position:relative;"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ r.w }};background:#a8863d;border-radius:2px;"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ TEMPLATES ============ -->
+      <sc-if value="{{ isTemplates }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <sc-for list="{{ tplCats }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.on }}" style="font-size:12px;padding:6px 14px;border-radius:14px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.fg }};" style-hover="border-color:#a8863d;">{{ c.label }}</div>
+          </sc-for>
+        </div>
+        <div style="font-size:12px;color:#8a8474;margin:10px 0 16px 0;">Variables: <sc-for list="{{ tplVars }}" as="v"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#f0ede4;border-radius:3px;padding:2px 6px;margin-right:6px;">{{ v }}</span></sc-for></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <sc-for list="{{ tpls }}" as="t" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:16px 18px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:14px;font-weight:600;">{{ t.name }}</span>
+                <span style="display:flex;gap:8px;align-items:center;">
+                  <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#7a5f24;background:#f6f0e0;border-radius:3px;padding:3px 8px;">{{ t.category }}</span>
+                  <button onClick="{{ t.onCopy }}" style="border:1px solid #e6e2d8;background:#fff;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;color:#3a3f48;" style-hover="background:#f6f4ef;">{{ t.copyLabel }}</button>
+                </span>
+              </div>
+              <div style="font-size:12.5px;line-height:1.6;margin-top:10px;color:#3a3f48;white-space:pre-wrap;border-top:1px solid #f0ede4;padding-top:10px;">{{ t.body }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ SETTINGS ============ -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+          <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:18px 20px;">
+            <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">Workspace</div>
+            <sc-for list="{{ settingsRows }}" as="s" hint-placeholder-count="5">
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #f0ede4;font-size:13px;"><span style="color:#6b6f78;">{{ s.k }}</span><span style="font-weight:500;">{{ s.v }}</span></div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #e6e2d8;border-radius:6px;padding:18px 20px;">
+            <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:600;">AI capabilities (planned)</div>
+            <sc-for list="{{ aiRows }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f0ede4;">
+                <span><span style="display:block;font-size:13px;font-weight:500;">{{ s.k }}</span><span style="display:block;font-size:11.5px;color:#8a8474;margin-top:2px;">{{ s.d }}</span></span>
+                <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#8a8474;background:#f0ede4;border-radius:3px;padding:3px 8px;flex:none;">Not configured</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADD PROSPECT MODAL ============ -->
+<sc-if value="{{ showAdd }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(12,18,32,.55);display:flex;align-items:center;justify-content:center;z-index:100;">
+    <div style="background:#fff;border-radius:8px;width:560px;max-height:86vh;overflow-y:auto;padding:24px 26px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div style="font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:600;">Add prospect</div>
+        <div onClick="{{ closeAdd }}" style="font-size:13px;color:#8a8474;cursor:pointer;" style-hover="color:#10151e;">Close &#215;</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;">
+        <sc-for list="{{ addFields }}" as="f" hint-placeholder-count="8">
+          <div style="grid-column:{{ f.span }};">
+            <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;margin-bottom:5px;">{{ f.label }}</div>
+            <input value="{{ f.val }}" onChange="{{ f.on }}" placeholder="{{ f.ph }}" style="width:100%;box-sizing:border-box;border:1px solid #e6e2d8;border-radius:4px;padding:8px 11px;font-size:13px;background:#faf9f5;color:#10151e;outline:none;" />
+          </div>
+        </sc-for>
+        <div>
+          <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;margin-bottom:5px;">Industry</div>
+          <select value="{{ addIndustry }}" onChange="{{ setAddIndustry }}" style="width:100%;border:1px solid #e6e2d8;border-radius:4px;padding:8px 10px;font-size:13px;background:#faf9f5;color:#10151e;">
+            <sc-for list="{{ industryOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8a8474;font-weight:600;margin-bottom:5px;">Lead source</div>
+          <select value="{{ addSource }}" onChange="{{ setAddSource }}" style="width:100%;border:1px solid #e6e2d8;border-radius:4px;padding:8px 10px;font-size:13px;background:#faf9f5;color:#10151e;">
+            <sc-for list="{{ sourceOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:#8a8474;margin-top:14px;">New prospects start in <b>New</b> with next action &#8220;Research decision-maker&#8221; due today.</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;">
+        <button onClick="{{ closeAdd }}" style="border:1px solid #e6e2d8;background:#fff;border-radius:4px;padding:9px 16px;font-size:13px;cursor:pointer;color:#3a3f48;">Cancel</button>
+        <button onClick="{{ saveAdd }}" style="background:#0c1220;color:#fff;border:none;border-radius:4px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;" style-hover="background:#a8863d;">Save prospect</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- ============ OPPORTUNITY BRIEF MODAL ============ -->
+<sc-if value="{{ showBrief }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(12,18,32,.55);display:flex;align-items:center;justify-content:center;z-index:100;">
+    <div style="background:#fff;border-radius:8px;width:640px;max-height:88vh;overflow-y:auto;">
+      <div style="background:#0c1220;color:#fff;padding:20px 26px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:baseline;">
+        <div>
+          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#a8863d;font-weight:700;">Digital opportunity brief &#183; internal</div>
+          <div style="font-family:'Source Serif 4',Georgia,serif;font-size:21px;font-weight:600;margin-top:5px;">{{ briefCompany }}</div>
+        </div>
+        <div onClick="{{ closeBrief }}" style="font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;" style-hover="color:#fff;">Close &#215;</div>
+      </div>
+      <sc-if value="{{ briefLoading }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 26px;text-align:center;">
+          <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#a8863d;font-weight:600;">Generating brief&#8230;</div>
+          <div style="font-size:12.5px;color:#8a8474;margin-top:8px;">Mock AI &#8212; assembling from recorded opportunity data</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ briefReady }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:8px 26px 24px 26px;">
+          <sc-for list="{{ brief }}" as="b" hint-placeholder-count="6">
+            <div style="padding:14px 0;border-bottom:1px solid #f0ede4;">
+              <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#a8863d;font-weight:700;">{{ b.h }}</div>
+              <div style="font-size:13.5px;line-height:1.6;margin-top:6px;color:#3a3f48;white-space:pre-wrap;">{{ b.t }}</div>
+            </div>
+          </sc-for>
+          <div style="font-size:11px;color:#a39d8f;margin-top:14px;">Placeholder generation &#8212; V2 will draft this with AI from live research.</div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;demoData&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;defaultView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;dashboard&quot;,&quot;options&quot;:[&quot;dashboard&quot;,&quot;prospects&quot;,&quot;pipeline&quot;,&quot;outreach&quot;,&quot;tasks&quot;,&quot;analytics&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+class Component extends DCLogic {
+  state = { loaded:false, view:'dashboard', selId:null, search:'', showBell:false, showAdd:false, showBrief:false, briefLoading:false, briefFor:null,
+    pipeTab:'board', savedView:'All', fIndustry:'All industries', fStage:'All stages', fGrade:'All grades', fSource:'All sources',
+    tplCat:'All', copiedTpl:null, notes:{}, form:{}, data:null, stages:[], services:[], sources:[] };
+
+  componentDidMount() {
+    import((window.__resources && window.__resources.caeData) || './cae-data.js').then(m => {
+      const data = JSON.parse(JSON.stringify(m.db));
+      const view = this.props.defaultView ?? 'dashboard';
+      if (this.props.demoData === false) { data.companies=[]; data.contacts=[]; data.opportunities=[]; data.outreach=[]; data.tasks=[]; data.meetings=[]; data.proposals=[]; data.clients=[]; data.activities=[]; }
+      this.setState({ loaded:true, data, view, stages:m.STAGES, services:m.SERVICES, sources:m.LEAD_SOURCES, today:m.TODAY });
+    });
+  }
+
+  // helpers
+  score(c){ const s=c.scores; return s.problem+s.pay+s.need+s.access+s.growth; }
+  grade(n){ return n>=20?'A':n>=15?'B':n>=10?'C':'—'; }
+  gradeColors(g){ return g==='A'?['#0c1220','#ffffff']:g==='B'?['#a8863d','#ffffff']:g==='C'?['#e6e2d8','#3a3f48']:['#f0ede4','#8a8474']; }
+  oppScore(o){ const s=o.scores; return s.severity+s.impact+s.fit+s.budget+s.likelihood; }
+  money(v){ return v?'R'+String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g,'\u2009'):'—'; }
+  fdate(d){ if(!d) return '—'; const p=d.split(' ')[0].split('-'); const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return parseInt(p[2],10)+' '+M[parseInt(p[1],10)-1]; }
+  isToday(d){ return d===this.state.today; }
+  isOverdue(d){ return !!d && d<this.state.today; }
+  dueLabel(d){ if(!d) return '—'; if(this.isToday(d)) return 'Today'; if(this.isOverdue(d)) return 'Overdue'; return this.fdate(d); }
+  dueColor(d){ if(!d) return '#8a8474'; if(this.isOverdue(d)) return '#b0453c'; if(this.isToday(d)) return '#a8863d'; return '#8a8474'; }
+  contactOf(cid){ return this.state.data.contacts.find(x=>x.companyId===cid); }
+  oppOf(cid){ return this.state.data.opportunities.find(x=>x.companyId===cid); }
+  companyOf(cid){ return this.state.data.companies.find(x=>x.id===cid); }
+  statusColor(s){ return {'Replied':'#2e7d5b','Positive':'#2e7d5b','Accepted':'#2e7d5b','Viewed':'#a8863d','Negotiation':'#a8863d','Sent':'#6b6f78','Scheduled':'#6b6f78','Draft':'#8a8474','No response':'#b0453c','Negative':'#b0453c','Not interested':'#b0453c','Rejected':'#b0453c','Expired':'#b0453c'}[s]||'#6b6f78'; }
+  mut(key, fn){ this.setState(s=>({ data:{ ...s.data, [key]: fn(s.data[key]) } })); }
+  addActivity(cid, kind, text){ const ts=this.state.today+' 09:00'; this.mut('activities', a=>[{id:'a'+Date.now(), ts, companyId:cid, kind, text}, ...a]); }
+  setStage(cid, stage){ this.mut('companies', cs=>cs.map(c=>c.id===cid?{...c, stage}:c)); const co=this.companyOf(cid); this.addActivity(cid,'Stage change', (co?co.name:'')+' moved to '+stage+'.'); }
+
+  open(cid){ this.setState({selId:cid, showBell:false, search:''}); }
+
+  renderVals() {
+    const S = this.state;
+    if (!S.loaded) return { nav:[], kpis:[], viewTitle:'Loading…', isDash:true, funnelStages:[], actions:[], priority:[], activity:[], forecast:[], todayLabel:'', actionCount:'' };
+    const D = S.data, T = S.today;
+    const money = this.money.bind(this), fdate=this.fdate.bind(this);
+    const active = D.companies.filter(c=>c.stage!=='Won'&&c.stage!=='Lost');
+    const openProps = D.proposals.filter(p=>['Draft','Sent','Viewed','Negotiation'].includes(p.status));
+    const wonRevenue = D.clients.reduce((a,c)=>a+c.revenue,0);
+    const followDue = D.outreach.filter(o=>o.followUpDate && o.followUpDate<=T);
+    const openTasks = D.tasks.filter(t=>t.status!=='Done');
+    const tasksToday = openTasks.filter(t=>t.due<=T);
+    const meetingsToday = D.meetings.filter(m=>m.date===T);
+    const qualified = D.companies.filter(c=>this.score(c)>=15);
+    const won = D.companies.filter(c=>c.stage==='Won').length, lost=D.companies.filter(c=>c.stage==='Lost').length;
+    const convRate = (won+lost)>0 ? Math.round(won/(won+lost)*100)+'%' : '—';
+    const pipeValue = active.reduce((a,c)=>{const o=this.oppOf(c.id); return a+(o?o.estValue:0);},0);
+    const weighted = openProps.reduce((a,p)=>a+p.value*p.probability,0);
+
+    const detailC = S.selId ? this.companyOf(S.selId) : null;
+
+    // nav
+    const counts = { outreach: followDue.length, tasks: tasksToday.length };
+    const nav = [['dashboard','Dashboard'],['prospects','Prospects'],['opportunities','Opportunities'],['outreach','Outreach'],['pipeline','Pipeline'],['clients','Clients'],['tasks','Tasks'],['analytics','Analytics'],['templates','Templates'],['settings','Settings']].map(([id,label])=>{
+      const act = S.view===id && !S.selId || (id==='prospects' && S.selId);
+      return { label, count: id==='outreach'?counts.outreach||null : id==='tasks'?counts.tasks||null : null,
+        color: act?'#ffffff':'rgba(255,255,255,.62)', bg: act?'rgba(255,255,255,.07)':'transparent', edge: act?'#a8863d':'transparent',
+        on: ()=>this.setState({view:id, selId:null, showBell:false}) };
+    });
+
+    const titles={dashboard:'Command Center',prospects:'Prospects',opportunities:'Opportunity Intelligence',outreach:'Outreach',pipeline:'Pipeline',clients:'Clients',tasks:'Tasks',analytics:'Analytics',templates:'Template Library',settings:'Settings'};
+
+    // dashboard
+    const kpis = [
+      {label:'Total prospects', value:D.companies.length, sub:active.length+' active'},
+      {label:'Qualified (B+)', value:qualified.length, sub:'lead score ≥ 15'},
+      {label:'Outreach due', value:followDue.length, sub:'follow-ups today'},
+      {label:'Meetings', value:D.meetings.filter(m=>m.date&&m.date>=T).length, sub:meetingsToday.length+' today'},
+      {label:'Open proposals', value:openProps.length, sub:money(openProps.reduce((a,p)=>a+p.value,0))},
+      {label:'Pipeline value', value:money(pipeValue), sub:'active opportunities'},
+      {label:'Won revenue', value:money(wonRevenue), sub:D.clients.length+' clients'},
+      {label:'Conversion rate', value:convRate, sub:won+' won · '+lost+' lost'}
+    ];
+    const funnelStages = S.stages.filter(s=>s!=='Lost').map(name=>{
+      const count = name==='Won' ? won : D.companies.filter(c=>c.stage===name).length;
+      const on = ()=>this.setState({view:'pipeline', selId:null, pipeTab:'board'});
+      return count>0 ? {name, count, on, bg:'#0c1220', border:'#0c1220', fg:'#ffffff', sub:'rgba(255,255,255,.55)'} : {name, count, on, bg:'#faf9f5', border:'#e6e2d8', fg:'#c6c0b0', sub:'#b8b2a2'};
+    });
+    const actions = [];
+    followDue.forEach(o=>{ const c=this.companyOf(o.companyId); actions.push({tag:'Follow up', tagFg:'#7a5f24', tagBg:'#f6f0e0', text:(c?c.nextAction.label:'Follow up'), company:c?c.name:'', on:()=>this.open(o.companyId)}); });
+    meetingsToday.forEach(m=>{ const c=this.companyOf(m.companyId); actions.push({tag:'Meeting', tagFg:'#2e5b7d', tagBg:'#e6eef4', text:m.type+' at '+m.time, company:c?c.name:'', on:()=>this.open(m.companyId)}); });
+    D.companies.filter(c=>c.stage==='New').forEach(c=>actions.push({tag:'Research', tagFg:'#3a3f48', tagBg:'#f0ede4', text:'New prospect needs research', company:c.name, on:()=>this.open(c.id)}));
+    openProps.filter(p=>p.expiry!=='—' && p.expiry<= '2026-08-16').forEach(p=>{ const c=this.companyOf(p.companyId); actions.push({tag:'Proposal', tagFg:'#8a3b34', tagBg:'#f6e6e4', text:'Proposal expires '+fdate(p.expiry), company:c?c.name:'', on:()=>this.open(p.companyId)}); });
+    tasksToday.filter(t=>t.priority==='High').slice(0,3).forEach(t=>{ if(!actions.some(a=>a.company===(this.companyOf(t.companyId)||{}).name && a.tag==='Follow up')) { const c=this.companyOf(t.companyId); actions.push({tag:'Task', tagFg:'#3a3f48', tagBg:'#f0ede4', text:t.title, company:c?c.name:'', on:()=>this.open(t.companyId)}); } });
+
+    const rank = active.map(c=>{ const o=this.oppOf(c.id); const s=this.score(c); return {c, s, os:o?this.oppScore(o):0, v:o?o.estValue:0}; }).sort((a,b)=>(b.s+b.os)-(a.s+a.os)).slice(0,5);
+    const priority = rank.map(({c,s,os,v})=>{ const g=this.grade(s); const [bg,fg]=this.gradeColors(g); return {name:c.name, grade:g, gradeBg:bg, gradeFg:fg, meta:c.industry+' · lead '+s+'/25 · opp '+os+'/25', next:c.nextAction.label, value:money(v), on:()=>this.open(c.id)}; });
+    const activity = D.activities.slice(0,7).map(a=>({kind:a.kind, when:fdate(a.ts), text:a.text}));
+    const forecast = [
+      {label:'Potential pipeline', value:money(pipeValue)},
+      {label:'Weighted pipeline', value:money(weighted)},
+      {label:'Open proposal value', value:money(openProps.reduce((a,p)=>a+p.value,0))},
+      {label:'Won revenue (YTD)', value:money(wonRevenue)}
+    ];
+
+    // prospects list
+    const industries = [...new Set(D.companies.map(c=>c.industry))];
+    let rows = D.companies.slice();
+    const sv = S.savedView;
+    if(sv==='Hot prospects') rows=rows.filter(c=>this.score(c)>=20);
+    if(sv==='Follow up today') rows=rows.filter(c=>D.outreach.some(o=>o.companyId===c.id&&o.followUpDate&&o.followUpDate<=T)||c.nextAction.due<=T&&c.stage!=='Won'&&c.stage!=='Lost');
+    if(sv==='High value') rows=rows.filter(c=>{const o=this.oppOf(c.id);return o&&o.estValue>=250000;});
+    if(sv==='No response') rows=rows.filter(c=>D.outreach.some(o=>o.companyId===c.id&&o.status==='No response'));
+    if(sv==='Proposal stage') rows=rows.filter(c=>c.stage==='Proposal'||c.stage==='Negotiation');
+    if(sv==='Won clients') rows=rows.filter(c=>c.stage==='Won');
+    if(S.fIndustry!=='All industries') rows=rows.filter(c=>c.industry===S.fIndustry);
+    if(S.fStage!=='All stages') rows=rows.filter(c=>c.stage===S.fStage);
+    if(S.fGrade!=='All grades') rows=rows.filter(c=>this.grade(this.score(c))===S.fGrade);
+    if(S.fSource!=='All sources') rows=rows.filter(c=>c.leadSource===S.fSource);
+    rows.sort((a,b)=>this.score(b)-this.score(a));
+    const prospects = rows.map(c=>{ const s=this.score(c), g=this.grade(s), [bg,fg]=this.gradeColors(g); const ct=this.contactOf(c.id); const o=this.oppOf(c.id);
+      return {name:c.name, industry:c.industry, contact:ct?ct.name:'—', source:c.leadSource, score:s+'/25', grade:g, gradeBg:bg, gradeFg:fg, stage:c.stage, next:c.nextAction.label, nextColor:this.dueColor(c.nextAction.due)==='#8a8474'?'#6b6f78':this.dueColor(c.nextAction.due), value:o?money(o.estValue):'—', on:()=>this.open(c.id)}; });
+    const savedViews = ['All','Hot prospects','Follow up today','High value','No response','Proposal stage','Won clients'].map(v=>({label:v, on:()=>this.setState({savedView:v}), bg:sv===v?'#0c1220':'#fff', fg:sv===v?'#fff':'#3a3f48', border:sv===v?'#0c1220':'#e6e2d8'}));
+
+    // detail
+    let sel=null, qualDims=[];
+    if(detailC){ const c=detailC; const s=this.score(c), g=this.grade(s), [bg,fg]=this.gradeColors(g);
+      const ct=this.contactOf(c.id), o=this.oppOf(c.id);
+      const dimDefs=[['problem','Digital problem'],['pay','Ability to pay'],['need','Potential need'],['access','Decision-maker access'],['growth','Company growth / activity']];
+      qualDims = dimDefs.map(([key,label])=>({key,label,val:c.scores[key], dots:[1,2,3,4,5].map(n=>({n, filled:n<=c.scores[key], bg:n<=c.scores[key]?'#0c1220':'#fff', border:n<=c.scores[key]?'#0c1220':'#d8d2c2', on:()=>{ const nv = (c.scores[key]===n && n===1)?0:n; this.mut('companies', cs=>cs.map(x=>x.id===c.id?{...x, scores:{...x.scores,[key]:nv}}:x)); }}))}));
+      const outs = D.outreach.filter(x=>x.companyId===c.id).map(x=>({channel:x.channel, touchLabel:x.touch?('Touch '+x.touch):'Draft', date:x.dateSent?fdate(x.dateSent):('Scheduled '+fdate(x.dateScheduled)), status:x.status, statusFg:this.statusColor(x.status), message:x.message, response:x.response||false}));
+      const tks = D.tasks.filter(x=>x.companyId===c.id&&x.status!=='Done').map(x=>({title:x.title, due:this.dueLabel(x.due), dueFg:this.dueColor(x.due), on:()=>{this.mut('tasks',ts=>ts.map(t=>t.id===x.id?{...t,status:'Done'}:t)); this.addActivity(c.id,'Task done',x.title);}}));
+      const acts = D.activities.filter(x=>x.companyId===c.id).map(x=>({kind:x.kind, when:fdate(x.ts), text:x.text}));
+      sel = { name:c.name, meta:c.industry+' · '+c.subIndustry+' · '+c.location+' · '+c.size+' staff · '+c.website,
+        score:s, grade:g, gradeBg:bg, gradeFg:fg, stage:c.stage, priority:c.priority, prioFg:c.priority==='High'?'#b0453c':c.priority==='Medium'?'#a8863d':'#8a8474',
+        next:c.nextAction.label, nextDue:this.dueLabel(c.nextAction.due), nextDueColor:this.isOverdue(c.nextAction.due)?'#e08e85':this.isToday(c.nextAction.due)?'#d9b96a':'rgba(255,255,255,.6)',
+        description:c.description,
+        facts:[{k:'Lead source',v:c.leadSource},{k:'Discovered',v:fdate(c.dateDiscovered)},{k:'Owner',v:c.owner},{k:'Campaign',v:c.campaign||'—'}],
+        digital:Object.entries(c.digital).map(([k,v])=>({k:{website:'Website',mobile:'Mobile',app:'App',portal:'Customer portal',internal:'Internal systems',social:'Social presence'}[k]||k, v})),
+        hasOpp:!!o, problems:o?o.problems:[], oppText:o?o.opportunity:'', service:o?o.service:'', valueBand:o?o.valueBand:'', oppValue:o?money(o.estValue):'', oppScore:o?this.oppScore(o):0,
+        contactName:ct?ct.name:'—', contactTitle:ct?ct.title:'', isDM:!!(ct&&ct.decisionMaker), notDM:!!(ct&&!ct.decisionMaker), contactEmail:ct?ct.email:'', contactPhone:ct?ct.phone:'', contactLinkedin:ct?ct.linkedin:'',
+        outreach:outs, noOutreach:outs.length===0, tasks:tks, noTasks:tks.length===0, acts, noActs:acts.length===0,
+        note: S.notes[c.id] ?? '' };
+    }
+
+    // opportunities
+    const oppRows = D.opportunities.map(o=>{ const c=this.companyOf(o.companyId); return {company:c?c.name:'', text:o.opportunity, problems:o.problems, service:o.service, band:o.valueBand+' value', bandFg:o.valueBand==='High'?'#2e7d5b':o.valueBand==='Medium'?'#a8863d':'#8a8474', value:money(o.estValue), score:this.oppScore(o), on:()=>this.open(o.companyId)}; }).sort((a,b)=>b.score-a.score);
+
+    // outreach view
+    const cadence=[{touch:'Touch 1',label:'Initial personalised outreach',timing:'Day 0'},{touch:'Touch 2',label:'Value follow-up',timing:'3–4 days later'},{touch:'Touch 3',label:'Case study / proof',timing:'5–7 days later'},{touch:'Touch 4',label:'Final follow-up',timing:'Then close the loop'}];
+    const followUpsDue = followDue.map(o=>{ const c=this.companyOf(o.companyId);
+      const done=()=>{ this.mut('outreach', os=>os.map(x=>x.id===o.id?{...x, followUpDate:null}:x)); this.addActivity(o.companyId,'Follow-up done','Touch '+(o.touch+1)+' follow-up completed for '+(c?c.name:'')+'.'); };
+      const res=()=>{ const d=new Date(T); d.setDate(d.getDate()+3); const nd=d.toISOString().slice(0,10); this.mut('outreach', os=>os.map(x=>x.id===o.id?{...x, followUpDate:nd}:x)); };
+      const skip=()=>{ this.mut('outreach', os=>os.map(x=>x.id===o.id?{...x, followUpDate:null}:x)); };
+      return {company:c?c.name:'', detail:'Touch '+(o.touch+1)+' · '+(c?c.nextAction.label:'')+' · last: '+o.message, onOpen:()=>this.open(o.companyId), onDone:done, onResched:res, onSkip:skip}; });
+    const allOutreach = D.outreach.slice().sort((a,b)=>(b.dateSent||b.dateScheduled||'').localeCompare(a.dateSent||a.dateScheduled||'')).map(o=>{ const c=this.companyOf(o.companyId); return {company:c?c.name:'', channel:o.channel, touchLabel:o.touch?('T'+o.touch):'Draft', message:o.message, date:o.dateSent?fdate(o.dateSent):('Sched '+fdate(o.dateScheduled)), status:o.status, statusFg:this.statusColor(o.status), onOpen:()=>this.open(o.companyId)}; });
+
+    // pipeline
+    const cols = S.stages.map(stage=>{ const cards=D.companies.filter(c=>c.stage===stage);
+      return { name:stage, fg:stage==='Won'?'#2e7d5b':stage==='Lost'?'#b0453c':'#3a3f48', count:cards.length, total:money(cards.reduce((a,c)=>{const o=this.oppOf(c.id);return a+(o?o.estValue:0);},0)),
+        onDrop:(e)=>{e.preventDefault(); if(this._drag){ this.setStage(this._drag, stage); this._drag=null; }},
+        cards:cards.map(c=>{ const s=this.score(c), g=this.grade(s), [bg,fg]=this.gradeColors(g); const o=this.oppOf(c.id);
+          const isClient = D.clients.some(cl=>cl.companyId===c.id);
+          return {name:c.name, grade:g, gradeBg:bg, gradeFg:fg, service:o?o.service:c.industry, value:o?money(o.estValue):'—', due:this.dueLabel(c.nextAction.due), dueFg:this.dueColor(c.nextAction.due), next:c.nextAction.label,
+            canConvert: stage==='Won' && !isClient,
+            onConvert:(e)=>{ e.stopPropagation(); const ct=this.contactOf(c.id); this.mut('clients', cl=>[...cl, {id:'cl'+Date.now(), companyId:c.id, startDate:T, revenue:(o?o.estValue:0), services:[o?o.service:'—'], status:'Active — onboarding', growthOps:['New client → retainer','New client → next service'], referral:'—'}]); this.addActivity(c.id,'Converted to client', c.name+' converted to client.'); this.setState({view:'clients'}); },
+            onDrag:()=>{ this._drag=c.id; }, on:()=>this.open(c.id)}; }) }; });
+    const proposals = D.proposals.map(q=>{ const c=this.companyOf(q.companyId); return {company:c?c.name:'', project:q.project, value:money(q.value), prob:Math.round(q.probability*100)+'%', weighted:money(q.value*q.probability), expiry:q.expiry==='—'?'—':fdate(q.expiry), expiryFg:q.expiry!=='—'&&q.expiry<='2026-08-16'?'#b0453c':'#6b6f78', status:q.status, statusFg:this.statusColor(q.status), on:()=>this.open(q.companyId)}; });
+
+    // clients
+    const clients = D.clients.map(cl=>{ const c=this.companyOf(cl.companyId); const ct=this.contactOf(cl.companyId); return {name:c?c.name:'', revenue:money(cl.revenue), meta:(ct?ct.name+' · '+ct.title+' · ':'')+'client since '+fdate(cl.startDate)+' · '+cl.status, services:cl.services, growth:cl.growthOps, referral:cl.referral==='—'?'No referrals yet — ask at next review.':cl.referral, on:()=>this.open(cl.companyId)}; });
+    const clientStats=[{label:'Active clients', value:D.clients.length},{label:'Won revenue', value:money(wonRevenue)},{label:'Upsell opportunities', value:D.clients.reduce((a,c)=>a+c.growthOps.length,0)}];
+
+    // tasks
+    const mkTask=(t)=>{ const c=this.companyOf(t.companyId); const done=t.status==='Done';
+      return {title:t.title, company:c?c.name:'', type:t.type, priority:t.priority, prioFg:t.priority==='High'?'#b0453c':t.priority==='Medium'?'#a8863d':'#8a8474', due:this.dueLabel(t.due), dueFg:this.dueColor(t.due), check:done?'✓':'', circleBg:done?'#2e7d5b':'#fff', circleBorder:done?'#2e7d5b':'#b8b2a2', titleFg:done?'#a39d8f':'#10151e', deco:done?'line-through':'none',
+        onDone:()=>{ this.mut('tasks',ts=>ts.map(x=>x.id===t.id?{...x,status:done?'Open':'Done'}:x)); if(!done) this.addActivity(t.companyId,'Task done',t.title); }, onOpen:()=>this.open(t.companyId)}; };
+    const og = D.tasks.filter(t=>t.status!=='Done');
+    const taskGroups=[
+      {label:'Overdue', fg:'#b0453c', items:og.filter(t=>this.isOverdue(t.due)).map(mkTask)},
+      {label:'Due today', fg:'#a8863d', items:og.filter(t=>this.isToday(t.due)).map(mkTask)},
+      {label:'Upcoming', fg:'#3a3f48', items:og.filter(t=>t.due>T).sort((a,b)=>a.due.localeCompare(b.due)).map(mkTask)},
+      {label:'Done', fg:'#2e7d5b', items:D.tasks.filter(t=>t.status==='Done').map(mkTask)}
+    ].map(g=>({...g, count:g.items.length+(g.items.length===1?' task':' tasks'), empty:g.items.length===0}));
+
+    // analytics
+    const outSent = D.outreach.filter(o=>o.status!=='Draft'&&o.status!=='Scheduled');
+    const responded = outSent.filter(o=>['Replied','Positive','Negative','Not interested'].includes(o.status));
+    const positive = outSent.filter(o=>['Replied','Positive'].includes(o.status));
+    const anGroups=[
+      {label:'Acquisition', rows:[{k:'Prospects added',v:D.companies.length},{k:'Qualified (score ≥15)',v:qualified.length},{k:'Outreach sent',v:outSent.length},{k:'Response rate',v:outSent.length?Math.round(responded.length/outSent.length*100)+'%':'—'},{k:'Positive response rate',v:outSent.length?Math.round(positive.length/outSent.length*100)+'%':'—'}]},
+      {label:'Sales', rows:[{k:'Meetings held / booked',v:D.meetings.length},{k:'Proposals sent',v:D.proposals.length},{k:'Acceptance rate',v:D.proposals.length?Math.round(D.proposals.filter(p=>p.status==='Accepted').length/D.proposals.filter(p=>p.status!=='Draft').length*100)+'%':'—'},{k:'Won projects',v:won},{k:'Lost projects',v:lost}]},
+      {label:'Revenue', rows:[{k:'Pipeline value',v:money(pipeValue)},{k:'Weighted pipeline',v:money(weighted)},{k:'Won revenue',v:money(wonRevenue)},{k:'Avg project value',v:D.clients.length?money(wonRevenue/D.clients.length):'—'}]}
+    ];
+    const stageIdx = s=>S.stages.indexOf(s);
+    const reached = min => D.companies.filter(c=> stageIdx(c.stage)>=min || c.stage==='Won').length;
+    const convSteps=[['Prospects',D.companies.length],['Qualified',D.companies.filter(c=>stageIdx(c.stage)>=2&&c.stage!=='Lost').length],['Contacted',D.companies.filter(c=>stageIdx(c.stage)>=3&&c.stage!=='Lost').length],['Responded',D.companies.filter(c=>stageIdx(c.stage)>=4&&c.stage!=='Lost').length],['Meeting',D.companies.filter(c=>stageIdx(c.stage)>=5&&c.stage!=='Lost').length],['Proposal',D.companies.filter(c=>stageIdx(c.stage)>=6&&c.stage!=='Lost').length],['Won',won]];
+    const base=convSteps[0][1]||1;
+    const convFunnel = convSteps.map(([stage,count])=>({stage, count, w:Math.max(2,Math.round(count/base*100))+'%', pct:Math.round(count/base*100)+'% of total'}));
+    const mkBreak=(label, keyFn)=>{ const m={}; D.companies.forEach(c=>{ const k=keyFn(c); if(!k) return; const o=this.oppOf(c.id); m[k]=m[k]||{n:0,v:0}; m[k].n++; m[k].v+=(o?o.estValue:0); }); const max=Math.max(...Object.values(m).map(x=>x.v),1);
+      return {label, rows:Object.entries(m).sort((a,b)=>b[1].v-a[1].v).map(([k,x])=>({k, meta:x.n+' · '+money(x.v), w:Math.max(3,Math.round(x.v/max*100))+'%'}))}; };
+    const breakdowns=[mkBreak('By industry',c=>c.industry), mkBreak('By lead source',c=>c.leadSource), mkBreak('By service',c=>{const o=this.oppOf(c.id);return o?o.service:null;})];
+
+    // templates
+    const cats=['All','LinkedIn','Email','Discovery','Proposal'];
+    const tplCats=cats.map(c=>({label:c, on:()=>this.setState({tplCat:c}), bg:S.tplCat===c?'#0c1220':'#fff', fg:S.tplCat===c?'#fff':'#3a3f48', border:S.tplCat===c?'#0c1220':'#e6e2d8'}));
+    const tpls=D.templates.filter(t=>S.tplCat==='All'||t.category===S.tplCat).map(t=>({name:t.name, category:t.category, body:t.body, copyLabel:S.copiedTpl===t.id?'Copied ✓':'Copy',
+      onCopy:()=>{ try{navigator.clipboard.writeText(t.body);}catch(e){} this.setState({copiedTpl:t.id}); setTimeout(()=>this.setState({copiedTpl:null}),1500); }}));
+    const tplVars=['{'+'{company}'+'}','{'+'{contact}'+'}','{'+'{industry}'+'}','{'+'{problem}'+'}','{'+'{opportunity}'+'}','{'+'{service}'+'}'];
+
+    // settings
+    const settingsRows=[{k:'Studio',v:'AX-Channels — digital systems studio'},{k:'Currency',v:'ZAR (R) · USD invoicing +3% admin'},{k:'Owners',v:'Sipho M. · Thandi N.'},{k:'Follow-up cadence',v:'Touch 2 +3–4d · Touch 3 +5–7d · Touch 4 final'},{k:'Deposit policy',v:'50% to begin · 50% on delivery'},{k:'Sample data',v:'Demo dataset — clearly labelled'}];
+    const aiRows=[{k:'AI prospect research',d:'Company URL → generated overview'},{k:'AI opportunity detection',d:'Website analysis → UX/digital gaps'},{k:'AI lead scoring',d:'Recommended score from signals'},{k:'AI outreach drafting',d:'Personalised messages from the opportunity'},{k:'AI follow-up suggestions',d:'Based on conversation history'},{k:'AI sales assistant',d:'“What should I do today?”'}];
+
+    // search
+    const q=S.search.trim().toLowerCase();
+    const searchResults=q?D.companies.filter(c=>{const ct=this.contactOf(c.id); return c.name.toLowerCase().includes(q)||c.industry.toLowerCase().includes(q)||(ct&&ct.name.toLowerCase().includes(q));}).slice(0,6).map(c=>({name:c.name, meta:c.industry+' · '+c.stage, on:()=>this.open(c.id)})):[];
+
+    // notifications
+    const bellItems=[];
+    followDue.forEach(o=>{const c=this.companyOf(o.companyId); bellItems.push({tag:'Follow-up due', color:'#a8863d', text:(c?c.name:'')+' — touch '+(o.touch+1)+' due today', on:()=>this.open(o.companyId)});});
+    og.filter(t=>this.isOverdue(t.due)).forEach(t=>{const c=this.companyOf(t.companyId); bellItems.push({tag:'Overdue task', color:'#b0453c', text:t.title+' ('+(c?c.name:'')+')', on:()=>this.open(t.companyId)});});
+    meetingsToday.forEach(m=>{const c=this.companyOf(m.companyId); bellItems.push({tag:'Meeting today', color:'#2e5b7d', text:m.type+' with '+(c?c.name:'')+' at '+m.time, on:()=>this.open(m.companyId)});});
+    openProps.filter(p=>p.expiry!=='—'&&p.expiry<='2026-08-16').forEach(p=>{const c=this.companyOf(p.companyId); bellItems.push({tag:'Proposal expiring', color:'#b0453c', text:(c?c.name:'')+' proposal expires '+fdate(p.expiry), on:()=>this.open(p.companyId)});});
+
+    // add modal
+    const F=S.form; const setF=(k)=>(e)=>this.setState(s=>({form:{...s.form,[k]:e.target.value}}));
+    const addFields=[
+      {key:'name',label:'Company name',ph:'e.g. Highveld Grain Co',span:'span 2'},
+      {key:'website',label:'Website',ph:'company.co.za',span:'auto'},
+      {key:'location',label:'Location',ph:'City, Province',span:'auto'},
+      {key:'contactName',label:'Contact name',ph:'Full name',span:'auto'},
+      {key:'contactTitle',label:'Job title',ph:'e.g. Operations Director',span:'auto'},
+      {key:'email',label:'Email',ph:'name@company.co.za',span:'auto'},
+      {key:'size',label:'Company size',ph:'e.g. 50–100',span:'auto'},
+      {key:'description',label:'Description',ph:'What they do, why they might need AX-Channels',span:'span 2'}
+    ].map(f=>({...f, val:F[f.key]??'', on:setF(f.key)}));
+
+    // brief
+    let brief=[], briefCompanyName='';
+    if(S.briefFor){ const c=this.companyOf(S.briefFor); const o=this.oppOf(S.briefFor); const ct=this.contactOf(S.briefFor);
+      briefCompanyName=c?c.name:'';
+      if(c){ brief=[
+        {h:'Company', t:c.name+' — '+c.industry+' ('+c.subIndustry+'), '+c.location+', '+c.size+' staff. '+c.description},
+        {h:'Current situation', t:Object.entries(c.digital).map(([k,v])=>'• '+({website:'Website',mobile:'Mobile',app:'App',portal:'Customer portal',internal:'Internal systems',social:'Social'}[k]||k)+': '+v).join('\n')},
+        {h:'Problems', t:o?o.problems.map(p=>'• '+p).join('\n'):'No problems documented yet.'},
+        {h:'Business impact', t:o?'These gaps cost '+c.name+' time, margin and customer trust — the exact failure mode AX-Channels targets: digital tools that worked at launch but break under growth.':'—'},
+        {h:'Opportunity', t:o?o.opportunity:'—'},
+        {h:'Recommended solution', t:o?o.service+' engagement, '+o.valueBand.toLowerCase()+'-value band, estimated '+money(o.estValue)+'.':'—'},
+        {h:'Why AX-Channels', t:'We build digital infrastructure — systems that scale with the team, adapt to real users, and don\u2019t break as the business evolves. Not a template factory.'},
+        {h:'Suggested approach', t:'1. Short discovery with '+(ct?ct.name+' ('+ct.title+')':'the decision-maker')+'\n2. Expert teardown of the current experience\n3. Phased proposal — 50% deposit to begin, middle tier as default recommendation'},
+        {h:'Estimated scope & value', t:o?('Opportunity score '+this.oppScore(o)+'/25 · Lead score '+this.score(c)+'/25 · Estimated value '+money(o.estValue)+' (ZAR)'):'To be scoped after discovery.'}
+      ]; } }
+
+    return {
+      nav, viewTitle: S.selId?'Prospect':'…' && (S.selId?'Prospect':titles[S.view]), todayLabel:'Sunday 9 August 2026',
+      search:S.search, setSearch:(e)=>this.setState({search:e.target.value}), hasSearch:searchResults.length>0, searchResults,
+      toggleBell:()=>this.setState(s=>({showBell:!s.showBell})), showBell:S.showBell, bellCount:bellItems.length||null, bellItems,
+      openAdd:()=>this.setState({showAdd:true, form:{}, addIndustry:'Mining', addSource:'LinkedIn'}),
+      isDash:S.view==='dashboard'&&!S.selId, isProspects:S.view==='prospects'&&!S.selId, isDetail:!!S.selId,
+      isOpps:S.view==='opportunities'&&!S.selId, isOutreach:S.view==='outreach'&&!S.selId, isPipeline:S.view==='pipeline'&&!S.selId,
+      isClients:S.view==='clients'&&!S.selId, isTasks:S.view==='tasks'&&!S.selId, isAnalytics:S.view==='analytics'&&!S.selId,
+      isTemplates:S.view==='templates'&&!S.selId, isSettings:S.view==='settings'&&!S.selId,
+      kpis, funnelStages, actions, actionCount:actions.length, priority, activity, forecast,
+      savedViews, prospects, prospectCount:prospects.length,
+      industryFilterOpts:['All industries',...industries], stageFilterOpts:['All stages',...S.stages], gradeFilterOpts:['All grades','A','B','C'], sourceFilterOpts:['All sources',...S.sources],
+      fIndustry:S.fIndustry, setFIndustry:(e)=>this.setState({fIndustry:e.target.value}),
+      fStage:S.fStage, setFStage:(e)=>this.setState({fStage:e.target.value}),
+      fGrade:S.fGrade, setFGrade:(e)=>this.setState({fGrade:e.target.value}),
+      fSource:S.fSource, setFSource:(e)=>this.setState({fSource:e.target.value}),
+      clearFilters:()=>this.setState({fIndustry:'All industries',fStage:'All stages',fGrade:'All grades',fSource:'All sources',savedView:'All'}),
+      sel, qualDims, back:()=>this.setState({selId:null}), stageOpts:S.stages,
+      setSelStage:(e)=>this.setStage(S.selId, e.target.value),
+      setNote:(e)=>{const v=e.target.value; this.setState(s=>({notes:{...s.notes,[s.selId]:v}}));},
+      completeNext:()=>{ const c=this.companyOf(S.selId); this.addActivity(S.selId,'Action done',c.nextAction.label+' completed for '+c.name+'.'); this.mut('companies',cs=>cs.map(x=>x.id===S.selId?{...x,nextAction:{label:'Set next action',due:T}}:x)); },
+      genBrief:()=>{ this.setState({showBrief:true, briefLoading:true, briefFor:S.selId}); setTimeout(()=>this.setState({briefLoading:false}),900); },
+      showBrief:S.showBrief, briefLoading:S.briefLoading, briefReady:S.showBrief&&!S.briefLoading, brief, briefCompany:briefCompanyName, closeBrief:()=>this.setState({showBrief:false}),
+      opps:oppRows, oppTotal:money(D.opportunities.reduce((a,o)=>a+o.estValue,0)),
+      cadence, followUpsDue, dueCount:followUpsDue.length, noDue:followUpsDue.length===0, allOutreach,
+      isBoard:S.pipeTab==='board', isProps:S.pipeTab==='props',
+      setTabBoard:()=>this.setState({pipeTab:'board'}), setTabProps:()=>this.setState({pipeTab:'props'}),
+      tabBoardBg:S.pipeTab==='board'?'#0c1220':'#fff', tabBoardFg:S.pipeTab==='board'?'#fff':'#3a3f48',
+      tabPropsBg:S.pipeTab==='props'?'#0c1220':'#fff', tabPropsFg:S.pipeTab==='props'?'#fff':'#3a3f48',
+      cols, allowDrop:(e)=>e.preventDefault(), proposals,
+      pTotal:money(openProps.reduce((a,p)=>a+p.value,0)), wTotal:money(weighted), wonTotal:money(D.proposals.filter(p=>p.status==='Accepted').reduce((a,p)=>a+p.value,0)),
+      clientStats, clients, taskGroups, anGroups, convFunnel, breakdowns,
+      tplCats, tpls, tplVars,
+      settingsRows, aiRows,
+      showAdd:S.showAdd, closeAdd:()=>this.setState({showAdd:false}),
+      addFields, industryOpts:['Mining','Logistics','Property','Construction','Technology','Professional services','Other'], sourceOpts:S.sources,
+      addIndustry:S.addIndustry??'Mining', setAddIndustry:(e)=>this.setState({addIndustry:e.target.value}),
+      addSource:S.addSource??'LinkedIn', setAddSource:(e)=>this.setState({addSource:e.target.value}),
+      saveAdd:()=>{ const f=S.form; if(!f.name){return;} const cid='c'+Date.now();
+        this.mut('companies', cs=>[{id:cid, name:f.name, industry:S.addIndustry??'Other', subIndustry:'—', website:f.website||'—', location:f.location||'—', size:f.size||'—', linkedin:'—', description:f.description||'', leadSource:S.addSource??'Other', dateDiscovered:T, owner:'Sipho M.', campaign:'—', stage:'New', priority:'Medium', scores:{problem:0,pay:0,need:0,access:0,growth:0}, nextAction:{label:'Research decision-maker', due:T}, digital:{website:'—',mobile:'—',app:'—',portal:'—',internal:'—',social:'—'}}, ...cs]);
+        if(f.contactName){ this.mut('contacts', ps=>[...ps, {id:'p'+Date.now(), companyId:cid, name:f.contactName, title:f.contactTitle||'—', email:f.email||'—', phone:'—', linkedin:'—', decisionMaker:false}]); }
+        this.addActivity(cid,'Prospect added', f.name+' added manually.');
+        this.setState({showAdd:false, selId:cid});
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
