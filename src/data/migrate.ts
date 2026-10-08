@@ -1,6 +1,7 @@
 // Converts V2.5-shaped data (the bundled demo dataset, or a workspace saved by CAE V2.5.1) into the
 // V3 model. Nothing is upgraded to "verified": legacy free-text research becomes a draft that the user
 // must verify, and demo content is labelled demo everywhere.
+import { fdate } from "../lib/format";
 import { normalizeWebsite } from "../lib/url";
 import type {
   Company,
@@ -356,7 +357,7 @@ export function migrateLegacy(src: Legacy, isDemo: boolean, today: string): Db {
         .filter((m) => m.status === "Scheduled" && /^\d{4}-\d{2}-\d{2}$/.test(m.date))
         .map((m) => {
           const co = companies.find((c) => c.id === m.companyId);
-          return { id: "t-" + m.id, companyId: m.companyId, isDemo, title: `${m.type} with ${co ? co.name : "prospect"} — ${m.date} ${m.time}`.trim(), type: "Meeting", priority: "High", due: m.date, status: "Open", notes: "", outreachId: null, meetingId: m.id, completedAt: null } as Db["tasks"][number];
+          return { id: "t-" + m.id, companyId: m.companyId, isDemo, title: `${m.type} with ${co ? co.name : "prospect"} — ${fdate(m.date)} ${m.time}`.trim(), type: "Meeting", priority: "High", due: m.date, status: "Open", notes: "", outreachId: null, meetingId: m.id, completedAt: null } as Db["tasks"][number];
         }),
     ],
     meetings,

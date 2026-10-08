@@ -78,7 +78,7 @@ export const db = {
     {id:'r3', companyId:'c2', channel:'LinkedIn', touch:1, message:'Connected + note on load-status phone-call volume.', dateSent:'2026-07-29', status:'Replied', response:'Positive — discovery booked', followUpDate:null},
     {id:'r4', companyId:'c3', channel:'Email', touch:1, message:'Intro referencing Sandpiper Bay launch; offered IA teardown.', dateSent:'2026-08-05', status:'No response', response:'', followUpDate:'2026-08-09'},
     {id:'r5', companyId:'c4', channel:'Email', touch:1, message:'Cold intro: tender assembly time-cost angle.', dateSent:'2026-08-06', status:'Sent', response:'', followUpDate:'2026-08-11'},
-    {id:'r6', companyId:'c5', channel:'Referral intro', touch:1, message:'Warm intro via Atlas Ridge CTO.', dateSent:'2026-07-21', status:'Positive', response:'Meeting held 28 Jul', followUpDate:null},
+    {id:'r6', companyId:'c5', channel:'Referral intro', touch:1, message:'Warm intro via Atlas Ridge CTO.', dateSent:'2026-07-21', status:'Positive', response:'Meeting held', followUpDate:null},
     {id:'r7', companyId:'c6', channel:'Email', touch:1, message:'Intro: matter-status portal for commercial clients.', dateSent:'2026-08-04', status:'Replied', response:'Interested — wants a call', followUpDate:'2026-08-09'},
     {id:'r8', companyId:'c9', channel:'Phone', touch:2, message:'Walked GM through weighbridge dispute numbers.', dateSent:'2026-07-22', status:'Positive', response:'Requested proposal', followUpDate:null},
     {id:'r9', companyId:'c10', channel:'Email', touch:3, message:'Third touch — shared advisory-firm case study.', dateSent:'2026-07-30', status:'No response', response:'', followUpDate:'2026-08-13'},
@@ -89,8 +89,8 @@ export const db = {
     {id:'t2', companyId:'c8', title:'Research Peak Analytics beta + decision-maker map', type:'Research', priority:'High', due:'2026-08-09', status:'Open', notes:''},
     {id:'t3', companyId:'c3', title:'Send Touch 2 email to Pieter', type:'Outreach', priority:'Medium', due:'2026-08-09', status:'Open', notes:'Use website-opportunity template.'},
     {id:'t4', companyId:'c6', title:'Propose discovery slots to Adv. Bhekani', type:'Meeting', priority:'High', due:'2026-08-09', status:'Open', notes:''},
-    {id:'t5', companyId:'c2', title:'Prepare discovery agenda + portal references', type:'Meeting', priority:'High', due:'2026-08-10', status:'Open', notes:'Meeting 11 Aug 10:00.'},
-    {id:'t6', companyId:'c9', title:'Call Frans — proposal expires 15 Aug', type:'Proposal', priority:'High', due:'2026-08-12', status:'Open', notes:''},
+    {id:'t5', companyId:'c2', title:'Prepare discovery agenda + portal references', type:'Meeting', priority:'High', due:'2026-08-10', status:'Open', notes:'Ahead of the scheduled discovery meeting.'},
+    {id:'t6', companyId:'c9', title:'Call Frans before the proposal expires', type:'Proposal', priority:'High', due:'2026-08-12', status:'Open', notes:''},
     {id:'t7', companyId:'c12', title:'Draft patient-app upsell one-pager', type:'Client', priority:'Medium', due:'2026-08-20', status:'Open', notes:''},
     {id:'t8', companyId:'c4', title:'Identify Mzansi Build decision-maker', type:'Research', priority:'Medium', due:'2026-08-08', status:'Open', notes:'Overdue — Lerato is not the DM.'},
     {id:'t9', companyId:'c10', title:'Final follow-up email (Touch 4)', type:'Follow-up', priority:'Low', due:'2026-08-13', status:'Open', notes:''},
@@ -124,7 +124,7 @@ export const db = {
     {id:'a7', ts:'2026-08-04 17:15', companyId:'c1', kind:'Proposal sent', text:'R420 000 proposal sent to Karoo Ridge Mining.'},
     {id:'a8', ts:'2026-08-04 09:45', companyId:'c6', kind:'Outreach sent', text:'Matter-portal intro sent to Bhekani & Partners.'},
     {id:'a9', ts:'2026-07-30 13:20', companyId:'c5', kind:'Proposal sent', text:'Merchant dashboard proposal sent to LumoPay.'},
-    {id:'a10', ts:'2026-07-29 08:55', companyId:'c2', kind:'Meeting booked', text:'Discovery with Umzansi Freight set for 11 Aug.'}
+    {id:'a10', ts:'2026-07-29 08:55', companyId:'c2', kind:'Meeting booked', text:'Discovery with Umzansi Freight booked.'}
   ],
   templates: [
     // Placeholders only. A template never claims results, clients, growth or work you have not recorded:

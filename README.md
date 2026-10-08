@@ -3,7 +3,8 @@
 A React + TypeScript client acquisition workspace, built from the Claude Design prototype
 `project/CAE V2.5.1.dc.html` and hardened for real use. The design hand-off bundle is kept for
 reference: `HANDOFF.md`, `chats/` (the design conversation) and `project/` (the prototypes and data).
-The audit that drove the V3 rework is in `docs/AUDIT.md`.
+The audit that drove the V3 rework is in `docs/AUDIT.md`; the feature-by-feature production audit
+is in `docs/AUDIT-2.md`.
 
 ## Run
 
@@ -16,6 +17,21 @@ npm run build:standalone  # one self-contained, offline HTML file: CAE-V3-standa
 
 The standalone file opens straight from disk (`file://`) — no npm, no server. Its JavaScript, CSS and
 font are inlined.
+
+## Using it day to day
+
+1. **Dashboard → Today’s Acquisition Plan.** Work the tabs: Follow up now, Contact now, Prepare now,
+   Research now. Every row's button opens the exact step that needs doing.
+2. **Add a prospect** (+ Add prospect): company name and website are enough to start.
+3. **Work the 13 steps** in the prospect workspace. The dark "Next best action" bar always names the
+   first thing still missing, and each step says what it needs before it counts as complete.
+4. **Outreach:** prepare the message (built only from your records), approve it, send it from your own
+   email or LinkedIn, then press **Mark as sent**. That creates the follow-up task for the next touch.
+5. **When they reply:** Response → Record response. Positive → schedule discovery (it appears in
+   Tasks); record the meeting once it has happened; create and send the proposal; record Won or Lost.
+6. **Tasks:** ordinary tasks tick off. Follow-up and meeting tasks complete themselves when the
+   touch is sent or the meeting is recorded; ticking them takes you to that step.
+7. **Lost but came back?** Won / Lost → Reopen prospect. **Export** your data weekly (Settings).
 
 ## Principles
 
@@ -146,8 +162,8 @@ returned without a source is downgraded to Assumption.
 
 The final validation evidence (research cases, security tests, workflow checks) is in `docs/VALIDATION.md`.
 
-- Settings → QA → **Run self-test**: 56 checks on an isolated workspace (the live workspace is
-  verified untouched afterwards).
+- Settings → QA → **Run self-test**: 77 checks on an isolated workspace (the live workspace is
+  verified untouched afterwards), including one per fix from the production audit.
 - Browser journey (Playwright): first run → proxy research with sources → assessments → opportunity
   → decision-maker → strategy → message → approve → mark sent → one follow-up task → reply →
   discovery → proposal → Won → client; plus the failure path (DNS failure, refused Observed

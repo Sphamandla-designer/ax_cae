@@ -46,8 +46,14 @@ const VIEW_TITLES: Record<string, string> = {
   settings: "Settings",
 };
 
+/** The demo dataset with the stage and next-action rules applied, so it reads like data the app produced. */
+function freshDemo(today: string): Db {
+  let n = 0;
+  return A.normalizeDb(demoDb(today), { today, now: new Date().toISOString(), uid: (p) => p + "-dn" + n++, demo: true });
+}
+
 function freshEnvelope(today: string, active: WorkspaceKind): Envelope {
-  return { schemaVersion: SCHEMA_VERSION, updatedAt: new Date().toISOString(), active, workspaces: { live: emptyDb(), demo: demoDb(today) }, settings: { research: null, firstRunDone: false } };
+  return { schemaVersion: SCHEMA_VERSION, updatedAt: new Date().toISOString(), active, workspaces: { live: emptyDb(), demo: freshDemo(today) }, settings: { research: null, firstRunDone: false } };
 }
 
 function initialState(props: AppProps) {
@@ -228,14 +234,14 @@ export default class App extends Component<AppProps, State> {
   switchWorkspace = (kind: WorkspaceKind) => {
     const env = this.state.env;
     const ws = { ...env.workspaces };
-    if (!ws[kind]) ws[kind] = kind === "demo" ? demoDb(this.state.today) : emptyDb(env.workspaces.live?.targets);
+    if (!ws[kind]) ws[kind] = kind === "demo" ? freshDemo(this.state.today) : emptyDb(env.workspaces.live?.targets);
     this.setWorkspace({ ...env, active: kind, workspaces: ws, settings: { ...env.settings, firstRunDone: true } }, { boot: "ok", view: "dashboard" });
     this.notify("info", kind === "live" ? "Live workspace" : "Demo workspace", [kind === "live" ? "Real prospects only. Demo data is kept separately and never mixes in." : "Fictional sample data. Nothing you add here appears in your live workspace."]);
   };
   resetDemo = () => {
     if (!this.confirm("Reset the DEMO workspace to its original state? Changes made in the demo are discarded. Your live workspace is not touched.")) return;
     const env = this.state.env;
-    this.setWorkspace({ ...env, workspaces: { ...env.workspaces, demo: demoDb(this.state.today) } });
+    this.setWorkspace({ ...env, workspaces: { ...env.workspaces, demo: freshDemo(this.state.today) } });
     this.notify("success", "Demo workspace reset", []);
   };
   clearDemo = () => {
@@ -526,7 +532,7 @@ export default class App extends Component<AppProps, State> {
       .sort((a, b) => (b.dateSent || b.createdAt || "").localeCompare(a.dateSent || a.createdAt || ""))
       .map((o) => {
         const c = companyOf(D, o.companyId);
-        return { company: c ? c.name : "", channel: o.channel, touchLabel: "T" + o.touch, message: o.message, date: o.dateSent ? fdate(o.dateSent) : o.status === "Scheduled" ? "Sched " + fdate(o.dateScheduled) : "Not sent", status: o.status + (o.outcome && o.outcome !== "Sent" ? " · " + o.outcome : ""), statusFg: o.status === "Replied" ? "#2e7d5b" : o.status === "Sent" ? "#6b6f78" : "#a8863d", onOpen: () => this.open(o.companyId, o.dateSent ? "followup" : "outreach") };
+        return { company: c ? c.name : "", channel: o.channel, touchLabel: "T" + o.touch, message: o.message, date: o.dateSent ? fdate(o.dateSent) : o.status === "Scheduled" ? "Sched " + fdate(o.dateScheduled) : "Not sent", status: o.status + (o.outcome && o.outcome !== "Sent" && o.outcome !== o.status ? " · " + o.outcome : ""), statusFg: o.status === "Replied" ? "#2e7d5b" : o.status === "Sent" ? "#6b6f78" : "#a8863d", onOpen: () => this.open(o.companyId, o.dateSent ? "followup" : "outreach") };
       });
 
     // pipeline
@@ -600,8 +606,10 @@ export default class App extends Component<AppProps, State> {
         type: t.type,
         priority: t.priority,
         prioFg: t.priority === "High" ? "#b0453c" : t.priority === "Medium" ? "#a8863d" : "#8a8474",
-        due: dueLabel(t.due),
-        dueFg: dueColor(t.due),
+        due: done ? (t.completedAt ? "Done " + fdate(t.completedAt) : "Done") : dueLabel(t.due),
+        dueFg: done ? "#2e7d5b" : dueColor(t.due),
+        // Done tasks and meeting tasks (rescheduled via the meeting) have nothing to push back.
+        canReschedule: !done && !t.meetingId,
         check: done ? "✓" : "",
         circleBg: done ? "#2e7d5b" : "#fff",
         circleBorder: done ? "#2e7d5b" : "#b8b2a2",
@@ -629,7 +637,7 @@ export default class App extends Component<AppProps, State> {
     const decided = D.proposals.filter((p) => p.status === "Accepted" || p.status === "Rejected");
     const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) + "%" : "—");
     const anGroups = [
-      { label: "Acquisition", rows: [{ k: "Prospects added", v: D.companies.length }, { k: "Qualified (score ≥15)", v: D.companies.filter((c) => score(c) >= 15).length }, { k: "Prospects contacted", v: contactedIds.size }, { k: "Messages sent", v: outSent.length }, { k: "Reply rate (per prospect)", v: pct(repliedIds.size, contactedIds.size) }, { k: "Positive reply rate", v: pct(positiveIds.size, contactedIds.size) }] },
+      { label: "Acquisition", rows: [{ k: "Prospects added", v: D.companies.length }, { k: "Lead score B+ (≥15)", v: D.companies.filter((c) => score(c) >= 15).length }, { k: "Prospects contacted", v: contactedIds.size }, { k: "Messages sent", v: outSent.length }, { k: "Reply rate (per prospect)", v: pct(repliedIds.size, contactedIds.size) }, { k: "Positive reply rate", v: pct(positiveIds.size, contactedIds.size) }] },
       { label: "Sales", rows: [{ k: "Meetings held", v: D.meetings.filter((m) => m.status === "Held").length }, { k: "Proposals", v: D.proposals.length }, { k: "Acceptance rate", v: pct(D.proposals.filter((p) => p.status === "Accepted").length, decided.length) }, { k: "Won", v: won }, { k: "Lost", v: lost }] },
       { label: "Revenue", rows: [{ k: "Pipeline value", v: money(pipeValue) }, { k: "Weighted pipeline", v: money(weighted) }, { k: "Won revenue", v: money(wonRevenue) }, { k: "Avg project value", v: D.clients.length ? money(wonRevenue / D.clients.length) : "—" }] },
     ];

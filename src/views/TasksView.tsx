@@ -79,6 +79,7 @@ export default function TasksView({ v }: { v: VM }) {
               >
                 {t.company}
               </span>
+{t.canReschedule ? (
               <button
                 onClick={t.onReschedule}
                 style={{
@@ -94,6 +95,7 @@ export default function TasksView({ v }: { v: VM }) {
               >
                 +3d
               </button>
+              ) : null}
               <span
                 style={{
                   fontSize: "10px",

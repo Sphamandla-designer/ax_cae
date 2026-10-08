@@ -2,6 +2,7 @@
 import { STAGES, STALL_THRESHOLDS } from "../data/seed";
 import type { Company, Db } from "../data/types";
 import { daysBetween } from "../lib/dates";
+import { fdate } from "../lib/format";
 import {
   bestOpp,
   clientOf,
@@ -266,20 +267,20 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
   }
   const eff = props.map((p) => ({ p, st: effectiveProposalStatus(p, today) }));
   const expired = eff.find((x) => x.st === "Expired");
-  if (expired) return mk("Follow up on expired proposal", "Proposal expired " + expired.p.expiry + " — re-send it or record the outcome", "proposal");
+  if (expired) return mk("Follow up on expired proposal", "Proposal expired " + fdate(expired.p.expiry) + " — re-send it or record the outcome", "proposal");
   const open = eff.find((x) => ["Sent", "Viewed", "Negotiation"].includes(x.st));
-  if (open) return mk("Follow up on proposal", "Proposal " + open.st.toLowerCase() + (open.p.expiry ? " · expires " + open.p.expiry : ""), "proposal");
+  if (open) return mk("Follow up on proposal", "Proposal " + open.st.toLowerCase() + (open.p.expiry ? " · expires " + fdate(open.p.expiry) : ""), "proposal");
   const draftProp = props.find((p) => p.status === "Draft");
   if (draftProp) return mk("Send proposal", "Proposal drafted, not sent", "proposal");
   const mtgs = meetingsOf(db, cid);
   const held = mtgs.filter((m) => m.status === "Held");
   const scheduled = mtgs.filter((m) => m.status === "Scheduled" && m.date).sort((a, b) => a.date.localeCompare(b.date))[0];
   if (props.length && props.every((p) => p.status === "Rejected")) {
-    if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Follow-up meeting booked for " + scheduled.date, "discovery");
+    if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Follow-up meeting booked for " + fdate(scheduled.date), "discovery");
     return mk("Revise proposal or record outcome", "Proposal rejected — send a revised proposal or close as lost", "proposal");
   }
   if (held.length && !props.length) return mk("Prepare proposal", "Discovery held, no proposal yet", "proposal");
-  if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Discovery booked for " + scheduled.date, "discovery");
+  if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Discovery booked for " + fdate(scheduled.date), "discovery");
   const sentAtOf = (o: (typeof outs)[number]) => o.sentAt || (o.dateSent ? o.dateSent + "T00:00:00" : "");
   const lastSentAt = sent.map(sentAtOf).sort().pop() || "";
   // A reply only steers the next step until you have written again after it.
@@ -288,7 +289,7 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
     .sort((a, b) => (b.respondedAt || "").localeCompare(a.respondedAt || ""))
     .find((o) => (o.respondedAt || "") >= lastSentAt);
   if (latestReply) {
-    if (["Positive", "Meeting booked", "Replied"].includes(latestReply.outcome)) return mk("Schedule discovery", latestReply.outcome + " response received", "discovery");
+    if (["Positive", "Meeting booked", "Replied"].includes(latestReply.outcome)) return mk("Schedule discovery", (latestReply.outcome === "Replied" ? "Reply" : latestReply.outcome + " reply") + " received", "discovery");
     if (latestReply.outcome === "Wrong person") {
       const dm = dmOf(db, cid);
       if (dm && dm.id !== latestReply.contactId) return mk("Contact the new decision-maker", dm.name + " is now the decision-maker — send them the next message", "followup");
@@ -300,7 +301,7 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
   const due = outs.find((o) => o.followUpDate && o.followUpDate <= today);
   if (due) return mk("Follow up with decision-maker", "Touch " + (due.touch + 1) + " due" + (due.followUpDate! < today ? " (overdue)" : " today"), "followup");
   const next = outs.filter((o) => o.followUpDate).map((o) => o.followUpDate!).sort()[0];
-  if (next) return mk("Await reply", "Next follow-up due " + next, "followup");
+  if (next) return mk("Await reply", "Next follow-up due " + fdate(next), "followup");
   const lastTouchNo = Math.max(0, ...sent.map((o) => o.touch));
   if (lastTouchNo >= 4) return mk("Record outcome", "All four touches sent with no reply — close as lost (with a re-entry date) or keep waiting", "outcome");
   return mk("Await reply", "Follow-up skipped — prepare the next touch when it makes sense", "followup");

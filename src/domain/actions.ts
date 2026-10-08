@@ -35,6 +35,7 @@ import {
   type Strategy,
 } from "../data/types";
 import { addDays, daysBetween } from "../lib/dates";
+import { fdate } from "../lib/format";
 import { hostOf, isEmail, normalizeWebsite, validOptionalUrl } from "../lib/url";
 import type { ResearchResult } from "../research/provider";
 import {
@@ -145,6 +146,11 @@ export function syncNextAction(db: Db, cid: string, ctx: Ctx): Db {
   else due = c.nextAction.label === nb.label && c.nextAction.due ? c.nextAction.due : ctx.today;
   if (c.nextAction.label === nb.label && c.nextAction.due === due) return db;
   return { ...db, companies: db.companies.map((x) => (x.id === cid ? { ...x, nextAction: { label: nb.label, due } } : x)) };
+}
+
+/** Apply the record-based stage and next-action rules to every prospect (used when a dataset is loaded). */
+export function normalizeDb(db: Db, ctx: Ctx): Db {
+  return db.companies.reduce((acc, c) => syncNextAction(acc, c.id, ctx), db);
 }
 
 const done = (db: Db, ctx: Ctx, cid: string | null, extra: { id?: string; message?: string } = {}): Result => ({
@@ -917,7 +923,7 @@ export function scheduleOutreach(db: Db, id: string, date: string, ctx: Ctx): Re
   if (o.status !== "Approved") return fail("Approve the message before scheduling it.");
   if (!validDate(date) || date < ctx.today) return fail("Choose a valid send date, today or later.");
   const next: Db = { ...db, outreach: db.outreach.map((x) => (x.id === id ? { ...x, status: "Scheduled", dateScheduled: date } : x)) };
-  return done(activity(next, ctx, o.companyId, "Outreach scheduled", `Touch ${o.touch} scheduled to send on ${date}.`), ctx, o.companyId);
+  return done(activity(next, ctx, o.companyId, "Outreach scheduled", `Touch ${o.touch} scheduled to send on ${fdate(date)}.`), ctx, o.companyId);
 }
 
 /** The only way an outreach becomes Sent. Creates exactly one follow-up task for the touch. */
@@ -972,7 +978,7 @@ export function markOutreachSent(db: Db, id: string, ctx: Ctx, opts: { overrideR
   }
   if (touch === 1 && c.notReadyReason && opts.overrideReadiness) next = patchCompany(next, c.id, ctx, (x) => ({ ...x, overrideNotReady: true }));
   next = advanceStage(next, o.companyId, "Outreach", ctx);
-  next = activity(next, ctx, o.companyId, "Outreach sent", `Touch ${touch} sent via ${o.channel}${fu ? "; follow-up due " + fu : "; cadence complete"}.`);
+  next = activity(next, ctx, o.companyId, "Outreach sent", `Touch ${touch} sent via ${o.channel}${fu ? "; follow-up due " + fdate(fu) : "; cadence complete"}.`);
   return done(next, ctx, o.companyId);
 }
 
@@ -1052,7 +1058,7 @@ export function rescheduleFollowUp(db: Db, id: string, days: number, ctx: Ctx): 
     outreach: db.outreach.map((x) => (x.id === id ? { ...x, followUpDate: nd } : x)),
     tasks: db.tasks.map((x) => (x.outreachId === id && x.type === "Follow-up" && x.status !== "Done" ? { ...x, due: nd } : x)),
   };
-  return done(activity(next, ctx, o.companyId, "Follow-up rescheduled", `Touch ${o.touch + 1} moved to ${nd}.`), ctx, o.companyId);
+  return done(activity(next, ctx, o.companyId, "Follow-up rescheduled", `Touch ${o.touch + 1} moved to ${fdate(nd)}.`), ctx, o.companyId);
 }
 
 export function skipFollowUp(db: Db, id: string, ctx: Ctx): Result {
@@ -1081,7 +1087,7 @@ export interface MeetingInput {
 
 /** One open task per scheduled meeting, so it shows in Tasks and on the dashboard. */
 function upsertMeetingTask(db: Db, m: Meeting, c: Company): Db {
-  const title = `${m.type} with ${c.name} — ${m.date} ${m.time}`;
+  const title = `${m.type} with ${c.name} — ${fdate(m.date)} ${m.time}`;
   const open = db.tasks.find((x) => x.meetingId === m.id && x.status !== "Done");
   if (open) return { ...db, tasks: db.tasks.map((x) => (x.id === open.id ? { ...x, title, due: m.date } : x)) };
   return { ...db, tasks: [...db.tasks, { id: "t-" + m.id, companyId: c.id, isDemo: c.isDemo, title, type: "Meeting", priority: "High", due: m.date, status: "Open", notes: m.notes ? "Agenda: " + m.notes : "", outreachId: null, meetingId: m.id, completedAt: null }] };
@@ -1120,7 +1126,7 @@ export function scheduleMeeting(db: Db, cid: string, input: MeetingInput, ctx: C
   next = upsertMeetingTask(next, rec, c);
   // Booking the meeting is what the "Schedule discovery" task asked for.
   next = closeTasks(next, (x) => x.companyId === cid && !!x.outreachId?.endsWith(":response") && /discovery/i.test(x.title), ctx.now);
-  return done(activity(next, ctx, cid, "Meeting booked", `${rec.type} ${id ? "moved to" : "scheduled for"} ${rec.date} ${rec.time}.`), ctx, cid, { id: rec.id });
+  return done(activity(next, ctx, cid, "Meeting booked", `${rec.type} ${id ? "moved to" : "scheduled for"} ${fdate(rec.date)} ${rec.time}.`), ctx, cid, { id: rec.id });
 }
 
 /** A held meeting needs what was learned — date reached, attendees, notes, pain points, requirements, next step. */
@@ -1159,7 +1165,7 @@ export function recordMeetingHeld(db: Db, cid: string, input: MeetingInput, ctx:
   let next: Db = { ...db, meetings: id ? db.meetings.map((m) => (m.id === id ? rec : m)) : [...db.meetings, rec] };
   next = closeTasks(next, (x) => (!!id && x.meetingId === id) || (x.companyId === cid && !!x.outreachId?.endsWith(":response") && /discovery/i.test(x.title)), ctx.now);
   next = advanceStage(next, cid, "Discovery", ctx);
-  return done(activity(next, ctx, cid, "Discovery held", `${rec.type} on ${rec.date}: ${rec.notes}`), ctx, cid, { id: rec.id });
+  return done(activity(next, ctx, cid, "Discovery held", `${rec.type} on ${fdate(rec.date)}: ${rec.notes}`), ctx, cid, { id: rec.id });
 }
 
 export function cancelMeeting(db: Db, id: string, ctx: Ctx): Result {
@@ -1167,7 +1173,7 @@ export function cancelMeeting(db: Db, id: string, ctx: Ctx): Result {
   if (!m || m.status !== "Scheduled") return fail("Only scheduled meetings can be cancelled.");
   let next: Db = { ...db, meetings: db.meetings.map((x) => (x.id === id ? { ...x, status: "Cancelled" } : x)) };
   next = closeTasks(next, (x) => x.meetingId === id, ctx.now);
-  return done(activity(next, ctx, m.companyId, "Meeting cancelled", `${m.type} on ${m.date} cancelled.`), ctx, m.companyId);
+  return done(activity(next, ctx, m.companyId, "Meeting cancelled", `${m.type} on ${fdate(m.date)} cancelled.`), ctx, m.companyId);
 }
 
 // ---------- proposals ----------
@@ -1384,7 +1390,7 @@ export function rescheduleTask(db: Db, id: string, days: number, ctx: Ctx): Resu
   if (isTouchFollowUp(x) && db.outreach.some((o) => o.id === x.outreachId && o.followUpDate)) return rescheduleFollowUp(db, x.outreachId!, days, ctx);
   if (x.meetingId) return fail("Reschedule the meeting itself in Discovery — its task follows.");
   const nd = addDays(x.due > ctx.today ? x.due : ctx.today, days);
-  return done(activity({ ...db, tasks: db.tasks.map((k) => (k.id === id ? { ...k, due: nd } : k)) }, ctx, x.companyId, "Task rescheduled", `${x.title} moved to ${nd}.`), ctx, x.companyId);
+  return done(activity({ ...db, tasks: db.tasks.map((k) => (k.id === id ? { ...k, due: nd } : k)) }, ctx, x.companyId, "Task rescheduled", `${x.title} moved to ${fdate(nd)}.`), ctx, x.companyId);
 }
 
 export function setTarget(db: Db, key: string, raw: string): Result {

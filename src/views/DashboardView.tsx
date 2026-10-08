@@ -448,7 +448,7 @@ export default function DashboardView({ v }: { v: VM }) {
               fontWeight: "600",
             }}
           >
-            Research needed
+            Profiles incomplete
           </div>
           {v.researchNeeded?.map((r, i) => (
             <div
