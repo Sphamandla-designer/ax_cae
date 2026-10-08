@@ -16,6 +16,8 @@ export interface DetailModel {
   researchRunning: boolean;
   /** Apply a domain action to the workspace. Returns the action's result so forms can show errors. */
   run: (f: (db: Db, ctx: Ctx) => Result) => Result;
+  /** Like run, but a refusal is shown to the user as a notice (for one-click actions without a form). */
+  act: (f: (db: Db, ctx: Ctx) => Result) => Result;
   setFocus: (focus: string) => void;
   runResearch: (website: string) => void;
   openComposer: (opts: { variant?: Variant; outreachId?: string }) => void;

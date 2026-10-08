@@ -1,6 +1,6 @@
 // Deterministic workflow self-test. Runs the real action functions against a temporary, isolated
 // workspace — it never reads or writes the user's data — and reports PASS/FAIL with a reason.
-import { demoDb, emptyDb } from "../data/seed";
+import { demoDb, emptyDb, LOST_REASONS } from "../data/seed";
 import { migrateLegacy } from "../data/migrate";
 import type { Db } from "../data/types";
 import { parseEnvelope, SCHEMA_VERSION } from "../lib/storage";
@@ -8,7 +8,7 @@ import { addDays } from "../lib/dates";
 import * as A from "./actions";
 import { draftMessage } from "./generate";
 import { checkIntegrity } from "./integrity";
-import { companyOf, outreachOf } from "./queries";
+import { companyOf, outcomeOf, outreachOf, parseRand } from "./queries";
 import { nextBest, readiness, researchCheck, steps13 } from "./workflow";
 
 export interface TestResult {
@@ -163,10 +163,81 @@ export function runSelfTest(today: string): TestResult[] {
     const legacy = migrateLegacy({ companies: [{ id: "c9", name: "Old Co", website: "old.co.za", stage: "Qualified", scores: { problem: 1, pay: 1, need: 1, access: 1, growth: 1 } }], scans: [{ id: "s1", companyId: "c9", category: "Website", status: "Weak", problem: "Old site layout", evidence: "Seen on the home page", confidence: "Observed" }], templates: [] }, false, today);
     check("V2.5 data migrates without inventing evidence", legacy.scans[0].confidence === "Indicated" && legacy.research.every((r) => r.status === "draft"), "legacy Observed (no source) became Indicated; legacy research stays a draft", "migration upgraded unverified data");
 
+    // 13b. Tracking rules found in the production audit
+    const prep = (name: string, site: string) => {
+      const r = apply(A.addCompany(db, { name, website: site }, ctx));
+      const id = r.ok ? r.id! : "";
+      apply(A.saveResearch(db, id, { facts: [{ field: "website", value: site, status: "Verified", confidence: "Indicated", source: "" }, { field: "description", value: "Regional logistics operator with three depots.", status: "Verified", confidence: "Indicated", source: "" }], notes: "" }, ctx));
+      apply(A.completeResearch(db, id, { confirmManual: true }, ctx));
+      ["Website", "Mobile experience", "Customer portal"].forEach((cat) => apply(A.addScan(db, id, scan(cat, { source: "https://" + site }), ctx)));
+      apply(A.saveOpportunity(db, id, { ...opp, evidenceScanIds: db.scans.filter((x) => x.companyId === id).map((x) => x.id) }, ctx));
+      const ct = apply(A.saveContact(db, id, { ...contact, email: "ops@" + site }, ctx));
+      apply(A.markDecisionMaker(db, id, ct.ok ? ct.id! : "", ctx));
+      apply(A.saveStrategy(db, id, { ...strat, targetContactId: ct.ok ? ct.id! : "", valueProposition: "Fewer phone calls" }, ctx));
+      return { id, contactId: ct.ok ? ct.id! : "" };
+    };
+    const q = prep("QA Tracking Co", "qa-tracking.co.za");
+    check("Outreach-ready prospect moves to Qualified", companyOf(db, q.id)?.stage === "Qualified", "stage Qualified once the readiness checklist is complete", "stage was " + companyOf(db, q.id)?.stage);
+    const c2 = apply(A.saveContact(db, q.id, { ...contact, name: "Second QA", email: "second@qa-tracking.co.za" }, ctx));
+    apply(A.markDecisionMaker(db, q.id, c2.ok ? c2.id! : "", ctx));
+    check("Only one decision-maker at a time", db.contacts.filter((x) => x.companyId === q.id && x.decisionMaker).length === 1 && db.contacts.find((x) => x.id === (c2.ok ? c2.id : ""))?.decisionMaker === true, "the new decision-maker replaces the old one", "several contacts marked decision-maker");
+    apply(A.markDecisionMaker(db, q.id, q.contactId, ctx));
+    const oq = db.opportunities.find((o) => o.companyId === q.id)!;
+    apply(A.saveOpportunity(db, q.id, { ...opp, budget: 5, evidenceScanIds: oq.evidenceScanIds }, ctx, oq.id));
+    apply(A.saveOpportunity(db, q.id, { ...opp, evidenceScanIds: oq.evidenceScanIds }, ctx, oq.id));
+    check("Editing an opportunity keeps its budget score", db.opportunities.find((o) => o.id === oq.id)?.scores.budget === 5, "budget 5 kept on edit", "budget became " + db.opportunities.find((o) => o.id === oq.id)?.scores.budget);
+    const msg = "Hello — a short note about the booking flow we looked at on your site.";
+    const d1 = apply(A.saveOutreachDraft(db, q.id, { contactId: q.contactId, channel: "Email", message: msg }, ctx));
+    const d2 = apply(A.saveOutreachDraft(db, q.id, { contactId: q.contactId, channel: "Email", message: msg + " (second)" }, ctx));
+    const [o1, o2] = [d1.ok ? d1.id! : "", d2.ok ? d2.id! : ""];
+    [o1, o2].forEach((id) => { apply(A.approveOutreach(db, id, ctx)); apply(A.markOutreachSent(db, id, ctx)); });
+    const touchOf = (id: string) => db.outreach.find((o) => o.id === id)?.touch;
+    check("Drafts prepared ahead get their touch number when sent", touchOf(o1) === 1 && touchOf(o2) === 2, "touch 1 then touch 2", `touches ${touchOf(o1)}, ${touchOf(o2)}`);
+    const fu2 = db.tasks.find((t) => t.outreachId === o2 && t.status !== "Done")!;
+    expectFail("Ticking a follow-up task is refused (send or skip the touch instead)", A.toggleTask(db, fu2.id, ctx), "the task stays open until the touch is sent or skipped");
+    apply(A.rescheduleTask(db, fu2.id, 3, ctx));
+    const o2r = db.outreach.find((o) => o.id === o2)!;
+    check("Rescheduling a follow-up task moves the follow-up too", o2r.followUpDate === db.tasks.find((t) => t.id === fu2.id)!.due, "task and outreach share the new date", `task ${db.tasks.find((t) => t.id === fu2.id)!.due} vs outreach ${o2r.followUpDate}`);
+    apply(A.recordResponse(db, o1, "Positive", "Replied to the first email", ctx));
+    check("A reply on an earlier touch clears every pending follow-up", !db.outreach.some((o) => o.companyId === q.id && o.followUpDate) && !db.tasks.some((t) => t.companyId === q.id && t.type === "Follow-up" && !t.outreachId!.endsWith(":response") && t.status !== "Done"), "no follow-up due after the reply", "a follow-up was still due");
+    const respTask = () => db.tasks.find((t) => t.outreachId === o1 + ":response")!;
+    const d3 = apply(A.saveOutreachDraft(db, q.id, { contactId: q.contactId, channel: "Email", message: msg + " (reply)" }, ctx));
+    apply(A.approveOutreach(db, d3.ok ? d3.id! : "", ctx));
+    apply(A.markOutreachSent(db, d3.ok ? d3.id! : "", ctx));
+    check("Sending a message does not close the reply task", respTask().status === "Open", "“Schedule discovery” stays open", "the reply task was closed by sending");
+    apply(A.recordResponse(db, o1, "Not interested", "Changed their mind", ctx));
+    check("Changing the reply updates its task", respTask().type === "Nurture" && db.tasks.filter((t) => t.outreachId === o1 + ":response").length === 1, "one task, now a nurture task", "task was " + respTask().type + " / count " + db.tasks.filter((t) => t.outreachId === o1 + ":response").length);
+    apply(A.recordResponse(db, o1, "Positive", "Back on — wants a call", ctx));
+    apply(A.scheduleMeeting(db, q.id, { ...mtg, date: addDays(today, 2) }, ctx));
+    const mt = db.tasks.find((t) => t.companyId === q.id && t.meetingId && t.status !== "Done");
+    check("Scheduling a meeting creates its task", !!mt && mt.due === addDays(today, 2), "meeting task due on the meeting date", "no meeting task");
+    expectFail("A meeting task cannot be ticked done", A.toggleTask(db, mt!.id, ctx), "it completes when the meeting is recorded");
+    check("Booking the meeting closes the “Schedule discovery” task", respTask().status === "Done", "reply task done", "reply task still open");
+    const mid2 = db.meetings.find((m) => m.companyId === q.id)!.id;
+    apply(A.recordMeetingHeld(db, q.id, { ...mtg, notes: "Walked through bookings.", painPoints: "Phone queue", requirements: "Portal", nextStep: "Proposal" }, ctx, mid2));
+    check("Recording the meeting closes its task", db.tasks.find((t) => t.id === mt!.id)?.status === "Done", "meeting task done", "meeting task still open");
+    const pr2 = apply(A.saveProposal(db, q.id, { ...prop, value: "120 000", opportunityId: db.opportunities.find((o) => o.companyId === q.id)!.id }, ctx));
+    apply(A.setProposalStatus(db, pr2.ok ? pr2.id! : "", "Sent", ctx));
+    apply(A.setProposalStatus(db, pr2.ok ? pr2.id! : "", "Rejected", ctx));
+    check("Rejected proposal → revise or close (not “Schedule discovery”)", nextBest(db, companyOf(db, q.id)!, today).label === "Revise proposal or record outcome", "Revise proposal or record outcome", "was " + nextBest(db, companyOf(db, q.id)!, today).label);
+    const pr3 = apply(A.saveProposal(db, q.id, { ...prop, value: "90000", opportunityId: db.opportunities.find((o) => o.companyId === q.id)!.id }, ctx));
+    apply(A.setProposalStatus(db, pr3.ok ? pr3.id! : "", "Sent", ctx));
+    apply(A.recordOutcome(db, q.id, { ...oc, kind: "Lost", reason: (LOST_REASONS as string[])[0], value: "", reEntryDate: addDays(today, 30) }, ctx));
+    check("Closing as Lost closes its open proposal", db.proposals.find((p) => p.id === (pr3.ok ? pr3.id : ""))?.status === "Rejected", "open proposal marked rejected", "proposal still " + db.proposals.find((p) => p.id === (pr3.ok ? pr3.id : ""))?.status);
+    expectOk("A Lost prospect can be reopened", apply(A.reopenCompany(db, q.id, ctx)), "back in the pipeline");
+    check("Reopening keeps the Lost outcome as history", !outcomeOf(db, q.id) && db.outcomes.some((o) => o.companyId === q.id && o.supersededAt) && companyOf(db, q.id)?.stage === "Proposal", "stage Proposal (from records), old outcome superseded", "stage " + companyOf(db, q.id)?.stage);
+    check("Rand amounts parse as typed", parseRand("180.000") === 180000 && parseRand("R180 000") === 180000 && parseRand("180,000") === 180000 && Number.isNaN(parseRand("")), "180.000 / R180 000 / 180,000 → 180000", "parsed " + parseRand("180.000"));
+    apply(A.applyResearchResult(db, q.id, { success: false, provider: "QA", code: "TIMEOUT", error: "timed out", retryable: true }, ctx));
+    check("A failed research refresh does not undo completed research", researchCheck(db, companyOf(db, q.id)!).ok, "research still complete", "research fell back to incomplete");
+    const r2 = apply(A.addCompany(db, { name: "QA Stage Co", website: "qa-stage.co.za" }, ctx));
+    expectFail("Moving forward without the stage's record is refused", A.setStage(db, r2.ok ? r2.id! : "", "Proposal", ctx), "Proposal needs a sent proposal");
+    const liveLegacy = migrateLegacy({ companies: [{ id: "c8", name: "Old Meeting Co", stage: "Discovery" }], meetings: [{ id: "m8", companyId: "c8", status: "Scheduled", date: addDays(today, -5), time: "09:00", type: "Discovery" }], templates: [] }, false, today);
+    check("Old scheduled meetings are not imported as held", liveLegacy.meetings[0].status === "Scheduled", "stays Scheduled until you record it", "imported as " + liveLegacy.meetings[0].status);
+
     // 13. Integrity & deletion
     check("No orphans or duplicate IDs", checkIntegrity(db).ok, "integrity check clean", JSON.stringify(checkIntegrity(db)).slice(0, 200));
     const del = A.deleteCompany(db, cid);
-    check("Deleting a prospect removes all its records", del.ok && checkIntegrity(del.db).ok && !del.db.contacts.length && !del.db.outreach.length && !del.db.tasks.length && !del.db.activities.length, "cascade delete left no orphans", "records were left behind");
+    check("Deleting a prospect removes all its records", del.ok && checkIntegrity(del.db).ok && ["contacts", "outreach", "tasks", "activities", "research", "scans"].every((k) => !(del.db as any)[k].some((r: { companyId: string }) => r.companyId === cid)), "cascade delete left no orphans", "records were left behind");
     const demo = demoDb(today);
     check("Demo data is flagged demo everywhere", [...demo.companies, ...demo.research, ...demo.contacts, ...demo.scans, ...demo.outreach].every((r: any) => r.isDemo === true) && demo.research.every((r) => r.mode === "demo"), "every demo record isDemo = true", "a demo record is not flagged");
     check("Demo data has no integrity problems", checkIntegrity(demo).ok, "demo workspace clean", JSON.stringify(checkIntegrity(demo)).slice(0, 200));

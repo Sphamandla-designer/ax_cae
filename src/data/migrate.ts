@@ -279,7 +279,8 @@ export function migrateLegacy(src: Legacy, isDemo: boolean, today: string): Db {
     id: m.id,
     companyId: m.companyId,
     isDemo,
-    status: m.status === "Held" || (m.date && m.date < today) ? "Held" : "Scheduled",
+    // Only the demo story treats past meetings as held; real ones stay Scheduled until you record them.
+    status: m.status === "Held" || (isDemo && m.date && m.date < today) ? "Held" : m.status === "Cancelled" ? "Cancelled" : "Scheduled",
     date: m.date || "",
     time: m.time || "",
     type: m.type || "Discovery",
@@ -291,7 +292,7 @@ export function migrateLegacy(src: Legacy, isDemo: boolean, today: string): Db {
     budget: m.budget || "",
     timeline: m.timeline || "",
     nextStep: m.nextStep || "",
-    heldAt: m.date && m.date < today ? ts(m.date) : null,
+    heldAt: m.status === "Held" || (isDemo && m.date && m.date < today) ? ts(m.date) : null,
   }));
 
   const proposals: Proposal[] = arr("proposals").map((q: Legacy) => {
@@ -318,13 +319,46 @@ export function migrateLegacy(src: Legacy, isDemo: boolean, today: string): Db {
   });
 
   const tag = <T extends object>(xs: T[]) => xs.map((x) => ({ ...x, isDemo }));
+  // Follow-up rules: a replied message has nothing due; only each prospect's latest sent touch carries a
+  // follow-up date; every follow-up that is due has exactly one linked task (an existing matching task is reused).
+  const REPLIES = ["Replied", "Positive", "Neutral", "Negative", "Wrong person", "Not interested", "Meeting booked"];
+  const latestSent = new Map<string, Outreach>();
+  outreach.filter((o) => o.dateSent).forEach((o) => {
+    const cur = latestSent.get(o.companyId);
+    if (!cur || o.touch > cur.touch) latestSent.set(o.companyId, o);
+  });
+  const repliedCos = new Set(outreach.filter((o) => REPLIES.includes(o.outcome)).map((o) => o.companyId));
+  outreach.forEach((o) => {
+    if (o.followUpDate && (REPLIES.includes(o.outcome) || repliedCos.has(o.companyId) || latestSent.get(o.companyId) !== o)) o.followUpDate = null;
+  });
+  const legacyTasks: Db["tasks"] = arr("tasks").map((t: Legacy) => ({ ...t, isDemo, outreachId: t.outreachId ?? null, meetingId: null, completedAt: null, notes: t.notes || "" }) as Db["tasks"][number]);
+  const fuTasks: Db["tasks"] = [];
+  outreach.filter((o) => o.followUpDate).forEach((o) => {
+    const match = legacyTasks.find((t) => t.companyId === o.companyId && t.status !== "Done" && !t.outreachId && (t.type === "Follow-up" || t.type === "Outreach") && /touch|follow/i.test(t.title));
+    if (match) Object.assign(match, { type: "Follow-up", outreachId: o.id, due: o.followUpDate });
+    else {
+      const co = companies.find((c) => c.id === o.companyId);
+      fuTasks.push({ id: "t-fu-" + o.id, companyId: o.companyId, isDemo, title: `Follow up ${co ? co.name : "prospect"} — touch ${o.touch + 1}`, type: "Follow-up", priority: "High", due: o.followUpDate!, status: "Open", notes: "", outreachId: o.id, meetingId: null, completedAt: null });
+    }
+  });
+
   return {
     companies,
     research,
     contacts,
     opportunities,
     outreach,
-    tasks: arr("tasks").map((t: Legacy) => ({ ...t, isDemo, outreachId: t.outreachId ?? null, notes: t.notes || "" }) as Db["tasks"][number]),
+    tasks: [
+      ...legacyTasks,
+      ...fuTasks,
+      // Every scheduled meeting gets its task, as new meetings do.
+      ...meetings
+        .filter((m) => m.status === "Scheduled" && /^\d{4}-\d{2}-\d{2}$/.test(m.date))
+        .map((m) => {
+          const co = companies.find((c) => c.id === m.companyId);
+          return { id: "t-" + m.id, companyId: m.companyId, isDemo, title: `${m.type} with ${co ? co.name : "prospect"} — ${m.date} ${m.time}`.trim(), type: "Meeting", priority: "High", due: m.date, status: "Open", notes: "", outreachId: null, meetingId: m.id, completedAt: null } as Db["tasks"][number];
+        }),
+    ],
     meetings,
     proposals,
     clients: tag(arr("clients")),

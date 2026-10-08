@@ -21,14 +21,21 @@ export default function CompanySection({ d, onDelete }: { d: DetailModel; onDele
   const set = (k: keyof A.CompanyInput) => (v: string) => setF((x) => ({ ...x, [k]: v }));
   const signals = signalsOf(db, c.id);
 
+  const pendingNote = useRef<string | null>(null);
+  // Leaving the section (or the prospect) saves a note that is still waiting for the typing pause.
   useEffect(() => () => {
     if (noteTimer.current) clearTimeout(noteTimer.current);
+    if (pendingNote.current !== null) d.act((db0) => A.setNote(db0, c.id, pendingNote.current!));
   }, []);
   const changeNote = (v: string) => {
     setNote(v);
+    pendingNote.current = v;
     if (noteTimer.current) clearTimeout(noteTimer.current);
     // Notes are saved after typing pauses, not on every keystroke.
-    noteTimer.current = setTimeout(() => d.run((db0) => A.setNote(db0, c.id, v)), 500);
+    noteTimer.current = setTimeout(() => {
+      pendingNote.current = null;
+      d.act((db0) => A.setNote(db0, c.id, v));
+    }, 500);
   };
   const edit = () => {
     setF({ name: c.name, website: c.website, industry: c.industry, subIndustry: c.subIndustry, location: c.location, size: c.size, leadSource: c.leadSource, campaign: c.campaign, linkedin: c.linkedin, priority: c.priority });
@@ -124,9 +131,9 @@ export default function CompanySection({ d, onDelete }: { d: DetailModel; onDele
           <div style={{ fontSize: "12.5px", color: C.grey }}>No not-ready flag. Mark the prospect not ready if it should stay out of “Contact now”.</div>
         )}
         <div className="cae-row" style={{ display: "flex", gap: "8px", alignItems: "flex-end", flexWrap: "wrap", marginTop: "10px" }}>
-          <SelectInput label="Not-ready reason" value={c.notReadyReason || ""} options={A.NOT_READY_REASONS} placeholder="None — ready when the checklist is" onChange={(v) => d.run((db0, ctx) => A.setNotReady(db0, c.id, v || null, ctx))} style={{ flex: "1 1 240px" }} />
+          <SelectInput label="Not-ready reason" value={c.notReadyReason || ""} options={A.NOT_READY_REASONS} placeholder="None — ready when the checklist is" onChange={(v) => d.act((db0, ctx) => A.setNotReady(db0, c.id, v || null, ctx))} style={{ flex: "1 1 240px" }} />
           {c.notReadyReason && !c.overrideNotReady ? (
-            <Button kind="secondary" onClick={() => d.confirm(`Override the NOT READY state for ${c.name}? It will appear in Contact now despite: ${c.notReadyReason}.`) && d.run((db0, ctx) => A.overrideNotReady(db0, c.id, ctx))}>
+            <Button kind="secondary" onClick={() => d.confirm(`Override the NOT READY state for ${c.name}? It will appear in Contact now despite: ${c.notReadyReason}.`) && d.act((db0, ctx) => A.overrideNotReady(db0, c.id, ctx))}>
               Override and allow outreach
             </Button>
           ) : null}

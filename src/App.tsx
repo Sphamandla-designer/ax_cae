@@ -2,13 +2,13 @@
 // which applies a validated domain action, persists (debounced) and re-renders all derived views.
 import { Component } from "react";
 import { demoDb, emptyDb, SERVICE_GROUPS, STAGES } from "./data/seed";
-import type { Db, Stage } from "./data/types";
+import { COMPANY_COLLECTIONS, type Db, type Stage } from "./data/types";
 import * as A from "./domain/actions";
 import type { Variant } from "./domain/generate";
 import { checkIntegrity, removeOrphans } from "./domain/integrity";
-import { bestOpp, companyOf, contactsOf, dmOf, grade, lastTouch, oppScore, oppValueOf, scansOf, score, sevRank } from "./domain/queries";
+import { bestOpp, companyOf, contactsOf, dmOf, grade, isTouchFollowUp, lastTouch, liveOutcomes, oppScore, oppValueOf, outcomeOf, scansOf, score, sevRank } from "./domain/queries";
 import { runSelfTest, type TestResult } from "./domain/selftest";
-import { acq, completeness, daysSince, dxDims, dxScore, nextBest, quadrant, readiness, REPLY_OUTCOMES, stall, stepStatuses } from "./domain/workflow";
+import { acq, completeness, daysSince, dxDims, dxScore, furthestStage, nextBest, quadrant, readiness, REPLY_OUTCOMES, stall, stepStatuses } from "./domain/workflow";
 import { addDays, daysBetween, localISODate } from "./lib/dates";
 import { fdate, fdatetime, money } from "./lib/format";
 import { discardStored, downloadJson, load, parseEnvelope, save, SCHEMA_VERSION, storageAvailable, type Envelope, type ResearchSettings, type WorkspaceKind } from "./lib/storage";
@@ -185,6 +185,8 @@ export default class App extends Component<AppProps, State> {
     const r = this.run(f);
     if (!r.ok) this.notify("error", r.errors[0], r.errors.slice(1));
     else if (success) this.notify("success", success, []);
+    // A stale error from an earlier attempt must not linger after something succeeded.
+    else if (this.state.notice && (this.state.notice.kind === "error" || this.state.notice.kind === "warn")) this.setState({ notice: null });
     return r;
   };
   notify(kind: "error" | "success" | "info" | "warn", title: string, lines: string[]) {
@@ -196,7 +198,8 @@ export default class App extends Component<AppProps, State> {
 
   setWorkspace(env: Envelope, extra: Partial<State> = {}) {
     this.live = env.workspaces[env.active]!;
-    this.setState({ env, selId: null, composer: null, responseFor: null, scoreFor: null, briefFor: null, ...extra } as State);
+    // Filters belong to a workspace's data: start clean so a stale filter can never hide everything.
+    this.setState({ env, selId: null, composer: null, responseFor: null, scoreFor: null, briefFor: null, savedView: "All", fIndustry: "All industries", fStage: "All stages", fGrade: "All grades", fSource: "All sources", ...extra } as State);
   }
 
   // ---------- navigation ----------
@@ -294,13 +297,18 @@ export default class App extends Component<AppProps, State> {
     const T = S.today;
     const go = (view: string, extra: Partial<State> = {}) => () => this.setState({ view, selId: null, navOpen: false, ...extra } as State);
     const active = D.companies.filter((c) => c.stage !== "Won" && c.stage !== "Lost");
-    const openProps = D.proposals.filter((p) => ["Draft", "Sent", "Viewed", "Negotiation"].includes(A.effectiveProposalStatus(p, T)));
+    const activeIds = new Set(active.map((c) => c.id));
+    // Open proposals = sent to an active prospect and not yet decided or expired. Drafts are not pipeline.
+    const openProps = D.proposals.filter((p) => activeIds.has(p.companyId) && ["Sent", "Viewed", "Negotiation"].includes(A.effectiveProposalStatus(p, T)));
+    const expiredProps = D.proposals.filter((p) => activeIds.has(p.companyId) && A.effectiveProposalStatus(p, T) === "Expired");
+    const dueText = (d: string | null) => (!d ? "" : d < T ? "overdue since " + fdate(d) : d === T ? "due today" : "due " + fdate(d));
+    const naOverdue = (c: (typeof D.companies)[number]) => !!c.nextAction.due && c.nextAction.due < T;
     const wonRevenue = D.clients.reduce((a, c) => a + c.revenue, 0);
     const followDue = D.outreach.filter((o) => o.followUpDate && o.followUpDate <= T);
     const openTasks = D.tasks.filter((t) => t.status !== "Done");
     const tasksToday = openTasks.filter((t) => t.due <= T);
     const meetingsToday = D.meetings.filter((m) => m.status === "Scheduled" && m.date === T);
-    const qualified = D.companies.filter((c) => score(c) >= 15);
+    const qualified = active.filter((c) => score(c) >= 15);
     const won = D.companies.filter((c) => c.stage === "Won").length;
     const lost = D.companies.filter((c) => c.stage === "Lost").length;
     const pipeValue = active.reduce((a, c) => a + oppValueOf(D, c.id), 0);
@@ -331,10 +339,10 @@ export default class App extends Component<AppProps, State> {
     // dashboard
     const kpis = [
       { label: "Total prospects", value: D.companies.length, sub: active.length + " active", on: go("prospects", { savedView: "All" }) },
-      { label: "Qualified (B+)", value: qualified.length, sub: "lead score ≥ 15", on: go("prospects", { savedView: "Hot prospects" }) },
+      { label: "Qualified (B+)", value: qualified.length, sub: "active, lead score ≥ 15", on: go("prospects", { savedView: "Qualified" }) },
       { label: "Outreach due", value: followDue.length, sub: "follow-ups due", on: go("outreach") },
       { label: "Meetings", value: D.meetings.filter((m) => m.status === "Scheduled" && m.date >= T).length, sub: meetingsToday.length + " today", on: go("tasks") },
-      { label: "Open proposals", value: openProps.length, sub: money(openProps.reduce((a, p) => a + p.value, 0)), on: go("pipeline", { pipeTab: "props" }) },
+      { label: "Open proposals", value: openProps.length, sub: money(openProps.reduce((a, p) => a + p.value, 0)) + (expiredProps.length ? " · " + expiredProps.length + " expired" : ""), on: go("pipeline", { pipeTab: "props" }) },
       { label: "Pipeline value", value: money(pipeValue), sub: "active opportunities", on: go("pipeline", { pipeTab: "board" }) },
       { label: "Won revenue", value: money(wonRevenue), sub: D.clients.length + " clients", on: go("clients") },
       { label: "Conversion rate", value: won + lost > 0 ? Math.round((won / (won + lost)) * 100) + "%" : "—", sub: won + " won · " + lost + " lost", on: go("analytics") },
@@ -349,21 +357,19 @@ export default class App extends Component<AppProps, State> {
     const actions: { tag: string; tagFg: string; tagBg: string; text: string; company: string; on: () => void }[] = [];
     followDue.forEach((o) => {
       const c = companyOf(D, o.companyId);
-      if (c) actions.push({ tag: "Follow up", tagFg: "#7a5f24", tagBg: "#f6f0e0", text: "Touch " + (o.touch + 1) + " due", company: c.name, on: () => this.open(c.id, "followup") });
+      if (c) actions.push({ tag: "Follow up", tagFg: "#7a5f24", tagBg: "#f6f0e0", text: "Touch " + (o.touch + 1) + " " + dueText(o.followUpDate), company: c.name, on: () => this.open(c.id, "followup") });
     });
     meetingsToday.forEach((m) => {
       const c = companyOf(D, m.companyId);
       if (c) actions.push({ tag: "Meeting", tagFg: "#2e5b7d", tagBg: "#e6eef4", text: m.type + " at " + m.time, company: c.name, on: () => this.open(c.id, "discovery") });
     });
-    D.companies.filter((c) => c.stage === "New").forEach((c) => actions.push({ tag: "Research", tagFg: "#3a3f48", tagBg: "#f0ede4", text: "New prospect needs research", company: c.name, on: () => this.open(c.id, "research") }));
-    openProps
-      .filter((p) => p.expiry && p.expiry <= addDays(T, 7) && p.status !== "Draft")
-      .forEach((p) => {
-        const c = companyOf(D, p.companyId);
-        if (c) actions.push({ tag: "Proposal", tagFg: "#8a3b34", tagBg: "#f6e6e4", text: "Proposal expires " + fdate(p.expiry), company: c.name, on: () => this.open(c.id, "proposal") });
-      });
+    active.filter((c) => c.stage === "New").forEach((c) => actions.push({ tag: "Research", tagFg: "#3a3f48", tagBg: "#f0ede4", text: "New prospect needs research", company: c.name, on: () => this.open(c.id, "research") }));
+    [...expiredProps, ...openProps.filter((p) => p.expiry && p.expiry <= addDays(T, 7))].forEach((p) => {
+      const c = companyOf(D, p.companyId);
+      if (c) actions.push({ tag: "Proposal", tagFg: "#8a3b34", tagBg: "#f6e6e4", text: (p.expiry < T ? "Proposal expired " : "Proposal expires ") + fdate(p.expiry), company: c.name, on: () => this.open(c.id, "proposal") });
+    });
     tasksToday
-      .filter((t) => t.priority === "High" && !t.outreachId)
+      .filter((t) => t.priority === "High" && !isTouchFollowUp(t) && !(t.meetingId && t.due === T))
       .slice(0, 3)
       .forEach((t) => {
         const c = companyOf(D, t.companyId);
@@ -393,21 +399,23 @@ export default class App extends Component<AppProps, State> {
     let rows = D.companies.slice();
     const sv = S.savedView;
     if (sv === "Hot prospects") rows = rows.filter((c) => score(c) >= 20);
+    if (sv === "Qualified") rows = rows.filter((c) => activeIds.has(c.id) && score(c) >= 15);
     if (sv === "Follow up today") rows = rows.filter((c) => D.outreach.some((o) => o.companyId === c.id && o.followUpDate && o.followUpDate <= T));
     if (sv === "High value") rows = rows.filter((c) => oppValueOf(D, c.id) >= 250000);
     if (sv === "No response") rows = rows.filter((c) => D.outreach.some((o) => o.companyId === c.id && o.outcome === "No response"));
     if (sv === "Proposal stage") rows = rows.filter((c) => c.stage === "Proposal" || c.stage === "Negotiation");
     if (sv === "Won clients") rows = rows.filter((c) => c.stage === "Won");
-    if (S.fIndustry !== "All industries") rows = rows.filter((c) => c.industry === S.fIndustry);
+    // A filter value that no longer exists in this workspace is ignored rather than hiding everything.
+    if (S.fIndustry !== "All industries" && industries.includes(S.fIndustry)) rows = rows.filter((c) => c.industry === S.fIndustry);
     if (S.fStage !== "All stages") rows = rows.filter((c) => c.stage === S.fStage);
     if (S.fGrade !== "All grades") rows = rows.filter((c) => grade(score(c)) === S.fGrade);
-    if (S.fSource !== "All sources") rows = rows.filter((c) => c.leadSource === S.fSource);
+    if (S.fSource !== "All sources" && D.companies.some((c) => c.leadSource === S.fSource)) rows = rows.filter((c) => c.leadSource === S.fSource);
     const prospects = rows
       .map((c) => ({ c, a: acqOf(c.id) as ReturnType<typeof acq> }))
       .sort((x, y) => y.a.total - x.a.total)
       .map(({ c, a }) => {
         const s = score(c), g = grade(s);
-        const r = readiness(D, c), n = nb(c), st = stall(c, T), dm = dmOf(D, c.id), o = bestOpp(D, c.id);
+        const r = readiness(D, c), n = nb(c), st = stall(c, T, D), dm = dmOf(D, c.id), o = bestOpp(D, c.id);
         return {
           name: c.name,
           industry: c.industry || "Unknown",
@@ -430,14 +438,14 @@ export default class App extends Component<AppProps, State> {
           action: n.label,
           due: dueLabel(c.nextAction.due),
           nextColor: dueColor(c.nextAction.due) === "#8a8474" ? "#6b6f78" : dueColor(c.nextAction.due),
-          value: o ? money(o.estValue) : "—",
+          value: o ? money(oppValueOf(D, c.id)) : "—",
           actionCta: n.label + " →",
           on: () => this.open(c.id),
           onAction: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.openNext(c.id)),
           onMore: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.setState({ scoreFor: c.id })),
         };
       });
-    const savedViews = ["All", "Hot prospects", "Follow up today", "High value", "No response", "Proposal stage", "Won clients"].map((x) => ({ label: x, on: () => this.setState({ savedView: x }), bg: sv === x ? "#0c1220" : "#fff", fg: sv === x ? "#fff" : "#3a3f48", border: sv === x ? "#0c1220" : "#e6e2d8" }));
+    const savedViews = ["All", "Qualified", "Hot prospects", "Follow up today", "High value", "No response", "Proposal stage", "Won clients"].map((x) => ({ label: x, on: () => this.setState({ savedView: x }), bg: sv === x ? "#0c1220" : "#fff", fg: sv === x ? "#fff" : "#3a3f48", border: sv === x ? "#0c1220" : "#e6e2d8" }));
 
     // opportunities
     const oppRows = D.opportunities
@@ -501,9 +509,14 @@ export default class App extends Component<AppProps, State> {
       const c = companyOf(D, o.companyId);
       return {
         company: c ? c.name : "",
-        detail: "Touch " + (o.touch + 1) + " due " + dueLabel(o.followUpDate).toLowerCase() + " · last: " + (o.message || "").slice(0, 90),
+        detail: "Touch " + (o.touch + 1) + " " + dueText(o.followUpDate) + " · last: " + (o.message || "").slice(0, 90),
+        doneLabel: D.outreach.some((x) => x.companyId === o.companyId && !x.dateSent) ? "Open draft" : "Prepare touch " + (o.touch + 1),
         onOpen: () => this.open(o.companyId, "followup"),
-        onDone: () => this.setState({ composer: { cid: o.companyId, variant: o.touch + 1 >= 4 ? "Final follow-up" : "Follow-up" } }),
+        // An unsent draft for this prospect is the follow-up: open it instead of starting a second one.
+        onDone: () => {
+          const pend = D.outreach.find((x) => x.companyId === o.companyId && !x.dateSent);
+          this.setState({ composer: pend ? { cid: o.companyId, outreachId: pend.id } : { cid: o.companyId, variant: o.touch + 1 >= 4 ? "Final follow-up" : "Follow-up" } });
+        },
         onResched: () => this.act((db, ctx) => A.rescheduleFollowUp(db, o.id, 3, ctx)),
         onSkip: () => this.confirm("Skip touch " + (o.touch + 1) + " for " + (c?.name || "") + "?") && this.act((db, ctx) => A.skipFollowUp(db, o.id, ctx)),
       };
@@ -523,12 +536,16 @@ export default class App extends Component<AppProps, State> {
         name: stage,
         fg: stage === "Won" ? "#2e7d5b" : stage === "Lost" ? "#b0453c" : "#3a3f48",
         count: cards.length,
-        total: money(cards.reduce((a, c) => a + oppValueOf(D, c.id), 0)),
+        // Won = what was actually won; Lost carries no pipeline value; open stages = best opportunity value.
+        total: stage === "Won" ? money(cards.reduce((a, c) => a + (outcomeOf(D, c.id)?.value || 0), 0)) : stage === "Lost" ? "—" : money(cards.reduce((a, c) => a + oppValueOf(D, c.id), 0)),
         onDrop: (e: { preventDefault: () => void }) => {
           e.preventDefault();
           const id = this._drag;
           this._drag = null;
           if (!id) return;
+          const dragged = companyOf(D, id);
+          if (dragged && (dragged.stage === "Won" || dragged.stage === "Lost"))
+            return this.notify("warn", dragged.name + " is closed as " + dragged.stage, [dragged.stage === "Lost" ? "Open it and use “Reopen prospect” in Won / Lost to bring it back." : "A won client stays won."]);
           if (stage === "Won" || stage === "Lost") return this.openOutcome(id, stage);
           this.act((db, ctx) => A.setStage(db, id, stage as Stage, ctx));
         },
@@ -541,7 +558,7 @@ export default class App extends Component<AppProps, State> {
             gradeBg: GRADE[g][0],
             gradeFg: GRADE[g][1],
             service: o ? o.type || o.service : c.industry || "—",
-            value: o ? money(o.estValue) : "—",
+            value: c.stage === "Won" ? money(outcomeOf(D, c.id)?.value || 0) : o ? money(oppValueOf(D, c.id)) : "—",
             due: dueLabel(c.nextAction.due),
             dueFg: dueColor(c.nextAction.due),
             next: nb(c).label,
@@ -590,7 +607,8 @@ export default class App extends Component<AppProps, State> {
         circleBorder: done ? "#2e7d5b" : "#b8b2a2",
         titleFg: done ? "#a39d8f" : "#10151e",
         deco: done ? "line-through" : "none",
-        onDone: () => this.act((db, ctx) => A.toggleTask(db, t.id, ctx)),
+        doneAria: done ? "Reopen task" : isTouchFollowUp(t) ? "Done when the next touch is sent — opens the follow-up step" : t.meetingId ? "Done when the meeting is recorded — opens Discovery" : "Mark done",
+        onDone: () => this.toggleTask(t.id),
         onOpen: () => this.open(t.companyId, this.taskFocus(t)),
         onReschedule: () => this.act((db, ctx) => A.rescheduleTask(db, t.id, 3, ctx)),
       };
@@ -599,22 +617,26 @@ export default class App extends Component<AppProps, State> {
       { label: "Overdue", fg: "#b0453c", items: openTasks.filter((t) => t.due < T).map(mkTask) },
       { label: "Due today", fg: "#a8863d", items: openTasks.filter((t) => t.due === T).map(mkTask) },
       { label: "Upcoming", fg: "#3a3f48", items: openTasks.filter((t) => t.due > T).sort((a, b) => a.due.localeCompare(b.due)).map(mkTask) },
-      { label: "Done", fg: "#2e7d5b", items: D.tasks.filter((t) => t.status === "Done").slice(-30).reverse().map(mkTask) },
+      { label: "Done", fg: "#2e7d5b", items: D.tasks.filter((t) => t.status === "Done").map((t, i) => ({ t, i })).sort((a, b) => (b.t.completedAt || "").localeCompare(a.t.completedAt || "") || b.i - a.i).slice(0, 30).map((x) => mkTask(x.t)) },
     ].map((g) => ({ ...g, count: g.items.length + (g.items.length === 1 ? " task" : " tasks"), empty: g.items.length === 0 }));
 
     // analytics
     const outSent = D.outreach.filter((o) => o.dateSent);
-    const replied = outSent.filter((o) => REPLY_OUTCOMES.includes(o.outcome));
-    const positive = outSent.filter((o) => ["Replied", "Positive", "Meeting booked"].includes(o.outcome));
+    // Rates are per prospect contacted (not per message): one prospect replying once is one reply.
+    const contactedIds = new Set(outSent.map((o) => o.companyId));
+    const repliedIds = new Set(outSent.filter((o) => REPLY_OUTCOMES.includes(o.outcome)).map((o) => o.companyId));
+    const positiveIds = new Set(outSent.filter((o) => ["Positive", "Meeting booked"].includes(o.outcome)).map((o) => o.companyId));
     const decided = D.proposals.filter((p) => p.status === "Accepted" || p.status === "Rejected");
     const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) + "%" : "—");
     const anGroups = [
-      { label: "Acquisition", rows: [{ k: "Prospects added", v: D.companies.length }, { k: "Qualified (score ≥15)", v: qualified.length }, { k: "Outreach sent", v: outSent.length }, { k: "Reply rate", v: pct(replied.length, outSent.length) }, { k: "Positive reply rate", v: pct(positive.length, outSent.length) }] },
+      { label: "Acquisition", rows: [{ k: "Prospects added", v: D.companies.length }, { k: "Qualified (score ≥15)", v: D.companies.filter((c) => score(c) >= 15).length }, { k: "Prospects contacted", v: contactedIds.size }, { k: "Messages sent", v: outSent.length }, { k: "Reply rate (per prospect)", v: pct(repliedIds.size, contactedIds.size) }, { k: "Positive reply rate", v: pct(positiveIds.size, contactedIds.size) }] },
       { label: "Sales", rows: [{ k: "Meetings held", v: D.meetings.filter((m) => m.status === "Held").length }, { k: "Proposals", v: D.proposals.length }, { k: "Acceptance rate", v: pct(D.proposals.filter((p) => p.status === "Accepted").length, decided.length) }, { k: "Won", v: won }, { k: "Lost", v: lost }] },
       { label: "Revenue", rows: [{ k: "Pipeline value", v: money(pipeValue) }, { k: "Weighted pipeline", v: money(weighted) }, { k: "Won revenue", v: money(wonRevenue) }, { k: "Avg project value", v: D.clients.length ? money(wonRevenue / D.clients.length) : "—" }] },
     ];
     const stageIdx = (s: string) => (STAGES as string[]).indexOf(s);
-    const reached = (min: number) => D.companies.filter((c) => (stageIdx(c.stage) >= min && c.stage !== "Lost") || c.stage === "Won").length;
+    // How far each prospect actually got, from its records — Lost prospects count for the stages they reached.
+    const furthest = new Map(D.companies.map((c) => [c.id, Math.max(c.stage === "Lost" ? 0 : stageIdx(c.stage), furthestStage(D, c))]));
+    const reached = (min: number) => D.companies.filter((c) => (furthest.get(c.id) || 0) >= min).length;
     const convSteps: [string, number][] = [["Prospects", D.companies.length], ["Qualified", reached(2)], ["Contacted", reached(3)], ["Responded", reached(4)], ["Meeting", reached(5)], ["Proposal", reached(6)], ["Won", won]];
     const base = convSteps[0][1] || 1;
     const convFunnel = convSteps.map(([stage, count]) => ({ stage, count, w: Math.max(2, Math.round((count / base) * 100)) + "%", pct: Math.round((count / base) * 100) + "% of total" }));
@@ -633,7 +655,7 @@ export default class App extends Component<AppProps, State> {
     const breakdowns = [mkBreak("By industry", (c) => c.industry || "Unknown"), mkBreak("By lead source", (c) => c.leadSource || "Unknown"), mkBreak("By service", (c) => { const o = bestOpp(D, c.id); return o ? o.type || o.service : null; })];
     const wonCos = D.companies.filter((c) => c.stage === "Won"), lostCos = D.companies.filter((c) => c.stage === "Lost");
     const avg = (arr: number[]) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null);
-    const ocAcq = (cs: typeof wonCos) => cs.map((c) => D.outcomes.find((o) => o.companyId === c.id)?.acqAtClose ?? acqOf(c.id).total);
+    const ocAcq = (cs: typeof wonCos) => cs.map((c) => outcomeOf(D, c.id)?.acqAtClose ?? acqOf(c.id).total);
     const avgWon = avg(ocAcq(wonCos)), avgLost = avg(ocAcq(lostCos));
     const insuff = "Insufficient data";
     const bestBy = (keyFn: (c: (typeof D.companies)[number]) => string | null) => {
@@ -645,8 +667,9 @@ export default class App extends Component<AppProps, State> {
         m[k].t++;
         if (c.stage === "Won") m[k].w++;
       });
-      const e = Object.entries(m).sort((a, b) => b[1].w / b[1].t - a[1].w / a[1].t);
-      return e.length ? e[0][0] + " (" + e[0][1].w + "/" + e[0][1].t + ")" : insuff;
+      // Only groups with at least 3 closed deals qualify; ties go to the larger sample.
+      const e = Object.entries(m).filter(([, x]) => x.t >= 3).sort((a, b) => b[1].w / b[1].t - a[1].w / a[1].t || b[1].t - a[1].t);
+      return e.length ? e[0][0] + " (" + e[0][1].w + "/" + e[0][1].t + " won)" : insuff + " — needs 3+ closed deals in one group";
     };
     const chan = (() => {
       const m: Record<string, { r: number; t: number }> = {};
@@ -655,10 +678,10 @@ export default class App extends Component<AppProps, State> {
         m[o.channel].t++;
         if (REPLY_OUTCOMES.includes(o.outcome)) m[o.channel].r++;
       });
-      const e = Object.entries(m).sort((a, b) => b[1].r / b[1].t - a[1].r / a[1].t);
-      return e.length ? e[0][0] + " (" + Math.round((e[0][1].r / e[0][1].t) * 100) + "% reply, n=" + e[0][1].t + ")" : insuff;
+      const e = Object.entries(m).filter(([, x]) => x.t >= 3).sort((a, b) => b[1].r / b[1].t - a[1].r / a[1].t || b[1].t - a[1].t);
+      return e.length ? e[0][0] + " (" + Math.round((e[0][1].r / e[0][1].t) * 100) + "% of messages replied, n=" + e[0][1].t + ")" : insuff + " — needs 3+ messages on one channel";
     })();
-    const closeDays = D.outcomes.filter((o) => o.result === "Won").map((o) => o.daysToClose);
+    const closeDays = liveOutcomes(D).filter((o) => o.result === "Won").map((o) => o.daysToClose);
     const acqPerf = [
       { k: "Avg acquisition score — won", v: avgWon !== null ? avgWon + "/100" : insuff },
       { k: "Avg acquisition score — lost", v: avgLost !== null ? avgLost + "/100" : insuff },
@@ -696,7 +719,7 @@ export default class App extends Component<AppProps, State> {
 
     // day plan
     type W = { c: (typeof D.companies)[number]; a: ReturnType<typeof acq>; r: ReturnType<typeof readiness>; nb: ReturnType<typeof nextBest>; stall: ReturnType<typeof stall> };
-    const activeW: W[] = active.map((c) => ({ c, a: acqOf(c.id) as ReturnType<typeof acq>, r: readiness(D, c), nb: nb(c), stall: stall(c, T) }));
+    const activeW: W[] = active.map((c) => ({ c, a: acqOf(c.id) as ReturnType<typeof acq>, r: readiness(D, c), nb: nb(c), stall: stall(c, T, D) }));
     const rowFor = (x: W) => ({
       name: x.c.name,
       acq: x.a.total,
@@ -725,15 +748,16 @@ export default class App extends Component<AppProps, State> {
       .filter((x) => x.nb.label === "Await reply" || x.nb.label === "Follow up on proposal" || x.nb.label === "Prepare for discovery")
       .map((x) => ({ ...rowFor(x), waitingOn: x.nb.label === "Follow up on proposal" ? "Proposal decision" : x.nb.label === "Prepare for discovery" ? "Meeting · " + x.nb.why : "Reply to outreach" }));
     const atRisk = activeW
-      .filter((x) => x.stall || (x.c.nextAction.due < T) || daysSince(lastTouch(D, x.c.id), T) > 21)
-      .map((x) => ({ ...rowFor(x), risk: x.stall ? "Stalled " + x.stall.days + " days in " + x.c.stage : x.c.nextAction.due < T ? "Next action overdue since " + fdate(x.c.nextAction.due) : "No activity for " + daysSince(lastTouch(D, x.c.id), T) + " days" }));
+      .filter((x) => x.stall || naOverdue(x.c) || daysSince(lastTouch(D, x.c.id), T) > 21)
+      .map((x) => ({ ...rowFor(x), risk: x.stall ? "Stalled " + x.stall.days + " days in " + x.c.stage : naOverdue(x.c) ? "Next action overdue since " + fdate(x.c.nextAction.due) : "No activity for " + daysSince(lastTouch(D, x.c.id), T) + " days" }));
     const planSets: Record<string, ReturnType<typeof rowFor>[]> = { contact: contactNow, follow: followNow, research: researchNow, prepare: prepareNow, waiting, risk: atRisk };
     const planTabs = ([["contact", "Contact now"], ["follow", "Follow up now"], ["research", "Research now"], ["prepare", "Prepare now"], ["waiting", "Waiting"], ["risk", "At risk"]] as [string, string][]).map(([k, label]) => ({ label, n: planSets[k].length, current: S.planTab === k, on: () => this.setState({ planTab: k }), bg: S.planTab === k ? "#a8863d" : "transparent", fg: S.planTab === k ? "#0c1220" : "#e8e6e0", border: S.planTab === k ? "#a8863d" : "rgba(255,255,255,.18)" }));
     const planRows = planSets[S.planTab] || [];
     const planEmptyMsg = ({ contact: "Nothing is outreach-ready today — clear the Research now list first.", follow: "No follow-ups due today.", research: "No prospects are missing research or evidence.", prepare: "Nothing waiting on a strategy, proposal or meeting record.", waiting: "Nothing outstanding with prospects right now.", risk: "Nothing at risk — every prospect is moving." } as Record<string, string>)[S.planTab];
     const doneToday = {
       newProspects: D.companies.filter((c) => c.dateDiscovered === T).length,
-      qualified: D.companies.filter((c) => score(c) >= 15 && c.stageSince === T).length,
+      // Qualified today = moved to the Qualified stage today (that happens when it becomes outreach-ready).
+      qualified: new Set(D.activities.filter((a) => a.kind === "Stage change" && /moved to Qualified/.test(a.text) && localISODate(new Date(a.ts)) === T).map((a) => a.companyId)).size,
       outreach: D.outreach.filter((o) => o.dateSent === T && o.touch === 1).length,
       followUps: D.outreach.filter((o) => o.dateSent === T && o.touch > 1).length,
       meetings: D.meetings.filter((m) => m.status === "Held" && m.date === T).length,
@@ -754,7 +778,7 @@ export default class App extends Component<AppProps, State> {
         bandFg: a.bandColor,
         bandBg: a.bandBg,
         opp: o ? o.type || o.service : "No opportunity recorded",
-        value: o ? money(o.estValue) : "—",
+        value: o ? money(oppValueOf(D, c.id)) : "—",
         dm: dm ? dm.name + " · " + dm.title : cts.length ? "Not identified (" + cts[0].name + " is " + (cts[0].role || "unknown") + ")" : "Not identified",
         dmFg: dm ? "#3a3f48" : "#b0453c",
         next: nb(c).label,
@@ -768,18 +792,20 @@ export default class App extends Component<AppProps, State> {
         .filter((o) => !o.dateSent && (o.status === "Draft" || o.status === "Approved" || (o.status === "Scheduled" && (o.dateScheduled || "") <= T)))
         .map((o) => {
           const c = companyOf(D, o.companyId);
-          return { company: c ? c.name : "", detail: o.channel + " · " + (o.status === "Draft" ? "draft — needs approval" : o.status === "Approved" ? "approved — send it, then mark as sent" : "scheduled for today") + " · " + o.message.slice(0, 70), on: () => this.open(o.companyId, "outreach"), onGen: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.setState({ composer: { cid: o.companyId, outreachId: o.id } })) };
+          return { company: c ? c.name : "", detail: o.channel + " · " + (o.status === "Draft" ? "draft — needs approval" : o.status === "Approved" ? "approved — send it, then mark as sent" : o.dateScheduled && o.dateScheduled < T ? "was scheduled for " + fdate(o.dateScheduled) + " — send it, then mark as sent" : "scheduled for today — send it, then mark as sent") + " · " + o.message.slice(0, 70), on: () => this.open(o.companyId, "outreach"), onGen: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.setState({ composer: { cid: o.companyId, outreachId: o.id } })) };
         }),
       ...contactNow.filter((r) => !D.outreach.some((o) => o.companyId === activeW.find((x) => x.c.name === r.name)?.c.id)).map((r) => {
         const c = activeW.find((x) => x.c.name === r.name)!.c;
         return { company: c.name, detail: "Outreach-ready with no message yet — prepare touch 1", on: () => this.open(c.id, "outreach"), onGen: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.setState({ composer: { cid: c.id } })) };
       }),
     ];
+    const focusFor: Record<string, string> = { "Research complete": "research", "Decision-maker identified": "contacts", "Opportunity with evidence": "opportunity", "Acquisition strategy": "strategy" };
     const researchNeeded = active
       .map((c) => ({ c, comp: completeness(D, c) }))
-      .filter((x) => x.comp.missing.length > 0)
+      .map((x) => ({ ...x, req: x.comp.checks.filter((k) => k.required && !k.ok).map((k) => k.k) }))
+      .filter((x) => x.req.length > 0)
       .sort((a, b) => a.comp.pct - b.comp.pct)
-      .map(({ c, comp }) => ({ company: c.name, pct: comp.pct + "%", missing: comp.missing.slice(0, 3).join(" · "), on: () => this.openNext(c.id), w: comp.pct + "%" }));
+      .map(({ c, comp, req }) => ({ company: c.name, pct: comp.pct + "%", missing: req.slice(0, 3).join(" · "), on: () => this.open(c.id, focusFor[req[0]] || (/scan/i.test(req[0]) ? "assessment" : "company")), w: comp.pct + "%" }));
     const revStages = ["Qualified", "Outreach", "Responded", "Discovery", "Proposal", "Negotiation"];
     const revenueOps = acqAll
       .filter(({ c }) => revStages.includes(c.stage))
@@ -799,17 +825,17 @@ export default class App extends Component<AppProps, State> {
       { label: "Priority prospects", value: activeRanked.filter((x) => x.a.total >= 80).length, sub: "acq score ≥ 80" },
       { label: "Outreach today", value: outreachToday.length, sub: "drafts, approved, ready" },
       { label: "Follow-ups due", value: followDue.length, sub: "cadence due" },
-      { label: "Research needed", value: researchNow.length, sub: "missing research or evidence" },
+      { label: "Profiles incomplete", value: researchNeeded.length, sub: "required items missing" },
     ];
 
     // queue
-    const queueRows = activeRanked.map(({ c, a }) => ({ c, a, r: readiness(D, c), nb: nb(c), stall: stall(c, T) }));
+    const queueRows = activeRanked.map(({ c, a }) => ({ c, a, r: readiness(D, c), nb: nb(c), stall: stall(c, T, D) }));
     queueRows.sort((x, y) => {
       const boost = (z: (typeof queueRows)[number]) => {
         let b = 0;
         if (z.r.ready) b += 14;
         if (D.outreach.some((o) => o.companyId === z.c.id && o.followUpDate && o.followUpDate <= T)) b += 12;
-        if (z.c.nextAction.due < T) b += 8;
+        if (naOverdue(z.c)) b += 8;
         if (z.stall) b += 6;
         if (z.r.blocked) b -= 25;
         b += Math.min(8, Math.round(oppValueOf(D, z.c.id) / 60000));
@@ -830,7 +856,7 @@ export default class App extends Component<AppProps, State> {
     if (qs === "Stage") queueRows.sort((a, b) => stageIdx(b.c.stage) - stageIdx(a.c.stage));
     const queue = queueRows.map(({ c, a, r, nb: n, stall: st }, i) => {
       const o = bestOpp(D, c.id), dm = dmOf(D, c.id);
-      const whyNowTxt = st ? "Stalled " + st.days + "d in " + c.stage : D.outreach.some((x) => x.companyId === c.id && x.followUpDate && x.followUpDate <= T) ? "Follow-up due" : r.blocked ? "Not ready — " + r.reason : r.ready && !D.outreach.some((x) => x.companyId === c.id && x.dateSent) ? "Outreach ready" : c.nextAction.due < T ? "Action overdue" : n.why;
+      const whyNowTxt = st ? "Stalled " + st.days + "d in " + c.stage : D.outreach.some((x) => x.companyId === c.id && x.followUpDate && x.followUpDate <= T) ? "Follow-up due" : r.blocked ? "Not ready — " + r.reason : r.ready && !D.outreach.some((x) => x.companyId === c.id && x.dateSent) ? "Outreach ready" : naOverdue(c) ? "Action overdue" : n.why;
       return {
         rank: String(i + 1).padStart(2, "0"),
         name: c.name,
@@ -843,7 +869,7 @@ export default class App extends Component<AppProps, State> {
         readyW: r.pct + "%",
         readyFg: readyFg(r.pct),
         opp: o ? o.type || o.service : "—",
-        value: o ? money(o.estValue) : "—",
+        value: o ? money(oppValueOf(D, c.id)) : "—",
         dm: dm ? dm.name : "Not identified",
         dmFg: dm ? "#3a3f48" : "#b0453c",
         stage: c.stage,
@@ -858,13 +884,17 @@ export default class App extends Component<AppProps, State> {
     const queueSorts = ["Smart (default)", "Acquisition score", "Action readiness", "Opportunity value", "Urgency", "Follow-up date", "Stage"].map((k) => ({ label: k, current: qs === k, on: () => this.setState({ queueSort: k }), bg: qs === k ? "#0c1220" : "#fff", fg: qs === k ? "#fff" : "#3a3f48", border: qs === k ? "#0c1220" : "#e6e2d8" }));
 
     // campaigns
-    const campaigns = D.campaigns.map((cam) => {
+    // Campaigns = the defined ones plus every campaign name typed on a prospect.
+    const camNames = [...new Set([...D.campaigns.map((x) => x.name), ...D.companies.map((c) => c.campaign).filter(Boolean)])];
+    const campaigns = camNames.map((name) => {
+      const cam = D.campaigns.find((x) => x.name === name) || { name, target: "Not defined — set on the prospects tagged with it", offer: "—", goal: "—" };
       const cs = D.companies.filter((c) => c.campaign === cam.name);
       const ids = new Set(cs.map((c) => c.id));
       const outs = D.outreach.filter((o) => ids.has(o.companyId) && o.dateSent);
-      const reps = outs.filter((o) => REPLY_OUTCOMES.includes(o.outcome));
+      const contacted = new Set(outs.map((o) => o.companyId));
+      const reps = [...new Set(outs.filter((o) => REPLY_OUTCOMES.includes(o.outcome)).map((o) => o.companyId))];
       const rev = D.clients.filter((cl) => ids.has(cl.companyId)).reduce((a, c) => a + c.revenue, 0);
-      return { name: cam.name, target: cam.target, offer: cam.offer, goal: cam.goal, stats: [{ k: "Prospects", v: cs.length }, { k: "Outreach", v: outs.length }, { k: "Replies", v: reps.length }, { k: "Meetings", v: D.meetings.filter((m) => ids.has(m.companyId) && m.status === "Held").length }, { k: "Proposals", v: D.proposals.filter((p) => ids.has(p.companyId)).length }, { k: "Won", v: cs.filter((c) => c.stage === "Won").length }], revenue: money(rev), conv: outs.length ? Math.round((reps.length / outs.length) * 100) + "% reply" : "No outreach yet", avgAcq: cs.length ? Math.round(cs.reduce((a, c) => a + acqOf(c.id).total, 0) / cs.length) + "/100" : "—" };
+      return { name: cam.name, target: cam.target, offer: cam.offer, goal: cam.goal, stats: [{ k: "Prospects", v: cs.length }, { k: "Contacted", v: contacted.size }, { k: "Replied", v: reps.length }, { k: "Meetings", v: D.meetings.filter((m) => ids.has(m.companyId) && m.status === "Held").length }, { k: "Proposals", v: D.proposals.filter((p) => ids.has(p.companyId)).length }, { k: "Won", v: cs.filter((c) => c.stage === "Won").length }], revenue: money(rev), conv: contacted.size ? Math.round((reps.length / contacted.size) * 100) + "% of contacted replied" : "No outreach yet", avgAcq: cs.length ? Math.round(cs.reduce((a, c) => a + acqOf(c.id).total, 0) / cs.length) + "/100" : "—" };
     });
 
     // search & notifications
@@ -878,9 +908,10 @@ export default class App extends Component<AppProps, State> {
     const bellItems: { tag: string; color: string; text: string; on: () => void }[] = [];
     followDue.forEach((o) => {
       const c = companyOf(D, o.companyId);
-      if (c) bellItems.push({ tag: "Follow-up due", color: "#a8863d", text: c.name + " — touch " + (o.touch + 1) + " due " + dueLabel(o.followUpDate).toLowerCase(), on: () => this.open(c.id, "followup") });
+      if (c) bellItems.push({ tag: "Follow-up due", color: "#a8863d", text: c.name + " — touch " + (o.touch + 1) + " " + dueText(o.followUpDate), on: () => this.open(c.id, "followup") });
     });
-    openTasks.filter((t) => t.due < T).forEach((t) => {
+    // Touch follow-up tasks are already listed above as "Follow-up due".
+    openTasks.filter((t) => t.due < T && !isTouchFollowUp(t)).forEach((t) => {
       const c = companyOf(D, t.companyId);
       if (c) bellItems.push({ tag: "Overdue task", color: "#b0453c", text: t.title + " (" + c.name + ")", on: () => this.open(c.id, this.taskFocus(t)) });
     });
@@ -888,7 +919,7 @@ export default class App extends Component<AppProps, State> {
       const c = companyOf(D, m.companyId);
       if (c) bellItems.push({ tag: "Meeting today", color: "#2e5b7d", text: m.type + " with " + c.name + " at " + m.time, on: () => this.open(c.id, "discovery") });
     });
-    openProps.filter((p) => p.expiry && p.status !== "Draft" && daysBetween(T, p.expiry) <= 7).forEach((p) => {
+    [...expiredProps, ...openProps.filter((p) => p.expiry && daysBetween(T, p.expiry) <= 7)].forEach((p) => {
       const c = companyOf(D, p.companyId);
       if (c) bellItems.push({ tag: p.expiry < T ? "Proposal expired" : "Proposal expiring", color: "#b0453c", text: c.name + " proposal " + (p.expiry < T ? "expired " : "expires ") + fdate(p.expiry), on: () => this.open(c.id, "proposal") });
     });
@@ -908,6 +939,7 @@ export default class App extends Component<AppProps, State> {
         provider: providerInfo(S.env.settings.research),
         researchRunning: S.researching === sel.id,
         run: this.run,
+        act: (f) => this.act(f),
         setFocus: (f: string) => this.setState({ focus: f, outcomeKind: null }),
         runResearch: (w: string) => void this.runResearch(sel.id, w),
         openComposer: (o) => this.setState({ composer: { cid: sel.id, ...o } }),
@@ -1008,11 +1040,13 @@ export default class App extends Component<AppProps, State> {
       openNext: () => sel && this.openNext(sel.id),
       openOutcome: (k: "Won" | "Lost") => sel && this.openOutcome(sel.id, k),
       setStage: (cid: string, stage: string) => (stage === "Won" || stage === "Lost" ? this.openOutcome(cid, stage) : this.act((db, ctx) => A.setStage(db, cid, stage as Stage, ctx))),
-      toggleTask: (id: string) => this.act((db, ctx) => A.toggleTask(db, id, ctx)),
+      toggleTask: (id: string) => this.toggleTask(id),
       deleteCompany: (cid: string) => {
         const c = companyOf(D, cid);
         if (!c) return;
-        const n = ["research", "contacts", "scans", "opportunities", "outreach", "tasks", "meetings", "proposals", "activities"].reduce((a, k) => a + (D as any)[k].filter((r: { companyId: string }) => r.companyId === cid).length, 0);
+        const n = (COMPANY_COLLECTIONS as readonly string[]).reduce((a, k) => a + (D as any)[k].filter((r: { companyId: string }) => r.companyId === cid).length, 0);
+        const isClient = D.clients.some((x) => x.companyId === cid), hasOutcome = D.outcomes.some((x) => x.companyId === cid);
+        if ((isClient || hasOutcome) && !this.confirm(`${c.name} has ${isClient ? "a CLIENT record (with its revenue)" : "a recorded " + (outcomeOf(D, cid)?.result || "") + " outcome"}. Deleting removes it from Clients, Analytics and won revenue. Continue?`)) return;
         if (!this.confirm(`Delete ${c.name} and all ${n} related records (research, contacts, assessments, outreach, tasks, meetings, proposals, activity)? This cannot be undone.`)) return;
         const r = this.run((db) => A.deleteCompany(db, cid));
         if (r.ok) {
@@ -1022,7 +1056,7 @@ export default class App extends Component<AppProps, State> {
       },
       genBrief: () => sel && this.setState({ briefFor: sel.id }),
       opps: oppRows,
-      oppTotal: money(D.opportunities.reduce((a, o) => a + o.estValue, 0)),
+      oppTotal: money(D.opportunities.filter((o) => activeIds.has(o.companyId)).reduce((a, o) => a + o.estValue, 0)),
       cadence,
       followUpsDue,
       dueCount: followUpsDue.length,
@@ -1114,7 +1148,20 @@ export default class App extends Component<AppProps, State> {
     };
   }
 
-  taskFocus(t: { title: string; type: string; outreachId: string | null }) {
+  /** Tick a task. Tasks that stand for a record (follow-up touch, meeting) open the step that completes them instead. */
+  toggleTask = (id: string) => {
+    const t = this.db.tasks.find((x) => x.id === id);
+    if (!t) return;
+    const r = this.run((db, ctx) => A.toggleTask(db, id, ctx));
+    if (r.ok) return;
+    if (t.status !== "Done" && (isTouchFollowUp(t) || t.meetingId)) {
+      this.open(t.companyId, this.taskFocus(t));
+      this.notify("info", r.errors[0], []);
+    } else this.notify("error", r.errors[0], r.errors.slice(1));
+  };
+
+  taskFocus(t: { title: string; type: string; outreachId: string | null; meetingId?: string | null }) {
+    if (t.meetingId) return "discovery";
     if (t.outreachId) return t.outreachId.endsWith(":response") ? "response" : "followup";
     return ({ Research: "research", Outreach: "outreach", "Follow-up": "followup", Meeting: "discovery", Proposal: "proposal", Client: "outcome", Nurture: "outcome" } as Record<string, string>)[t.type] || "company";
   }

@@ -218,6 +218,8 @@ export interface Outreach {
   approvedAt: string | null;
   dateScheduled: string | null;
   dateSent: string | null;
+  /** Exact time it was marked sent (dateSent is the local calendar day). */
+  sentAt?: string | null;
   /** Response outcome (Positive, No response, Meeting booked, …) — separate from delivery status. */
   outcome: string;
   responseNotes: string;
@@ -239,6 +241,9 @@ export interface Task {
   notes: string;
   /** Outreach touch this follow-up task belongs to (one open task per touch). */
   outreachId: string | null;
+  /** Meeting this task belongs to (scheduled discovery). */
+  meetingId?: string | null;
+  completedAt?: string | null;
 }
 
 export interface Meeting {
@@ -335,6 +340,8 @@ export interface Outcome {
   notes: string;
   competitor: string;
   reEntryDate: string | null;
+  /** Set when a Lost prospect is reopened; the record stays as history. */
+  supersededAt?: string | null;
 }
 
 export interface Targets {

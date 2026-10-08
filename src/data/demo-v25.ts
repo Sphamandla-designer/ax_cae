@@ -7,13 +7,13 @@ export const CONFIDENCE_LEVELS = ['Observed','Indicated','Assumption'];
 export const OUTREACH_OUTCOMES = ['Sent','Viewed','Replied','Positive','Neutral','Negative','No response','Wrong person','Not interested','Meeting booked'];
 export const OUTCOME_NEXT = {
   'Positive':'Schedule discovery',
-  'Meeting booked':'Prepare discovery',
+  'Meeting booked':'Add the booked meeting to Discovery',
   'Replied':'Qualify the reply, then schedule discovery',
   'No response':'Follow up',
   'Wrong person':'Identify correct decision-maker',
   'Not interested':'Move to nurture',
   'Negative':'Close / nurture',
-  'Neutral':'Set nurture date',
+  'Neutral':'Set nurture date or follow up',
   'Viewed':'Follow up',
   'Sent':'Await reply — follow up on cadence'
 };

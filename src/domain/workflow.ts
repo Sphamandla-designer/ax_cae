@@ -1,13 +1,15 @@
 // Workflow engine: every status here is derived from records, never from a button having been clicked.
-import { STALL_THRESHOLDS } from "../data/seed";
+import { STAGES, STALL_THRESHOLDS } from "../data/seed";
 import type { Company, Db } from "../data/types";
 import { daysBetween } from "../lib/dates";
 import {
   bestOpp,
   clientOf,
+  completedResearch,
   contactsOf,
   currentResearch,
   dmOf,
+  effectiveProposalStatus,
   factOf,
   isValidOpportunity,
   isValidScan,
@@ -40,7 +42,20 @@ export interface Check {
 
 /** Research is complete only with identity, a confirmed website, a real description and evidence. */
 export function researchCheck(db: Db, c: Company): Check & { inProgress: boolean } {
-  const r = currentResearch(db, c.id);
+  const latest = currentResearch(db, c.id);
+  const prior = latest && latest.status !== "complete" ? completedResearch(db, c.id) : null;
+  // A newer draft (a refresh being reviewed) does not undo research that was already completed.
+  if (prior) {
+    const base = checkVersion(prior, c);
+    if (base.length === 0) return { ok: true, missing: [], inProgress: false };
+  }
+  const r = latest;
+  const missing = checkVersion(r, c);
+  const ok = !!r && r.status === "complete" && missing.length === 0;
+  return { ok, missing: r?.status === "complete" || missing.length ? missing : ["Complete research"], inProgress: !!r && !ok };
+}
+
+function checkVersion(r: ReturnType<typeof currentResearch>, c: Company): string[] {
   const missing: string[] = [];
   if (!c.name.trim()) missing.push("Company name");
   const desc = factOf(r, "description");
@@ -63,8 +78,25 @@ export function researchCheck(db: Db, c: Company): Check & { inProgress: boolean
   // The description feeds every later step, so it must be sourced unless you confirm it yourself.
   if (desc && desc.status !== "Unknown" && !desc.source && desc.sourceType !== "demo" && r?.mode !== "demo" && r?.verification?.type !== "manual")
     missing.push("A source for the company description, or your confirmation that you verified it");
-  const ok = !!r && r.status === "complete" && missing.length === 0;
-  return { ok, missing: r?.status === "complete" || missing.length ? missing : ["Complete research"], inProgress: !!r && !ok };
+  return missing;
+}
+
+const stageIdx = (s: string) => (STAGES as string[]).indexOf(s);
+
+/** The furthest pipeline stage the records prove (ignores the stage field itself). Used by the funnel, stage moves and reopening. */
+export function furthestStage(db: Db, c: Company): number {
+  const cid = c.id;
+  const outs = outreachOf(db, cid);
+  const props = proposalsOf(db, cid);
+  if (outcomeOf(db, cid)?.result === "Won") return stageIdx("Won");
+  if (props.some((p) => p.status === "Negotiation" || (p.status === "Accepted" && p.sentDate))) return stageIdx("Negotiation");
+  if (props.some((p) => p.sentDate)) return stageIdx("Proposal");
+  if (meetingsOf(db, cid).some((m) => m.status === "Held")) return stageIdx("Discovery");
+  if (outs.some((o) => REPLY_OUTCOMES.includes(o.outcome))) return stageIdx("Responded");
+  if (outs.some((o) => o.dateSent)) return stageIdx("Outreach");
+  if (readiness(db, c).ready) return stageIdx("Qualified");
+  if (researchCheck(db, c).ok) return stageIdx("Researching");
+  return stageIdx("New");
 }
 
 export interface StepDef {
@@ -210,7 +242,10 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
   if (accepted && !isClient) return mk("Record won outcome", "Proposal accepted — record the win", "outcome");
 
   const s = Object.fromEntries(steps13(db, c, today).map((d) => [d.key, d]));
-  if (!s.research.done) {
+  const outs = outreachOf(db, cid);
+  const sent = outs.filter((o) => o.dateSent);
+  // Before the first message goes out, the preparation steps gate everything. After that, the conversation leads.
+  if (!sent.length && !s.research.done) {
     const r = currentResearch(db, cid);
     const desc = factOf(r, "description");
     const failed = r?.lastError && r.lastError.code !== "PARTIAL" ? r.lastError.code : null;
@@ -219,44 +254,64 @@ export function nextBest(db: Db, c: Company, today: string): NextAction {
       return mk("Review and complete research", s.research.missing.filter((m) => m !== "Complete research")[0] || "Check the facts, then complete research", "research");
     return mk("Research company", failed ? `Automated research failed (${failed}) — retry or research manually` : s.research.missing[0] || "Research not complete", "research");
   }
-  if (!s.assessment.done) return mk("Assess digital experience", s.assessment.missing[0], "assessment");
-  if (!s.opportunity.done) return mk("Identify primary opportunity", s.opportunity.missing[0], "opportunity");
-  if (!s.contacts.done) return mk("Identify decision-maker", s.contacts.missing[0], "contacts");
-  if (!s.strategy.done) return mk("Create acquisition strategy", "Missing: " + s.strategy.missing.join(", "), "strategy");
-
-  const outs = outreachOf(db, cid);
-  const sent = outs.filter((o) => o.dateSent);
   const pending = outs.filter((o) => !o.dateSent && o.status !== "Replied");
   if (!sent.length) {
+    if (!s.assessment.done) return mk("Assess digital experience", s.assessment.missing[0], "assessment");
+    if (!s.opportunity.done) return mk("Identify primary opportunity", s.opportunity.missing[0], "opportunity");
+    if (!s.contacts.done) return mk("Identify decision-maker", s.contacts.missing[0], "contacts");
+    if (!s.strategy.done) return mk("Create acquisition strategy", "Missing: " + s.strategy.missing.join(", "), "strategy");
     if (pending.some((o) => o.status === "Approved" || o.status === "Scheduled")) return mk("Send initial outreach", "Message approved, not sent yet", "outreach");
     if (pending.length) return mk("Send initial outreach", "Draft ready — approve it and mark it as sent", "outreach");
     return mk("Prepare initial outreach", "Strategy ready, no outreach yet", "outreach");
   }
-  const open = props.find((p) => ["Sent", "Viewed", "Negotiation"].includes(p.status));
-  if (open) return mk("Follow up on proposal", "Proposal " + open.status.toLowerCase() + (open.expiry ? " · expires " + open.expiry : ""), "proposal");
+  const eff = props.map((p) => ({ p, st: effectiveProposalStatus(p, today) }));
+  const expired = eff.find((x) => x.st === "Expired");
+  if (expired) return mk("Follow up on expired proposal", "Proposal expired " + expired.p.expiry + " — re-send it or record the outcome", "proposal");
+  const open = eff.find((x) => ["Sent", "Viewed", "Negotiation"].includes(x.st));
+  if (open) return mk("Follow up on proposal", "Proposal " + open.st.toLowerCase() + (open.p.expiry ? " · expires " + open.p.expiry : ""), "proposal");
   const draftProp = props.find((p) => p.status === "Draft");
   if (draftProp) return mk("Send proposal", "Proposal drafted, not sent", "proposal");
   const mtgs = meetingsOf(db, cid);
   const held = mtgs.filter((m) => m.status === "Held");
+  const scheduled = mtgs.filter((m) => m.status === "Scheduled" && m.date).sort((a, b) => a.date.localeCompare(b.date))[0];
+  if (props.length && props.every((p) => p.status === "Rejected")) {
+    if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Follow-up meeting booked for " + scheduled.date, "discovery");
+    return mk("Revise proposal or record outcome", "Proposal rejected — send a revised proposal or close as lost", "proposal");
+  }
   if (held.length && !props.length) return mk("Prepare proposal", "Discovery held, no proposal yet", "proposal");
-  const scheduled = mtgs.find((m) => m.status === "Scheduled" && m.date);
   if (scheduled) return scheduled.date <= today ? mk("Record discovery", "Meeting date reached — record what was discussed", "discovery") : mk("Prepare for discovery", "Discovery booked for " + scheduled.date, "discovery");
-  const latestReply = outs.filter((o) => REPLY_OUTCOMES.includes(o.outcome)).sort((a, b) => (b.respondedAt || "").localeCompare(a.respondedAt || ""))[0];
+  const sentAtOf = (o: (typeof outs)[number]) => o.sentAt || (o.dateSent ? o.dateSent + "T00:00:00" : "");
+  const lastSentAt = sent.map(sentAtOf).sort().pop() || "";
+  // A reply only steers the next step until you have written again after it.
+  const latestReply = outs
+    .filter((o) => REPLY_OUTCOMES.includes(o.outcome))
+    .sort((a, b) => (b.respondedAt || "").localeCompare(a.respondedAt || ""))
+    .find((o) => (o.respondedAt || "") >= lastSentAt);
   if (latestReply) {
     if (["Positive", "Meeting booked", "Replied"].includes(latestReply.outcome)) return mk("Schedule discovery", latestReply.outcome + " response received", "discovery");
-    if (latestReply.outcome === "Wrong person") return mk("Identify correct decision-maker", "Reply says this is the wrong person", "contacts");
+    if (latestReply.outcome === "Wrong person") {
+      const dm = dmOf(db, cid);
+      if (dm && dm.id !== latestReply.contactId) return mk("Contact the new decision-maker", dm.name + " is now the decision-maker — send them the next message", "followup");
+      return mk("Identify correct decision-maker", "Reply says this is the wrong person", "contacts");
+    }
+    if (latestReply.outcome === "Neutral") return mk("Set nurture date or follow up", "Neutral reply — set a nurture date (close with a re-entry date) or prepare a follow-up", "outcome");
     if (["Not interested", "Negative"].includes(latestReply.outcome)) return mk("Record outcome", latestReply.outcome + " — close as lost or set a nurture date", "outcome");
   }
   const due = outs.find((o) => o.followUpDate && o.followUpDate <= today);
   if (due) return mk("Follow up with decision-maker", "Touch " + (due.touch + 1) + " due" + (due.followUpDate! < today ? " (overdue)" : " today"), "followup");
   const next = outs.filter((o) => o.followUpDate).map((o) => o.followUpDate!).sort()[0];
-  return mk("Await reply", next ? "Next follow-up due " + next : "No follow-up scheduled — log the next touch", "followup");
+  if (next) return mk("Await reply", "Next follow-up due " + next, "followup");
+  const lastTouchNo = Math.max(0, ...sent.map((o) => o.touch));
+  if (lastTouchNo >= 4) return mk("Record outcome", "All four touches sent with no reply — close as lost (with a re-entry date) or keep waiting", "outcome");
+  return mk("Await reply", "Follow-up skipped — prepare the next touch when it makes sense", "followup");
 }
 
-export function stall(c: Company, today: string) {
+/** Stalled = no stage change AND no contact for longer than the stage allows (following the cadence is not stalling). */
+export function stall(c: Company, today: string, db?: Db) {
   const th = (STALL_THRESHOLDS as Record<string, number>)[c.stage];
   if (!th || c.stage === "Won" || c.stage === "Lost") return null;
-  const d = daysBetween(c.stageSince || c.dateDiscovered, today);
+  const since = [c.stageSince || c.dateDiscovered, db ? lastTouch(db, c.id) || "" : ""].sort().pop()!;
+  const d = daysBetween(since, today);
   return d > th ? { days: d, threshold: th } : null;
 }
 

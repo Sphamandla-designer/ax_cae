@@ -94,7 +94,7 @@ export default function OutreachView({ v }: { v: VM }) {
               }}
               className="hover-bg-e8f2ec"
             >
-              Complete
+              {f.doneLabel}
             </button>
             <button
               onClick={f.onResched}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Strategy } from "../../data/types";
 import * as A from "../../domain/actions";
-import { bestOpp, contactsOf, currentResearch, dmOf, factOf, isValidScan, oppValueOf, scansOf, sevRank, strategyOf } from "../../domain/queries";
+import { bestOpp, completedResearch, contactsOf, currentResearch, dmOf, factOf, isValidScan, oppValueOf, scansOf, sevRank, strategyOf } from "../../domain/queries";
 import { researchCheck } from "../../domain/workflow";
 import { money } from "../../lib/format";
 import { Actions, Badge, Button, C, Card, Errors, Grid, KV, Notice, SelectInput, TextArea, TextInput, labelStyle } from "../ui";
@@ -53,7 +53,7 @@ export default function StrategySection({ d }: { d: DetailModel }) {
   const [errors, setErrors] = useState<string[]>([]);
   const set = (k: keyof A.StrategyInput) => (v: string) => setF((x) => ({ ...x, [k]: v }));
   const contacts = contactsOf(db, c.id);
-  const r = currentResearch(db, c.id);
+  const r = completedResearch(db, c.id) || currentResearch(db, c.id);
   const desc = factOf(r, "description");
   const evid = scansOf(db, c.id).filter(isValidScan);
   const opp = bestOpp(db, c.id);

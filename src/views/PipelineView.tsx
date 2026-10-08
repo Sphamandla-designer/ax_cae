@@ -238,7 +238,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontWeight: "600",
                 }}
               >
-                Accepted (won revenue)
+                Accepted proposals
               </div>
               <div
                 style={{

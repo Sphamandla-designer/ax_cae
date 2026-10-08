@@ -7,6 +7,7 @@ import {
   bestOpp,
   companyOf,
   contactsOf,
+  completedResearch,
   currentResearch,
   dmOf,
   factOf,
@@ -102,8 +103,8 @@ export function ResponseModal({
             title={"Recommended next action: " + ((OUTCOME_NEXT as Record<string, string>)[choice] || "Follow up")}
           >
             {REPLY_OUTCOMES.includes(choice)
-              ? "Saving closes the open follow-up for this touch and creates a task for the next action."
-              : "This is not a reply — the follow-up cadence continues."}
+              ? "Saving ends the follow-up cadence for this prospect (no further touches fall due) and creates a task for the next action."
+              : "This is not a reply — the follow-up cadence continues as scheduled."}
           </Notice>
         </div>
       ) : null}
@@ -315,7 +316,7 @@ export function AddProspectModal({
 export function BriefModal({ db, cid, onClose }: { db: Db; cid: string; onClose: () => void }) {
   const c = companyOf(db, cid);
   if (!c) return null;
-  const r = currentResearch(db, cid);
+  const r = completedResearch(db, cid) || currentResearch(db, cid);
   const ok = researchCheck(db, c).ok;
   const o = bestOpp(db, cid);
   const dm = dmOf(db, cid) || contactsOf(db, cid)[0] || null;

@@ -18,6 +18,7 @@ const blank = (): A.OpportunityInput => ({
   impact: 3,
   likelihood: 3,
   fit: 3,
+  budget: 3,
   evidenceScanIds: [],
   evidenceNote: "",
   confirmAssumption: false,
@@ -33,6 +34,7 @@ const fromOpp = (o: Opportunity): A.OpportunityInput => ({
   impact: o.scores.impact,
   likelihood: o.scores.likelihood,
   fit: o.scores.fit,
+  budget: o.scores.budget,
   evidenceScanIds: o.evidenceScanIds,
   evidenceNote: o.evidenceNote,
   confirmAssumption: o.basis === "Assumption",
@@ -115,11 +117,12 @@ export default function OpportunitySection({ d }: { d: DetailModel }) {
               <TextInput label="Estimated value (ZAR)" required value={f.estValue} onChange={set("estValue")} placeholder="180000" inputMode="numeric" />
               <SelectInput label="Complexity" required value={f.complexity} options={["Low", "High"]} onChange={set("complexity")} />
             </Grid>
-            <Grid cols={4}>
+            <Grid cols={5}>
               <SelectInput label="Severity" value={String(f.severity)} options={SCALE} onChange={(v) => set("severity")(Number(v))} />
               <SelectInput label="Impact" value={String(f.impact)} options={SCALE} onChange={(v) => set("impact")(Number(v))} />
               <SelectInput label="Likelihood" value={String(f.likelihood)} options={SCALE} onChange={(v) => set("likelihood")(Number(v))} />
               <SelectInput label="Service fit" value={String(f.fit)} options={SCALE} onChange={(v) => set("fit")(Number(v))} />
+              <SelectInput label="Budget fit" value={String(f.budget ?? 3)} options={SCALE} onChange={(v) => set("budget")(Number(v))} hint="Can they pay for it?" />
             </Grid>
             <div>
               <div style={labelStyle}>

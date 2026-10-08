@@ -62,6 +62,8 @@ export default function TasksView({ v }: { v: VM }) {
                 role="button"
                 tabIndex={0}
                 onKeyDown={activate}
+                aria-label={t.doneAria + ": " + t.title}
+                title={t.doneAria}
               >
                 {t.check}
               </span>

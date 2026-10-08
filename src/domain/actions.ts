@@ -43,12 +43,19 @@ import {
   companyOf,
   currentResearch,
   dmOf,
+  effectiveProposalStatus,
   factOf,
+  isTouchFollowUp,
+  meetingsOf,
   oppScore,
   outcomeOf,
   outreachOf,
+  parseRand,
+  proposalsOf,
 } from "./queries";
-import { acq, nextBest, readiness, REPLY_OUTCOMES, researchCheck } from "./workflow";
+import { acq, furthestStage, nextBest, readiness, REPLY_OUTCOMES, researchCheck } from "./workflow";
+
+export { effectiveProposalStatus };
 
 export interface Ctx {
   today: string;
@@ -107,17 +114,35 @@ function resolveNotReady(db: Db, cid: string, reason: string, ctx: Ctx): Db {
   return c && c.notReadyReason === reason ? patchCompany(db, cid, ctx, (x) => ({ ...x, notReadyReason: null })) : db;
 }
 
-function closeTasks(db: Db, pred: (x: Db["tasks"][number]) => boolean): Db {
-  return { ...db, tasks: db.tasks.map((x) => (x.status !== "Done" && pred(x) ? { ...x, status: "Done" } : x)) };
+function closeTasks(db: Db, pred: (x: Db["tasks"][number]) => boolean, at?: string): Db {
+  return { ...db, tasks: db.tasks.map((x) => (x.status !== "Done" && pred(x) ? { ...x, status: "Done", completedAt: at || x.completedAt || null } : x)) };
 }
 
-/** Keep the logged next action equal to the engine's next best action (due date: follow-up date or today). */
+/** Labels where you are waiting on the prospect or a date: they carry that date, or none — never "overdue" by themselves. */
+const WAITING = ["Await reply", "Prepare for discovery", "Nurture", "Plan growth review"];
+
+/**
+ * Keep the logged next action equal to the engine's next best action.
+ * Due date: the follow-up date, the meeting date, the re-entry date, or — for work you can do now — the day it became the next action.
+ * Also moves a prospect to Qualified once it is ready for outreach (the only record-based route to that stage).
+ */
 export function syncNextAction(db: Db, cid: string, ctx: Ctx): Db {
-  const c = companyOf(db, cid);
+  let c = companyOf(db, cid);
   if (!c) return db;
+  if ((c.stage === "New" || c.stage === "Researching") && readiness(db, c).ready) {
+    db = advanceStage(db, cid, "Qualified", ctx);
+    c = companyOf(db, cid)!;
+  }
   const nb = nextBest(db, c, ctx.today);
   const followUp = outreachOf(db, cid).filter((o) => o.followUpDate).map((o) => o.followUpDate!).sort()[0];
-  const due = nb.focus === "followup" && followUp ? followUp : c.nextAction.label === nb.label ? c.nextAction.due : ctx.today;
+  const meeting = meetingsOf(db, cid).filter((m) => m.status === "Scheduled" && m.date).map((m) => m.date).sort()[0];
+  const oc = outcomeOf(db, cid);
+  let due: string;
+  if (nb.focus === "followup" && followUp) due = followUp;
+  else if (nb.label === "Prepare for discovery" && meeting) due = meeting;
+  else if (nb.label === "Nurture") due = oc?.reEntryDate || "";
+  else if (WAITING.includes(nb.label)) due = "";
+  else due = c.nextAction.label === nb.label && c.nextAction.due ? c.nextAction.due : ctx.today;
   if (c.nextAction.label === nb.label && c.nextAction.due === due) return db;
   return { ...db, companies: db.companies.map((x) => (x.id === cid ? { ...x, nextAction: { label: nb.label, due } } : x)) };
 }
@@ -262,8 +287,22 @@ export function setStage(db: Db, cid: string, stage: Stage, ctx: Ctx): Result {
   if (!c) return fail("This prospect no longer exists.");
   if (!(STAGES as string[]).includes(stage)) return fail(`"${stage}" is not a pipeline stage.`);
   if (stage === "Won" || stage === "Lost") return fail("Record the outcome to close a prospect as Won or Lost.");
-  if (c.stage === "Won" || c.stage === "Lost") return fail(`${c.name} is closed as ${c.stage}. Its outcome record stays; reopening is not supported.`);
+  if (c.stage === "Won") return fail(`${c.name} is a won client. Its outcome record stays.`);
+  if (c.stage === "Lost") return fail(`${c.name} is closed as Lost. Use “Reopen prospect” in Won / Lost to bring it back into the pipeline.`);
   if (c.stage === stage) return done(db, ctx, cid);
+  // Moving forward needs the record that stage stands for; moving back is your call (and is logged).
+  const target = stageIndex(stage), supported = Math.max(stageIndex(c.stage), furthestStage(db, c));
+  if (target > supported && target > stageIndex("Researching")) {
+    const need: Record<string, string> = {
+      Qualified: "complete the readiness checklist (research, assessment, opportunity, decision-maker, strategy)",
+      Outreach: "mark the first outreach as sent",
+      Responded: "record a reply on a sent message",
+      Discovery: "record a discovery meeting as held",
+      Proposal: "mark a proposal as sent",
+      Negotiation: "mark a proposal as sent (then move it to negotiation)",
+    };
+    return fail(`${c.name} cannot move to ${stage} yet: ${need[stage] || "the records for that stage are missing"}.`);
+  }
   const next = activity(patchCompany(db, cid, ctx, (x) => ({ ...x, stage, stageSince: ctx.today })), ctx, cid, "Stage change", c.name + " moved to " + stage + ".");
   return done(next, ctx, cid);
 }
@@ -414,7 +453,9 @@ export function applyResearchResult(db: Db, cid: string, result: ResearchResult,
   const c = needCompany(db, cid);
   if (!c) return fail("This prospect no longer exists.");
   if (!result.success) {
-    const { db: base, r } = draftFor(db, cid, ctx, "manual", "Manual");
+    // A failed refresh leaves completed research as it is (the failure is noted on it); otherwise it goes on the draft.
+    const cur = currentResearch(db, cid);
+    const { db: base, r } = cur && cur.status === "complete" ? { db, r: cur } : draftFor(db, cid, ctx, "manual", "Manual");
     const err = { code: result.code, message: result.error, at: ctx.now };
     const next = { ...base, research: base.research.map((x) => (x.id === r.id ? { ...x, lastError: err, updatedAt: ctx.now } : x)) };
     return done(activity(next, ctx, cid, "Research failed", `${result.provider || "Research provider"}: ${result.error}`), ctx, cid);
@@ -547,9 +588,16 @@ export function deleteScan(db: Db, id: string, ctx: Ctx): Result {
   const next: Db = {
     ...db,
     scans: db.scans.filter((x) => x.id !== id),
-    opportunities: db.opportunities.map((o) => (o.evidenceScanIds.includes(id) ? { ...o, evidenceScanIds: o.evidenceScanIds.filter((x) => x !== id) } : o)),
+    opportunities: db.opportunities.map((o) => {
+      if (!o.evidenceScanIds.includes(id)) return o;
+      const ids = o.evidenceScanIds.filter((x) => x !== id);
+      const ev = db.scans.filter((x) => ids.includes(x.id));
+      const basis: Confidence = ev.some((x) => x.confidence === "Observed") ? "Observed" : ev.length ? "Indicated" : "Assumption";
+      return { ...o, evidenceScanIds: ids, basis };
+    }),
   };
-  return done(activity(next, ctx, s.companyId, "Assessment removed", s.category + " assessment removed."), ctx, s.companyId);
+  const hit = db.opportunities.filter((o) => o.evidenceScanIds.includes(id)).length;
+  return done(activity(next, ctx, s.companyId, "Assessment removed", s.category + " assessment removed." + (hit ? ` ${hit} opportunit${hit === 1 ? "y" : "ies"} lost this evidence — check the evidence basis.` : "")), ctx, s.companyId);
 }
 
 // ---------- opportunity ----------
@@ -565,6 +613,8 @@ export interface OpportunityInput {
   impact: number;
   likelihood: number;
   fit: number;
+  /** Ability to pay (1–5). Optional for older callers: an edit keeps the saved value, a new opportunity defaults to 3. */
+  budget?: number;
   evidenceScanIds: string[];
   evidenceNote: string;
   confirmAssumption?: boolean;
@@ -579,9 +629,11 @@ export function saveOpportunity(db: Db, cid: string, input: OpportunityInput, ct
   if (!t(input.consequence)) errors.push("Describe the business consequence of the problem.");
   if (!t(input.opportunity)) errors.push("Describe the opportunity (what AX-Channels would do).");
   if (!OPP_TYPES.includes(input.type)) errors.push("Choose the recommended service from the list.");
-  const value = Number(String(input.estValue).replace(/[\s,R]/gi, ""));
+  const value = parseRand(input.estValue);
   if (!Number.isFinite(value) || value <= 0 || !Number.isInteger(value)) errors.push("Estimated value must be a whole number of rand greater than 0.");
-  for (const [k, v] of [["Severity", input.severity], ["Impact", input.impact], ["Likelihood", input.likelihood], ["Service fit", input.fit]] as const)
+  const prevOpp = id ? db.opportunities.find((o) => o.id === id) : null;
+  const budget = input.budget ?? prevOpp?.scores.budget ?? 3;
+  for (const [k, v] of [["Severity", input.severity], ["Impact", input.impact], ["Likelihood", input.likelihood], ["Service fit", input.fit], ["Budget fit", budget]] as const)
     if (!Number.isInteger(v) || v < 1 || v > 5) errors.push(`${k} must be between 1 and 5.`);
   if (!["Low", "High"].includes(input.complexity)) errors.push("Choose a complexity.");
   const own = new Set(db.scans.filter((s) => s.companyId === cid).map((s) => s.id));
@@ -606,7 +658,7 @@ export function saveOpportunity(db: Db, cid: string, input: OpportunityInput, ct
     valueBand: value >= 250000 ? "High" : value >= 100000 ? "Medium" : "Low",
     estValue: value,
     complexity: input.complexity,
-    scores: { severity: input.severity, impact: input.impact, fit: input.fit, budget: 3, likelihood: input.likelihood },
+    scores: { severity: input.severity, impact: input.impact, fit: input.fit, budget, likelihood: input.likelihood },
     evidenceScanIds: ev,
     evidenceNote: t(input.evidenceNote),
     basis,
@@ -699,16 +751,24 @@ export function saveContact(db: Db, cid: string, input: ContactInput, ctx: Ctx, 
   };
   const rec = id ? { ...db.contacts.find((p) => p.id === id)!, ...fields } : blankContact({ ...ctx, demo: c.isDemo }, cid, fields);
   let next: Db = { ...db, contacts: id ? db.contacts.map((p) => (p.id === id ? rec : p)) : [...db.contacts, rec] };
-  if (rec.decisionMaker) next = resolveNotReady(next, cid, "No decision-maker", ctx);
+  // One decision-maker per prospect: choosing a new one steps the previous one down.
+  if (rec.decisionMaker) {
+    next = resolveNotReady(next, cid, "No decision-maker", ctx);
+    next = { ...next, contacts: next.contacts.map((p) => (p.companyId === cid && p.id !== rec.id && p.decisionMaker ? { ...p, decisionMaker: false, role: p.role === "Decision Maker" ? "Influencer" : p.role } : p)) };
+  }
   return done(activity(next, ctx, cid, id ? "Contact updated" : "Contact added", `${rec.name} (${rec.role}) ${id ? "updated" : "added"}.`), ctx, cid, { id: rec.id });
 }
 
 export function markDecisionMaker(db: Db, cid: string, pid: string, ctx: Ctx): Result {
   const p = db.contacts.find((x) => x.id === pid && x.companyId === cid);
   if (!p) return fail("This contact no longer exists.");
-  let next: Db = { ...db, contacts: db.contacts.map((x) => (x.id === pid ? { ...x, role: "Decision Maker", decisionMaker: true } : x)) };
+  const prev = db.contacts.find((x) => x.companyId === cid && x.decisionMaker && x.id !== pid);
+  let next: Db = {
+    ...db,
+    contacts: db.contacts.map((x) => (x.id === pid ? { ...x, role: "Decision Maker", decisionMaker: true } : x.companyId === cid && x.decisionMaker ? { ...x, decisionMaker: false, role: x.role === "Decision Maker" ? "Influencer" : x.role } : x)),
+  };
   next = resolveNotReady(next, cid, "No decision-maker", ctx);
-  return done(activity(next, ctx, cid, "Decision-maker identified", p.name + " marked as decision-maker."), ctx, cid);
+  return done(activity(next, ctx, cid, "Decision-maker identified", p.name + " marked as decision-maker" + (prev ? ` (replaces ${prev.name}).` : ".")), ctx, cid);
 }
 
 export function logContactTouch(db: Db, cid: string, pid: string, ctx: Ctx): Result {
@@ -869,23 +929,27 @@ export function markOutreachSent(db: Db, id: string, ctx: Ctx, opts: { overrideR
   if (o.dateSent) return fail("This message is already marked as sent.");
   if (o.status !== "Approved" && o.status !== "Scheduled") return fail("Approve the message before marking it as sent.");
   if (t(o.message).length < 20) return fail("Cannot mark as sent: the message is empty.");
-  if (o.touch === 1 && !opts.overrideReadiness) {
+  // The touch number is fixed when it is actually sent (drafts prepared ahead of time do not share a number).
+  const touch = outreachOf(db, o.companyId).filter((x) => x.dateSent).length + 1;
+  const defaultPurpose = (n: number) => (TOUCH_PURPOSES as Record<number, string>)[n] || "Follow-up";
+  const purpose = o.purpose === defaultPurpose(o.touch) || !o.purpose ? defaultPurpose(touch) : o.purpose;
+  if (touch === 1 && !opts.overrideReadiness) {
     const r = readiness(db, c);
     if (!r.ready) return fail("Not ready for outreach. Missing:", ...(r.blocked ? ["• Do not contact yet: " + r.reason] : []), ...r.missing.map((m) => "• " + m.k));
   }
-  const gap = FOLLOW_UP_DAYS[o.touch];
+  const gap = FOLLOW_UP_DAYS[touch];
   const fu = gap ? addDays(ctx.today, gap) : null;
   let next: Db = {
     ...db,
     outreach: db.outreach.map((x) => {
-      if (x.id === id) return { ...x, status: "Sent", dateSent: ctx.today, followUpDate: fu, outcome: x.outcome || "Sent" };
+      if (x.id === id) return { ...x, touch, purpose, status: "Sent", dateSent: ctx.today, sentAt: ctx.now, followUpDate: fu, outcome: x.outcome || "Sent" };
       // Sending this touch is the follow-up the earlier touches were waiting for.
       if (x.companyId === o.companyId && x.dateSent && x.followUpDate) return { ...x, followUpDate: null };
       return x;
     }),
     contacts: db.contacts.map((p) => (p.id === o.contactId ? { ...p, lastContacted: ctx.today } : p)),
   };
-  next = closeTasks(next, (x) => x.companyId === o.companyId && x.type === "Follow-up" && !!x.outreachId && x.outreachId !== id);
+  next = closeTasks(next, (x) => x.companyId === o.companyId && isTouchFollowUp(x) && x.outreachId !== id, ctx.now);
   if (fu && !next.tasks.some((x) => x.outreachId === id && x.type === "Follow-up")) {
     next = {
       ...next,
@@ -895,20 +959,20 @@ export function markOutreachSent(db: Db, id: string, ctx: Ctx, opts: { overrideR
           id: ctx.uid("t"),
           companyId: o.companyId,
           isDemo: c.isDemo,
-          title: `Follow up ${c.name} — touch ${o.touch + 1}: ${(TOUCH_PURPOSES as Record<number, string>)[o.touch + 1] || "close the loop"}`,
+          title: `Follow up ${c.name} — touch ${touch + 1}: ${(TOUCH_PURPOSES as Record<number, string>)[touch + 1] || "close the loop"}`,
           type: "Follow-up",
           priority: "High",
           due: fu,
           status: "Open",
-          notes: `Created when touch ${o.touch} was marked sent.`,
+          notes: `Created when touch ${touch} was marked sent.`,
           outreachId: id,
         },
       ],
     };
   }
-  if (o.touch === 1 && c.notReadyReason && opts.overrideReadiness) next = patchCompany(next, c.id, ctx, (x) => ({ ...x, overrideNotReady: true }));
+  if (touch === 1 && c.notReadyReason && opts.overrideReadiness) next = patchCompany(next, c.id, ctx, (x) => ({ ...x, overrideNotReady: true }));
   next = advanceStage(next, o.companyId, "Outreach", ctx);
-  next = activity(next, ctx, o.companyId, "Outreach sent", `Touch ${o.touch} sent via ${o.channel}${fu ? "; follow-up due " + fu : "; cadence complete"}.`);
+  next = activity(next, ctx, o.companyId, "Outreach sent", `Touch ${touch} sent via ${o.channel}${fu ? "; follow-up due " + fu : "; cadence complete"}.`);
   return done(next, ctx, o.companyId);
 }
 
@@ -925,41 +989,57 @@ export function recordResponse(db: Db, id: string, outcome: string, notes: strin
   if (!o.dateSent) return fail("Responses can only be recorded for messages that were sent.");
   if (!(OUTREACH_OUTCOMES as string[]).includes(outcome) || outcome === "Sent") return fail("Choose what happened.");
   if (REPLY_OUTCOMES.includes(outcome) && t(notes).length < 3) return fail("Add response notes — what did they actually say?");
+  const c = companyOf(db, o.companyId);
   const replied = REPLY_OUTCOMES.includes(outcome);
+  const wasReply = REPLY_OUTCOMES.includes(o.outcome);
   const rec = (OUTCOME_NEXT as Record<string, string>)[outcome] || "Follow up";
+  const cold = ["Not interested", "Negative"].includes(outcome);
+  const sentTouches = outreachOf(db, o.companyId).filter((x) => x.dateSent);
+  const latest = sentTouches.sort((a, b) => b.touch - a.touch)[0];
+  // Un-recording a reply on the latest touch puts its follow-up back (it was cleared by the reply).
+  const restoreFu = !replied && wasReply && latest?.id === id && !o.followUpSkipped && FOLLOW_UP_DAYS[o.touch] ? addDays(o.dateSent, FOLLOW_UP_DAYS[o.touch]) : null;
   let next: Db = {
     ...db,
-    outreach: db.outreach.map((x) =>
-      x.id === id
-        ? { ...x, outcome, status: replied ? "Replied" : "Sent", responseNotes: t(notes), response: t(notes), respondedAt: replied ? ctx.now : x.respondedAt, followUpDate: replied ? null : x.followUpDate }
-        : x,
-    ),
+    outreach: db.outreach.map((x) => {
+      if (x.id === id)
+        return {
+          ...x,
+          outcome,
+          status: replied ? "Replied" : "Sent",
+          responseNotes: t(notes),
+          response: t(notes),
+          respondedAt: replied ? (wasReply && x.respondedAt ? x.respondedAt : ctx.now) : null,
+          followUpDate: replied ? null : restoreFu || x.followUpDate,
+        };
+      // A reply on any touch answers the whole thread: no more follow-ups are due on the others.
+      if (replied && x.companyId === o.companyId && x.followUpDate) return { ...x, followUpDate: null };
+      return x;
+    }),
   };
-  if (replied) {
-    next = closeTasks(next, (x) => x.outreachId === id && x.type === "Follow-up");
-    next = advanceStage(next, o.companyId, "Responded", ctx);
-  }
   const key = id + ":response";
-  const taskExists = next.tasks.some((x) => x.outreachId === key && x.status !== "Done");
-  if (replied && !taskExists)
-    next = {
-      ...next,
-      tasks: [
-        ...next.tasks,
-        {
-          id: ctx.uid("t"),
-          companyId: o.companyId,
-          isDemo: o.isDemo,
-          title: rec,
-          type: ["Not interested", "Negative"].includes(outcome) ? "Nurture" : "Follow-up",
-          priority: ["Not interested", "Negative"].includes(outcome) ? "Low" : "High",
-          due: ctx.today,
-          status: "Open",
-          notes: t(notes),
-          outreachId: key,
-        },
-      ],
-    };
+  if (replied) {
+    next = closeTasks(next, (x) => x.companyId === o.companyId && isTouchFollowUp(x), ctx.now);
+    next = advanceStage(next, o.companyId, "Responded", ctx);
+    const existing = next.tasks.find((x) => x.outreachId === key);
+    const fields = { title: rec, type: cold ? "Nurture" : "Follow-up", priority: cold ? "Low" : "High", notes: t(notes) };
+    if (existing) {
+      // Same reply edited → keep the task as it is (open or done); a different outcome → the task changes and reopens.
+      const changed = existing.title !== rec;
+      next = { ...next, tasks: next.tasks.map((x) => (x.id === existing.id ? { ...x, ...fields, ...(changed ? { status: "Open", due: ctx.today, completedAt: null } : {}) } : x)) };
+    } else {
+      next = { ...next, tasks: [...next.tasks, { id: ctx.uid("t"), companyId: o.companyId, isDemo: o.isDemo, ...fields, due: ctx.today, status: "Open", outreachId: key, completedAt: null }] };
+    }
+  } else if (wasReply) {
+    next = closeTasks(next, (x) => x.outreachId === key, ctx.now);
+    if (restoreFu && c && !next.tasks.some((x) => x.outreachId === id && x.status !== "Done"))
+      next = {
+        ...next,
+        tasks: [...next.tasks, { id: ctx.uid("t"), companyId: o.companyId, isDemo: o.isDemo, title: `Follow up ${c.name} — touch ${o.touch + 1}: ${(TOUCH_PURPOSES as Record<number, string>)[o.touch + 1] || "close the loop"}`, type: "Follow-up", priority: "High", due: restoreFu, status: "Open", notes: "Restored when the reply was changed to " + outcome + ".", outreachId: id, completedAt: null }],
+      };
+    // No reply left on record → the prospect is back at Outreach.
+    if (c && c.stage === "Responded" && !next.outreach.some((x) => x.companyId === o.companyId && REPLY_OUTCOMES.includes(x.outcome)))
+      next = activity(patchCompany(next, o.companyId, ctx, (x) => ({ ...x, stage: "Outreach", stageSince: ctx.today })), ctx, o.companyId, "Stage change", c.name + " moved back to Outreach (no reply on record).");
+  }
   return done(activity(next, ctx, o.companyId, "Response recorded", `${outcome} — ${t(notes) || "no notes"} → ${rec}.`), ctx, o.companyId);
 }
 
@@ -979,7 +1059,7 @@ export function skipFollowUp(db: Db, id: string, ctx: Ctx): Result {
   const o = db.outreach.find((x) => x.id === id);
   if (!o || !o.followUpDate) return fail("There is no follow-up scheduled on this touch.");
   let next: Db = { ...db, outreach: db.outreach.map((x) => (x.id === id ? { ...x, followUpDate: null, followUpSkipped: true } : x)) };
-  next = closeTasks(next, (x) => x.outreachId === id && x.type === "Follow-up");
+  next = closeTasks(next, (x) => x.outreachId === id && x.type === "Follow-up", ctx.now);
   return done(activity(next, ctx, o.companyId, "Follow-up skipped", `Touch ${o.touch + 1} skipped deliberately.`), ctx, o.companyId);
 }
 
@@ -997,6 +1077,14 @@ export interface MeetingInput {
   budget: string;
   timeline: string;
   nextStep: string;
+}
+
+/** One open task per scheduled meeting, so it shows in Tasks and on the dashboard. */
+function upsertMeetingTask(db: Db, m: Meeting, c: Company): Db {
+  const title = `${m.type} with ${c.name} — ${m.date} ${m.time}`;
+  const open = db.tasks.find((x) => x.meetingId === m.id && x.status !== "Done");
+  if (open) return { ...db, tasks: db.tasks.map((x) => (x.id === open.id ? { ...x, title, due: m.date } : x)) };
+  return { ...db, tasks: [...db.tasks, { id: "t-" + m.id, companyId: c.id, isDemo: c.isDemo, title, type: "Meeting", priority: "High", due: m.date, status: "Open", notes: m.notes ? "Agenda: " + m.notes : "", outreachId: null, meetingId: m.id, completedAt: null }] };
 }
 
 export function scheduleMeeting(db: Db, cid: string, input: MeetingInput, ctx: Ctx, id?: string): Result {
@@ -1028,7 +1116,10 @@ export function scheduleMeeting(db: Db, cid: string, input: MeetingInput, ctx: C
     nextStep: "",
     heldAt: null,
   } as Meeting;
-  const next: Db = { ...db, meetings: id ? db.meetings.map((m) => (m.id === id ? rec : m)) : [...db.meetings, rec] };
+  let next: Db = { ...db, meetings: id ? db.meetings.map((m) => (m.id === id ? rec : m)) : [...db.meetings, rec] };
+  next = upsertMeetingTask(next, rec, c);
+  // Booking the meeting is what the "Schedule discovery" task asked for.
+  next = closeTasks(next, (x) => x.companyId === cid && !!x.outreachId?.endsWith(":response") && /discovery/i.test(x.title), ctx.now);
   return done(activity(next, ctx, cid, "Meeting booked", `${rec.type} ${id ? "moved to" : "scheduled for"} ${rec.date} ${rec.time}.`), ctx, cid, { id: rec.id });
 }
 
@@ -1066,6 +1157,7 @@ export function recordMeetingHeld(db: Db, cid: string, input: MeetingInput, ctx:
     heldAt: ctx.now,
   };
   let next: Db = { ...db, meetings: id ? db.meetings.map((m) => (m.id === id ? rec : m)) : [...db.meetings, rec] };
+  next = closeTasks(next, (x) => (!!id && x.meetingId === id) || (x.companyId === cid && !!x.outreachId?.endsWith(":response") && /discovery/i.test(x.title)), ctx.now);
   next = advanceStage(next, cid, "Discovery", ctx);
   return done(activity(next, ctx, cid, "Discovery held", `${rec.type} on ${rec.date}: ${rec.notes}`), ctx, cid, { id: rec.id });
 }
@@ -1073,7 +1165,8 @@ export function recordMeetingHeld(db: Db, cid: string, input: MeetingInput, ctx:
 export function cancelMeeting(db: Db, id: string, ctx: Ctx): Result {
   const m = db.meetings.find((x) => x.id === id);
   if (!m || m.status !== "Scheduled") return fail("Only scheduled meetings can be cancelled.");
-  const next: Db = { ...db, meetings: db.meetings.map((x) => (x.id === id ? { ...x, status: "Cancelled" } : x)) };
+  let next: Db = { ...db, meetings: db.meetings.map((x) => (x.id === id ? { ...x, status: "Cancelled" } : x)) };
+  next = closeTasks(next, (x) => x.meetingId === id, ctx.now);
   return done(activity(next, ctx, m.companyId, "Meeting cancelled", `${m.type} on ${m.date} cancelled.`), ctx, m.companyId);
 }
 
@@ -1097,7 +1190,7 @@ export function saveProposal(db: Db, cid: string, input: ProposalInput, ctx: Ctx
   const opp = db.opportunities.find((o) => o.id === input.opportunityId && o.companyId === cid);
   if (!opp) errors.push("Link the proposal to one of this prospect's opportunities.");
   if (!t(input.scope)) errors.push("Describe the scope.");
-  const value = Number(String(input.value).replace(/[\s,R]/gi, ""));
+  const value = parseRand(input.value);
   if (!Number.isFinite(value) || value <= 0 || !Number.isInteger(value)) errors.push("Proposal value must be a whole number of rand greater than 0.");
   if (t(input.expiry) && (!validDate(input.expiry) || input.expiry < ctx.today)) errors.push("Expiry must be a valid date, today or later.");
   const existing = id ? db.proposals.find((p) => p.id === id && p.companyId === cid) : null;
@@ -1123,11 +1216,6 @@ export function saveProposal(db: Db, cid: string, input: ProposalInput, ctx: Ctx
   };
   const next: Db = { ...db, proposals: id ? db.proposals.map((p) => (p.id === id ? rec : p)) : [...db.proposals, rec] };
   return done(activity(next, ctx, cid, id ? "Proposal updated" : "Proposal created", `${rec.project} — R${rec.value} (draft).`), ctx, cid, { id: rec.id });
-}
-
-/** Proposals past their expiry while still open read as Expired. */
-export function effectiveProposalStatus(p: Proposal, today: string): ProposalStatus {
-  return p.expiry && p.expiry < today && ["Sent", "Viewed", "Negotiation"].includes(p.status) ? "Expired" : p.status;
 }
 
 export function setProposalStatus(db: Db, id: string, status: ProposalStatus, ctx: Ctx): Result {
@@ -1177,7 +1265,7 @@ export function recordOutcome(db: Db, cid: string, input: OutcomeInput, ctx: Ctx
   if (outcomeOf(db, cid)) return fail("An outcome is already recorded for this prospect.");
   const errors: string[] = [];
   const won = input.kind === "Won";
-  const value = Number(String(input.value).replace(/[\s,R]/gi, ""));
+  const value = parseRand(input.value);
   if (won) {
     if (!Number.isFinite(value) || value <= 0 || !Number.isInteger(value)) errors.push("Final project value must be a whole number of rand greater than 0.");
     if (!t(input.service)) errors.push("Record the service purchased.");
@@ -1223,13 +1311,39 @@ export function recordOutcome(db: Db, cid: string, input: OutcomeInput, ctx: Ctx
       ...next,
       tasks: [...next.tasks, { id: ctx.uid("t"), companyId: cid, isDemo: c.isDemo, title: `Re-engage ${c.name}`, type: "Nurture", priority: "Low", due: outcome.reEntryDate, status: "Open", notes: "Lost: " + outcome.reason, outreachId: null }],
     };
-  next = closeTasks(next, (x) => x.companyId === cid && x.type === "Follow-up");
+  // Closing the deal settles everything still open: follow-ups, reply tasks, meeting tasks, proposals.
+  next = closeTasks(next, (x) => x.companyId === cid && (x.type === "Follow-up" || !!x.meetingId), ctx.now);
   next = {
     ...next,
     outreach: next.outreach.map((o) => (o.companyId === cid && o.followUpDate ? { ...o, followUpDate: null } : o)),
+    meetings: won ? next.meetings : next.meetings.map((m) => (m.companyId === cid && m.status === "Scheduled" ? { ...m, status: "Cancelled" } : m)),
   };
+  const openProps = proposalsOf(next, cid).filter((p) => ["Draft", "Sent", "Viewed", "Negotiation", "Expired"].includes(effectiveProposalStatus(p, ctx.today)));
+  const hasAccepted = proposalsOf(next, cid).some((p) => p.status === "Accepted");
+  const winner = won && !hasAccepted ? openProps.filter((p) => p.status !== "Draft").sort((a, b) => (b.sentDate || b.date).localeCompare(a.sentDate || a.date))[0] : undefined;
+  if (openProps.length)
+    next = {
+      ...next,
+      proposals: next.proposals.map((p) =>
+        !openProps.includes(p) ? p : p === winner ? { ...p, status: "Accepted", probability: 1, decidedAt: ctx.now, notes: (p.notes ? p.notes + " · " : "") + "Accepted — deal recorded as won." } : { ...p, status: "Rejected", probability: 0, decidedAt: ctx.now, notes: (p.notes ? p.notes + " · " : "") + `Closed when the prospect was marked ${input.kind.toLowerCase()}.` },
+      ),
+    };
   next = activity(next, ctx, cid, input.kind, `${c.name} marked ${input.kind.toLowerCase()} — ${won ? "R" + value + ", " + t(input.service) : outcome.reason}.`);
   return done(next, ctx, cid);
+}
+
+/** Bring a Lost prospect back into the pipeline. The Lost outcome stays as history. */
+export function reopenCompany(db: Db, cid: string, ctx: Ctx): Result {
+  const c = needCompany(db, cid);
+  if (!c) return fail("This prospect no longer exists.");
+  if (c.stage !== "Lost") return fail("Only a prospect closed as Lost can be reopened.");
+  const oc = outcomeOf(db, cid);
+  let next: Db = { ...db, outcomes: db.outcomes.map((o) => (o === oc ? { ...o, supersededAt: ctx.now } : o)) };
+  next = closeTasks(next, (x) => x.companyId === cid && x.type === "Nurture", ctx.now);
+  // Back to the furthest stage its records support (at least Researching).
+  const back = (STAGES as Stage[])[Math.max(stageIndex("Researching"), Math.min(furthestStage(next, c), stageIndex("Negotiation")))];
+  next = patchCompany(next, cid, ctx, (x) => ({ ...x, stage: back, stageSince: ctx.today }));
+  return done(activity(next, ctx, cid, "Reopened", `${c.name} reopened at ${back}. The earlier Lost outcome (${oc?.reason || "no reason"}) is kept as history.`), ctx, cid);
 }
 
 export function convertToClient(db: Db, cid: string, ctx: Ctx): Result {
@@ -1250,8 +1364,15 @@ export function convertToClient(db: Db, cid: string, ctx: Ctx): Result {
 export function toggleTask(db: Db, id: string, ctx: Ctx): Result {
   const x = db.tasks.find((k) => k.id === id);
   if (!x) return fail("This task no longer exists.");
+  // Tasks that stand for a record are completed by that record, never by a tick.
+  if (x.status !== "Done" && isTouchFollowUp(x)) {
+    const o = db.outreach.find((k) => k.id === x.outreachId);
+    return fail(`This follow-up is done when touch ${(o?.touch || 0) + 1} is marked as sent — or skip it deliberately. Open the prospect's Follow-up step to do either.`);
+  }
+  if (x.status !== "Done" && x.meetingId) return fail("This meeting task is done when you record the meeting as held (or cancel it) in Discovery.");
+  if (x.status === "Done" && (isTouchFollowUp(x) || x.meetingId)) return fail("This task was closed by its record and cannot be reopened by hand.");
   const status = x.status === "Done" ? "Open" : "Done";
-  let next: Db = { ...db, tasks: db.tasks.map((k) => (k.id === id ? { ...k, status } : k)) };
+  let next: Db = { ...db, tasks: db.tasks.map((k) => (k.id === id ? { ...k, status, completedAt: status === "Done" ? ctx.now : null } : k)) };
   next = activity(next, ctx, x.companyId, status === "Done" ? "Task done" : "Task reopened", x.title);
   return done(next, ctx, x.companyId);
 }
@@ -1259,6 +1380,9 @@ export function toggleTask(db: Db, id: string, ctx: Ctx): Result {
 export function rescheduleTask(db: Db, id: string, days: number, ctx: Ctx): Result {
   const x = db.tasks.find((k) => k.id === id);
   if (!x) return fail("This task no longer exists.");
+  // A touch follow-up moves together with its outreach record.
+  if (isTouchFollowUp(x) && db.outreach.some((o) => o.id === x.outreachId && o.followUpDate)) return rescheduleFollowUp(db, x.outreachId!, days, ctx);
+  if (x.meetingId) return fail("Reschedule the meeting itself in Discovery — its task follows.");
   const nd = addDays(x.due > ctx.today ? x.due : ctx.today, days);
   return done(activity({ ...db, tasks: db.tasks.map((k) => (k.id === id ? { ...k, due: nd } : k)) }, ctx, x.companyId, "Task rescheduled", `${x.title} moved to ${nd}.`), ctx, x.companyId);
 }

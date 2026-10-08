@@ -78,7 +78,7 @@ export default function DiscoverySection({ d }: { d: DetailModel }) {
               <Actions style={{ marginTop: "6px" }}>
                 {!m.date || m.date <= today ? <Button small onClick={() => open("held", m)}>Record discovery</Button> : <span style={{ fontSize: "12px", color: C.grey }}>Can be recorded on or after {fdate(m.date)}.</span>}
                 <Button small kind="secondary" onClick={() => open("schedule", m)}>Reschedule</Button>
-                <Button small kind="danger" onClick={() => d.confirm("Cancel this meeting? It stays in the history as cancelled.") && d.run((db0, ctx) => A.cancelMeeting(db0, m.id, ctx))}>
+                <Button small kind="danger" onClick={() => d.confirm("Cancel this meeting? It stays in the history as cancelled.") && d.act((db0, ctx) => A.cancelMeeting(db0, m.id, ctx))}>
                   Cancel meeting
                 </Button>
               </Actions>

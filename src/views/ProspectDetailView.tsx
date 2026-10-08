@@ -2,6 +2,7 @@
 import { STAGES } from "../data/seed";
 import {
   bestOpp,
+  completedResearch,
   currentResearch,
   dmOf,
   grade,
@@ -82,13 +83,14 @@ export default function ProspectDetailView({ v }: { v: VM }) {
     [gBg, gFg] = GRADE_COLORS[g];
   const a = acq(db, c, today);
   const r = readiness(db, c);
-  const st = stall(c, today);
+  const st = stall(c, today, db);
   const bo = bestOpp(db, c.id);
   const comp = completeness(db, c);
   const why = whyOf(db, c.id);
   const wc = whyConfidence(db, c);
   const wn = whyNow(db, c.id);
-  const research = currentResearch(db, c.id);
+  // The research the rest of the workflow stands on: the latest completed version (a refresh draft is still being reviewed).
+  const research = completedResearch(db, c.id) || currentResearch(db, c.id);
   const strategy = strategyOf(db, c.id);
   const cur = d.steps.find((x) => x.key === d.focus) || d.steps[0];
   const [cfg, cbg] = STATUS_COLORS[cur.status];
@@ -107,7 +109,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
     .filter((t) => t.companyId === c.id && t.status !== "Done")
     .sort((x, y) => x.due.localeCompare(y.due));
   const acts = db.activities.filter((x) => x.companyId === c.id).slice(0, 25);
-  const verified = research?.status === "complete" && researchCheck(db, c).ok;
+  const verified = researchCheck(db, c).ok;
   const whyRows: [string, string, string | null][] = [
     [
       "Primary opportunity",
@@ -454,14 +456,16 @@ export default function ProspectDetailView({ v }: { v: VM }) {
           style={{
             fontSize: "12.5px",
             color:
-              c.nextAction.due < today ? "#e08e85" : c.nextAction.due === today ? "#d9b96a" : "rgba(255,255,255,.6)",
+              c.nextAction.due && c.nextAction.due < today ? "#e08e85" : c.nextAction.due === today ? "#d9b96a" : "rgba(255,255,255,.6)",
           }}
         >
-          {c.nextAction.due === today
-            ? "Due today"
-            : c.nextAction.due < today
-              ? "Overdue since " + fdate(c.nextAction.due)
-              : "Due " + fdate(c.nextAction.due)}
+          {!c.nextAction.due
+            ? "No date — waiting"
+            : c.nextAction.due === today
+              ? "Due today"
+              : c.nextAction.due < today
+                ? "Overdue since " + fdate(c.nextAction.due)
+                : "Due " + fdate(c.nextAction.due)}
         </div>
         <Button kind="gold" onClick={v.openNext}>
           {d.nba.label} →

@@ -190,7 +190,11 @@ export default function ComposerModal({ db, cid, outreachId, variant: v0, run, c
             label: `${p.name} — ${p.title}${p.decisionMaker ? " (decision-maker)" : ""}`,
           }))}
           placeholder="Choose…"
-          onChange={(x) => setContactId(x)}
+          onChange={(x) => {
+            setContactId(x);
+            // The greeting and the evidence list follow the recipient (asks first if you edited the text).
+            regenerate(variant, x);
+          }}
         />
         <SelectInput label="Channel" required value={channel} options={A.CHANNELS} onChange={setChannel} />
       </Grid>
