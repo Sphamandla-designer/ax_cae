@@ -66,6 +66,9 @@ number shown. Method:
 - Notes typed just before switching step are saved.
 - One-click actions that failed silently now show the reason.
 - A stale error notice no longer lingers after a later action succeeds.
+- The demo banner's "Switch to your live workspace" now switches (it only opened Settings).
+- Dates in next-action reasons, the activity log and meeting tasks read DD MMM YYYY. Done tasks show
+  when they were done; done and meeting tasks no longer offer "+3d".
 
 ## Evidence
 
@@ -75,7 +78,11 @@ number shown. Method:
 - Fixed-flow browser tests: 12/12. Journey: 33/33. Workflow, persistence, isolation and integrity: 58/58.
   Research cases: all 19 behave as specified.
 - Responsive: phone, tablet and desktop, with no console errors; Escape closes dialogs and returns focus.
-- Click crawl: see the crawl summary in the final report.
+- Click crawl: 3 306 clicks. That covers every control on all 12 screens (336 clicks) and every control in all 13 steps for 8
+  demo prospects at every stage, from New to Won and Lost (2 970 clicks). There were no page or console errors.
+  Controls with no visible effect were reviewed one by one. All were the tab, filter, score or radio that was already
+  selected, a button disabled for a stated reason ("Create proposal" with no opportunity), or an external link. The
+  one real dead control, the demo banner link, is fixed.
 
 ## Still true (unchanged limits)
 

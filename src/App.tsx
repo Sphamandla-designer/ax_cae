@@ -987,7 +987,8 @@ export default class App extends Component<AppProps, State> {
       viewTitle: S.selId ? "Prospect" : VIEW_TITLES[S.view],
       isDemo: S.env.active === "demo",
       demoLabel: S.env.active === "demo" ? "Demo workspace" : "Live workspace",
-      onDemoLabel: go("settings"),
+      // Does what it says: switches to the live workspace (Settings → Workspace has the other options).
+      onDemoLabel: () => this.switchWorkspace("live"),
       today: T,
       navOpen: S.navOpen,
       toggleNav: () => this.setState((s) => ({ navOpen: !s.navOpen })),
