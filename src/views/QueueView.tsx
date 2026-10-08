@@ -6,7 +6,7 @@ export default function QueueView({ v }: { v: VM }) {
   return (
     <>
       <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "14px", flexWrap: "wrap" }}>
-        <span style={{ fontSize: "12px", color: "#8a8474", marginRight: "4px" }}>Sort by</span>
+        <span style={{ fontSize: "12px", color: "#73767a", marginRight: "4px" }}>Sort by</span>
         {v.queueSorts?.map((s, i) => (
           <div
             key={i}
@@ -29,11 +29,11 @@ export default function QueueView({ v }: { v: VM }) {
           </div>
         ))}
         <div style={{ flex: "1" }} />
-        <div style={{ fontSize: "12.5px", color: "#8a8474" }}>
+        <div style={{ fontSize: "12.5px", color: "#73767a" }}>
           {v.queueCount} active prospects · your daily working list
         </div>
       </div>
-      <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", overflowX: "auto" }}>
+      <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", overflowX: "auto" }}>
         <div
           style={{
             display: "grid",
@@ -42,8 +42,8 @@ export default function QueueView({ v }: { v: VM }) {
             gap: "10px",
             minWidth: "1240px",
             padding: "10px 18px",
-            borderBottom: "1px solid #e6e2d8",
-            background: "#faf9f5",
+            borderBottom: "1px solid #e4e4e7",
+            background: "#fafafa",
           }}
         >
           <span
@@ -51,7 +51,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -62,7 +62,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -73,7 +73,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -84,7 +84,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -95,7 +95,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -106,7 +106,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
               textAlign: "right",
             }}
@@ -118,7 +118,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -129,7 +129,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -140,7 +140,7 @@ export default function QueueView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -159,7 +159,7 @@ export default function QueueView({ v }: { v: VM }) {
               gap: "10px",
               minWidth: "1240px",
               padding: "12px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               cursor: "pointer",
               alignItems: "center",
             }}
@@ -168,14 +168,14 @@ export default function QueueView({ v }: { v: VM }) {
             tabIndex={0}
             onKeyDown={activate}
           >
-            <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "14px", color: "#a39d8f" }}>
+            <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "14px", color: "#9a9ca3" }}>
               {q.rank}
             </span>
             <span style={{ fontSize: "13.5px", fontWeight: "500" }}>{q.name}</span>
             <span onClick={q.onScore} style={{ cursor: "pointer" }} role="button" tabIndex={0} onKeyDown={activate}>
               {" "}
               <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "15px", fontWeight: "600" }}>
+                <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "15px", fontWeight: "600" }}>
                   {q.acq}
                 </span>
                 <span
@@ -186,7 +186,7 @@ export default function QueueView({ v }: { v: VM }) {
                     fontWeight: "700",
                     color: q.bandFg,
                     background: q.bandBg,
-                    borderRadius: "3px",
+                    borderRadius: "999px",
                     padding: "2px 6px",
                   }}
                 >
@@ -196,8 +196,8 @@ export default function QueueView({ v }: { v: VM }) {
               <span
                 style={{
                   display: "block",
-                  background: "#f0ede4",
-                  borderRadius: "2px",
+                  background: "#efeff1",
+                  borderRadius: "999px",
                   height: "4px",
                   marginTop: "5px",
                   position: "relative",
@@ -211,7 +211,7 @@ export default function QueueView({ v }: { v: VM }) {
                     bottom: "0",
                     width: q.w,
                     background: q.bandFg,
-                    borderRadius: "2px",
+                    borderRadius: "999px",
                   }}
                 />
               </span>{" "}
@@ -224,8 +224,8 @@ export default function QueueView({ v }: { v: VM }) {
               <span
                 style={{
                   display: "block",
-                  background: "#f0ede4",
-                  borderRadius: "2px",
+                  background: "#efeff1",
+                  borderRadius: "999px",
                   height: "4px",
                   marginTop: "4px",
                   position: "relative",
@@ -239,15 +239,15 @@ export default function QueueView({ v }: { v: VM }) {
                     bottom: "0",
                     width: q.readyW,
                     background: q.readyFg,
-                    borderRadius: "2px",
+                    borderRadius: "999px",
                   }}
                 />
               </span>{" "}
             </span>
-            <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{q.opp}</span>
+            <span style={{ fontSize: "12.5px", color: "#697080" }}>{q.opp}</span>
             <span
               style={{
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "13.5px",
                 fontWeight: "600",
                 textAlign: "right",
@@ -256,18 +256,18 @@ export default function QueueView({ v }: { v: VM }) {
               {q.value}
             </span>
             <span>
-              <span style={{ display: "block", fontSize: "11.5px", color: "#3a3f48" }}>{q.stage}</span>
+              <span style={{ display: "block", fontSize: "11.5px", color: "#2a2c31" }}>{q.stage}</span>
               <span style={{ display: "block", fontSize: "11.5px", color: q.dmFg, marginTop: "2px" }}>{q.dm}</span>
             </span>
-            <span style={{ fontSize: "12px", color: "#7a5f24" }}>{q.whyNow}</span>
-            <span style={{ fontSize: "12.5px", color: "#10151e", fontWeight: "500" }}>{q.action}</span>
+            <span style={{ fontSize: "12px", color: "#b3105a" }}>{q.whyNow}</span>
+            <span style={{ fontSize: "12.5px", color: "#0a0a0a", fontWeight: "500" }}>{q.action}</span>
             <button
               onClick={q.onAction}
               style={{
-                border: "1px solid #0c1220",
-                background: "#0c1220",
+                border: "1px solid #0a0a0a",
+                background: "#0a0a0a",
                 color: "#fff",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 8px",
                 fontSize: "11px",
                 fontWeight: "600",

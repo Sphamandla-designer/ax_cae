@@ -28,7 +28,7 @@ export default function TemplatesView({ v }: { v: VM }) {
           </div>
         ))}
       </div>
-      <div style={{ fontSize: "12px", color: "#8a8474", margin: "10px 0 16px 0" }}>
+      <div style={{ fontSize: "12px", color: "#73767a", margin: "10px 0 16px 0" }}>
         Variables:{" "}
         {v.tplVars?.map((v, i) => (
           <span
@@ -36,8 +36,8 @@ export default function TemplatesView({ v }: { v: VM }) {
             style={{
               fontFamily: "ui-monospace,Menlo,monospace",
               fontSize: "11px",
-              background: "#f0ede4",
-              borderRadius: "3px",
+              background: "#efeff1",
+              borderRadius: "999px",
               padding: "2px 6px",
               marginRight: "6px",
             }}
@@ -50,7 +50,7 @@ export default function TemplatesView({ v }: { v: VM }) {
         {v.tpls?.map((t, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "16px 18px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "16px 18px" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: "14px", fontWeight: "600" }}>{t.name}</span>
@@ -61,9 +61,9 @@ export default function TemplatesView({ v }: { v: VM }) {
                     letterSpacing: ".08em",
                     textTransform: "uppercase",
                     fontWeight: "700",
-                    color: "#7a5f24",
-                    background: "#f6f0e0",
-                    borderRadius: "3px",
+                    color: "#b3105a",
+                    background: "#fde8f1",
+                    borderRadius: "999px",
                     padding: "3px 8px",
                   }}
                 >
@@ -72,13 +72,13 @@ export default function TemplatesView({ v }: { v: VM }) {
                 <button
                   onClick={t.onCopy}
                   style={{
-                    border: "1px solid #e6e2d8",
+                    border: "1px solid #e4e4e7",
                     background: "#fff",
-                    borderRadius: "4px",
+                    borderRadius: "8px",
                     padding: "5px 10px",
                     fontSize: "11px",
                     cursor: "pointer",
-                    color: "#3a3f48",
+                    color: "#2a2c31",
                   }}
                   className="hover-bg-f6f4ef"
                 >
@@ -91,9 +91,9 @@ export default function TemplatesView({ v }: { v: VM }) {
                 fontSize: "12.5px",
                 lineHeight: "1.6",
                 marginTop: "10px",
-                color: "#3a3f48",
+                color: "#2a2c31",
                 whiteSpace: "pre-wrap",
-                borderTop: "1px solid #f0ede4",
+                borderTop: "1px solid #efeff1",
                 paddingTop: "10px",
               }}
             >

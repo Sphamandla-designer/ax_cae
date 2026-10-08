@@ -8,14 +8,14 @@ export default function AnalyticsView({ v }: { v: VM }) {
         {v.anGroups?.map((g, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "16px 18px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "16px 18px" }}
           >
             <div
               style={{
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
@@ -29,11 +29,11 @@ export default function AnalyticsView({ v }: { v: VM }) {
                   justifyContent: "space-between",
                   alignItems: "baseline",
                   padding: "8px 0",
-                  borderBottom: "1px solid #f0ede4",
+                  borderBottom: "1px solid #efeff1",
                 }}
               >
-                <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{r.k}</span>
-                <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "16px", fontWeight: "600" }}>
+                <span style={{ fontSize: "12.5px", color: "#697080" }}>{r.k}</span>
+                <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "16px", fontWeight: "600" }}>
                   {r.v}
                 </span>
               </div>
@@ -50,13 +50,13 @@ export default function AnalyticsView({ v }: { v: VM }) {
           alignItems: "start",
         }}
       >
-        <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "16px 18px" }}>
+        <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "16px 18px" }}>
           <div
             style={{
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
@@ -71,21 +71,21 @@ export default function AnalyticsView({ v }: { v: VM }) {
                 gap: "16px",
                 alignItems: "baseline",
                 padding: "8px 0",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
               }}
             >
-              <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{r.k}</span>
+              <span style={{ fontSize: "12.5px", color: "#697080" }}>{r.k}</span>
               <span style={{ fontSize: "13px", fontWeight: "600", textAlign: "right" }}>{r.v}</span>
             </div>
           ))}
         </div>
-        <div style={{ background: "#0c1220", borderRadius: "6px", padding: "16px 18px", color: "#fff" }}>
+        <div style={{ background: "#0a0a0a", borderRadius: "12px", padding: "16px 18px", color: "#fff" }}>
           <div
             style={{
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
@@ -115,8 +115,8 @@ export default function AnalyticsView({ v }: { v: VM }) {
       <div
         style={{
           background: "#fff",
-          border: "1px solid #e6e2d8",
-          borderRadius: "6px",
+          border: "1px solid #e4e4e7",
+          borderRadius: "12px",
           marginTop: "16px",
           padding: "16px 20px",
         }}
@@ -126,7 +126,7 @@ export default function AnalyticsView({ v }: { v: VM }) {
             fontSize: "10.5px",
             letterSpacing: ".12em",
             textTransform: "uppercase",
-            color: "#a8863d",
+            color: "#e0176b",
             fontWeight: "600",
           }}
         >
@@ -134,9 +134,9 @@ export default function AnalyticsView({ v }: { v: VM }) {
         </div>
         {v.convFunnel?.map((f, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "7px 0" }}>
-            <span style={{ width: "110px", fontSize: "12.5px", color: "#3a3f48", flex: "none" }}>{f.stage}</span>
+            <span style={{ width: "110px", fontSize: "12.5px", color: "#2a2c31", flex: "none" }}>{f.stage}</span>
             <div
-              style={{ flex: "1", background: "#f0ede4", borderRadius: "3px", height: "20px", position: "relative" }}
+              style={{ flex: "1", background: "#efeff1", borderRadius: "999px", height: "20px", position: "relative" }}
             >
               <div
                 style={{
@@ -145,15 +145,15 @@ export default function AnalyticsView({ v }: { v: VM }) {
                   top: "0",
                   bottom: "0",
                   width: f.w,
-                  background: "#0c1220",
-                  borderRadius: "3px",
+                  background: "#0a0a0a",
+                  borderRadius: "999px",
                 }}
               />
             </div>
             <span
               style={{
                 width: "34px",
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "14px",
                 fontWeight: "600",
                 textAlign: "right",
@@ -162,7 +162,7 @@ export default function AnalyticsView({ v }: { v: VM }) {
             >
               {f.count}
             </span>
-            <span style={{ width: "70px", fontSize: "11.5px", color: "#8a8474", textAlign: "right", flex: "none" }}>
+            <span style={{ width: "70px", fontSize: "11.5px", color: "#73767a", textAlign: "right", flex: "none" }}>
               {f.pct}
             </span>
           </div>
@@ -172,29 +172,29 @@ export default function AnalyticsView({ v }: { v: VM }) {
         {v.breakdowns?.map((bd, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "16px 18px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "16px 18px" }}
           >
             <div
               style={{
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
               {bd.label}
             </div>
             {bd.rows?.map((r, i) => (
-              <div key={i} style={{ padding: "8px 0", borderBottom: "1px solid #f0ede4" }}>
+              <div key={i} style={{ padding: "8px 0", borderBottom: "1px solid #efeff1" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px" }}>
                   <span>{r.k}</span>
-                  <span style={{ color: "#8a8474" }}>{r.meta}</span>
+                  <span style={{ color: "#73767a" }}>{r.meta}</span>
                 </div>
                 <div
                   style={{
-                    background: "#f0ede4",
-                    borderRadius: "2px",
+                    background: "#efeff1",
+                    borderRadius: "999px",
                     height: "6px",
                     marginTop: "6px",
                     position: "relative",
@@ -207,8 +207,8 @@ export default function AnalyticsView({ v }: { v: VM }) {
                       top: "0",
                       bottom: "0",
                       width: r.w,
-                      background: "#a8863d",
-                      borderRadius: "2px",
+                      background: "#e0176b",
+                      borderRadius: "999px",
                     }}
                   />
                 </div>

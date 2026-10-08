@@ -1,8 +1,8 @@
 """Bundle the production build into one self-contained HTML file that works offline.
 
 Run after `vite build` (see `npm run build:standalone`). Inlines the JS bundle and CSS from dist/ and
-embeds the Source Serif 4 font (Latin subsets) as base64. If the font cannot be downloaded, the
-Google Fonts link is kept and the page falls back to Georgia offline.
+embeds the AX-Channels brand fonts, Archivo and JetBrains Mono (Latin subsets), as base64. If the font cannot be downloaded, the
+Google Fonts link is kept and the page falls back to system fonts offline.
 Usage: python3 scripts/build-standalone.py [output.html]
 """
 import base64, re, subprocess, sys
@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / 'dist'
 OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'CAE-V3-standalone.html'
-FONT_CSS = 'https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap'
+FONT_CSS = 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36'
 
 

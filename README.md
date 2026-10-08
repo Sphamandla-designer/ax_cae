@@ -18,6 +18,16 @@ npm run build:standalone  # one self-contained, offline HTML file: CAE-V3-standa
 The standalone file opens straight from disk (`file://`) — no npm, no server. Its JavaScript, CSS and
 font are inlined.
 
+## Design system
+
+The CAE uses the AX-Channels design system from the website (`axchannels`, `assets/css/home.css`):
+Archivo for text and JetBrains Mono for uppercase captions, ink `#0a0a0a` on white, the magenta accent
+`#e0176b` (`#ff3d8a` on dark), a cyan glow on primary-button hover, pill buttons, 8–12 px cards and
+dark panels lit with the hero's teal and magenta glow. Amber (`#9a6200`) is kept only for states that
+need attention (due today, indicated, in progress); green and red keep their meaning. Tokens live in
+`src/views/ui.tsx` (`C`) and `src/styles/global.css` (`--ax-*`); the AX mark is inlined from
+`src/assets/ax-mark-reversed.png`.
+
 ## Using it day to day
 
 1. **Dashboard → Today’s Acquisition Plan.** Work the tabs: Follow up now, Contact now, Prepare now,

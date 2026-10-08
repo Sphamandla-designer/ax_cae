@@ -153,7 +153,7 @@ export default function ComposerModal({ db, cid, outreachId, variant: v0, run, c
               border: "1px solid " + (variant === x ? C.navy : C.line),
               background: variant === x ? C.navy : "#fff",
               color: variant === x ? "#fff" : C.greyDark,
-              borderRadius: "4px",
+              borderRadius: "8px",
               padding: "6px 12px",
               fontSize: "12px",
               fontWeight: 600,

@@ -152,7 +152,7 @@ export default function OutreachSection({ d, mode }: { d: DetailModel; mode: "ou
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px", flexWrap: "wrap" }}>
                   <label style={{ fontSize: "12px" }}>
                     Send on{" "}
-                    <input type="date" min={today} value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} style={{ border: "1px solid " + C.line, borderRadius: "4px", padding: "5px 8px", fontSize: "12.5px" }} />
+                    <input type="date" min={today} value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} style={{ border: "1px solid " + C.line, borderRadius: "8px", padding: "5px 8px", fontSize: "12.5px" }} />
                   </label>
                   <Button small onClick={() => run((db0, ctx) => A.scheduleOutreach(db0, o.id, scheduleDate, ctx)).ok && setScheduleFor(null)}>
                     Save schedule

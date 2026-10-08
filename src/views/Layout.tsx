@@ -21,7 +21,7 @@ export default function Layout({ v }: { v: VM }) {
     <div
       data-audit={v.audit}
       className="cae-shell"
-      style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#f6f4ef" }}
+      style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#f4f4f5" }}
     >
       <Sidebar v={v} />
       {v.navOpen ? <div className="cae-scrim" onClick={v.toggleNav} aria-hidden="true" /> : null}
@@ -59,8 +59,8 @@ export default function Layout({ v }: { v: VM }) {
                 fontSize: "12px",
                 color: C.goldText,
                 background: C.goldBg,
-                border: "1px solid #e0cf9e",
-                borderRadius: "5px",
+                border: "1px solid #efd59a",
+                borderRadius: "10px",
                 padding: "8px 12px",
               }}
             >

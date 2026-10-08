@@ -200,7 +200,7 @@ export default function SettingsView({ v }: { v: VM }) {
               style={{
                 width: "70px",
                 border: "1px solid " + C.line,
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 9px",
                 fontSize: "13px",
                 textAlign: "right",
@@ -261,7 +261,7 @@ export default function SettingsView({ v }: { v: VM }) {
               border: "1px solid " + C.line,
               background: v.auditBg,
               color: v.auditFg,
-              borderRadius: "4px",
+              borderRadius: "8px",
               padding: "8px 16px",
               fontSize: "12px",
               fontWeight: 600,

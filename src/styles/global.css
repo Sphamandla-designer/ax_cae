@@ -1,13 +1,36 @@
-/* Base styles from the design's <helmet>. */
-body{margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#10151e;background:#f6f4ef;-webkit-font-smoothing:antialiased;}
-a{color:#a8863d;text-decoration:none;} a:hover{color:#10151e;}
+/* AX-Channels design system (from axchannels.co.za, assets/css/home.css):
+   Archivo for text, JetBrains Mono for captions, ink #0a0a0a on white, magenta accent #e0176b,
+   cyan interaction glow, pill buttons, rounded dark blocks lit with the hero's teal / magenta glow. */
+:root{
+  --ax-ink:#0a0a0a; --ax-page:#f4f4f5; --ax-accent:#e0176b; --ax-accent-dark:#ff3d8a; --ax-cyan:92,209,240;
+  --ax-font:"Archivo",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --ax-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+body{margin:0;font-family:var(--ax-font);color:var(--ax-ink);background:var(--ax-page);-webkit-font-smoothing:antialiased;}
+a{color:var(--ax-accent);text-decoration:none;} a:hover{color:var(--ax-ink);}
 input,select,textarea,button{font-family:inherit;}
-::placeholder{color:#a39d8f;}
+::placeholder{color:#9a9ca3;}
+::selection{background:rgba(224,23,107,.18);}
+h1,h2,h3{letter-spacing:-.01em;}
+/* Uppercase captions everywhere read in the brand mono, as on the website. */
+[style*="text-transform: uppercase"]{font-family:var(--ax-mono);letter-spacing:.06em !important;font-weight:500 !important;}
+/* Every button is a pill (the website's .cta-pill). */
+.cae-content button,.cae-topbar button,[role="dialog"] button,.cae-sidebar nav button{border-radius:999px !important;}
+.ax-btn{transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .3s cubic-bezier(.22,.61,.36,1),background-color .25s;}
+.ax-btn--dark:hover:not(:disabled){background:#16161a !important;border-color:#16161a !important;}
+.ax-btn--accent:hover:not(:disabled){background:#f32079 !important;border-color:#f32079 !important;}
+.ax-btn--dark:hover:not(:disabled),.ax-btn--accent:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 0 0 1px rgba(var(--ax-cyan),.28),0 10px 28px -12px rgba(var(--ax-cyan),.45);}
+@media (prefers-reduced-motion: reduce){.ax-btn{transition:none;}.ax-btn:hover{transform:none !important;}}
+/* Inputs: white fields, magenta focus. */
+.cae-content input:focus,.cae-content select:focus,.cae-content textarea:focus,[role="dialog"] input:focus,[role="dialog"] select:focus,[role="dialog"] textarea:focus{outline:none;border-color:var(--ax-accent) !important;box-shadow:0 0 0 3px rgba(224,23,107,.14);}
+/* Dark blocks carry the hero's light: teal from the top right, magenta from the bottom left. */
+.ax-dark,.cae-nba,.cae-sidebar{background-image:radial-gradient(120% 90% at 100% 0%,rgba(0,98,117,.32),transparent 55%),radial-gradient(100% 90% at 0% 100%,rgba(62,18,41,.75),transparent 60%) !important;}
+.cae-nba{border-radius:16px !important;}
 /* Settings → Interaction audit: outline every interactive element. */
-[data-audit="on"] button,[data-audit="on"] select,[data-audit="on"] input,[data-audit="on"] textarea,[data-audit="on"] [data-click]{outline:1px dashed #a8863d;outline-offset:2px;}
+[data-audit="on"] button,[data-audit="on"] select,[data-audit="on"] input,[data-audit="on"] textarea,[data-audit="on"] [data-click]{outline:1px dashed var(--ax-accent);outline-offset:2px;}
 
 /* Accessibility */
-:focus-visible{outline:2px solid #a8863d;outline-offset:2px;}
+:focus-visible{outline:2px solid var(--ax-accent);outline-offset:2px;}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 button:disabled{cursor:not-allowed;}
 
@@ -18,7 +41,7 @@ button:disabled{cursor:not-allowed;}
 @media (max-width: 900px){
   .cae-sidebar{position:fixed;left:0;top:0;bottom:0;z-index:200;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.3);}
   .cae-sidebar-open{transform:none;}
-  .cae-scrim{position:fixed;inset:0;background:rgba(12,18,32,.45);z-index:150;}
+  .cae-scrim{position:fixed;inset:0;background:rgba(10,10,10,.45);z-index:150;}
   .cae-menu-btn{display:inline-block !important;}
   .cae-search{width:auto !important;flex:1 1 140px;min-width:0;}
   .cae-content{padding:16px !important;}

@@ -13,10 +13,10 @@ export default function OpportunitiesView({ v }: { v: VM }) {
             style={{
               fontSize: "12.5px",
               padding: "7px 14px",
-              borderRadius: "4px",
+              borderRadius: "8px",
               cursor: "pointer",
               fontWeight: "600",
-              border: "1px solid #e6e2d8",
+              border: "1px solid #e4e4e7",
               background: t.bg,
               color: t.fg,
             }}
@@ -30,9 +30,9 @@ export default function OpportunitiesView({ v }: { v: VM }) {
       </div>
       {v.oppTabOpps ? (
         <>
-          <div style={{ fontSize: "13px", color: "#6b6f78", marginBottom: "14px" }}>
+          <div style={{ fontSize: "13px", color: "#697080", marginBottom: "14px" }}>
             Documented digital opportunities across the prospect base — total potential{" "}
-            <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontWeight: "600", color: "#10151e" }}>
+            <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontWeight: "600", color: "#0a0a0a" }}>
               {v.oppTotal}
             </span>
           </div>
@@ -43,8 +43,8 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                 onClick={o.on}
                 style={{
                   background: "#fff",
-                  border: "1px solid #e6e2d8",
-                  borderRadius: "6px",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
                   padding: "16px 18px",
                   cursor: "pointer",
                 }}
@@ -54,33 +54,33 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                 onKeyDown={activate}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                  <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "16px", fontWeight: "600" }}>
+                  <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "16px", fontWeight: "600" }}>
                     {o.company}
                   </span>
-                  <span style={{ fontSize: "12px", color: "#8a8474" }}>
+                  <span style={{ fontSize: "12px", color: "#73767a" }}>
                     Opp score{" "}
                     <span
                       style={{
-                        fontFamily: "'Source Serif 4',Georgia,serif",
+                        fontFamily: "'Archivo',system-ui,sans-serif",
                         fontSize: "15px",
                         fontWeight: "600",
-                        color: "#10151e",
+                        color: "#0a0a0a",
                       }}
                     >
                       {o.score}/25
                     </span>
                   </span>
                 </div>
-                <div style={{ fontSize: "13px", color: "#3a3f48", marginTop: "8px", lineHeight: "1.5" }}>{o.text}</div>
+                <div style={{ fontSize: "13px", color: "#2a2c31", marginTop: "8px", lineHeight: "1.5" }}>{o.text}</div>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
                   {o.problems?.map((pr, i) => (
                     <span
                       key={i}
                       style={{
                         fontSize: "11px",
-                        background: "#f6f0e0",
-                        color: "#7a5f24",
-                        borderRadius: "3px",
+                        background: "#fde8f1",
+                        color: "#b3105a",
+                        borderRadius: "999px",
                         padding: "3px 8px",
                       }}
                     >
@@ -94,7 +94,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                     justifyContent: "space-between",
                     alignItems: "center",
                     marginTop: "12px",
-                    borderTop: "1px solid #f0ede4",
+                    borderTop: "1px solid #efeff1",
                     paddingTop: "10px",
                   }}
                 >
@@ -104,14 +104,14 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                       letterSpacing: ".06em",
                       textTransform: "uppercase",
                       fontWeight: "700",
-                      color: "#3a3f48",
+                      color: "#2a2c31",
                     }}
                   >
                     {o.service}
                   </span>
                   <span style={{ display: "flex", gap: "12px", alignItems: "baseline" }}>
                     <span style={{ fontSize: "11px", color: o.bandFg, fontWeight: "700" }}>{o.band}</span>
-                    <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "15px", fontWeight: "600" }}>
+                    <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "15px", fontWeight: "600" }}>
                       {o.value}
                     </span>
                   </span>
@@ -120,13 +120,13 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   <button
                     onClick={o.onCompany}
                     style={{
-                      border: "1px solid #e6e2d8",
+                      border: "1px solid #e4e4e7",
                       background: "#fff",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
                       padding: "6px 11px",
                       fontSize: "11px",
                       cursor: "pointer",
-                      color: "#3a3f48",
+                      color: "#2a2c31",
                     }}
                     className="hover-bg-f6f4ef"
                   >
@@ -135,13 +135,13 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   <button
                     onClick={o.on}
                     style={{
-                      border: "1px solid #e6e2d8",
+                      border: "1px solid #e4e4e7",
                       background: "#fff",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
                       padding: "6px 11px",
                       fontSize: "11px",
                       cursor: "pointer",
-                      color: "#3a3f48",
+                      color: "#2a2c31",
                     }}
                     className="hover-bg-f6f4ef"
                   >
@@ -150,13 +150,13 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   <button
                     onClick={o.onStrategy}
                     style={{
-                      border: "1px solid #e6e2d8",
+                      border: "1px solid #e4e4e7",
                       background: "#fff",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
                       padding: "6px 11px",
                       fontSize: "11px",
                       cursor: "pointer",
-                      color: "#3a3f48",
+                      color: "#2a2c31",
                     }}
                     className="hover-bg-f6f4ef"
                   >
@@ -165,10 +165,10 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   <button
                     onClick={o.onOutreach}
                     style={{
-                      border: "1px solid #0c1220",
-                      background: "#0c1220",
+                      border: "1px solid #0a0a0a",
+                      background: "#0a0a0a",
                       color: "#fff",
-                      borderRadius: "4px",
+                      borderRadius: "8px",
                       padding: "6px 11px",
                       fontSize: "11px",
                       fontWeight: "600",
@@ -185,8 +185,8 @@ export default function OpportunitiesView({ v }: { v: VM }) {
           <div
             style={{
               background: "#fff",
-              border: "1px solid #e6e2d8",
-              borderRadius: "6px",
+              border: "1px solid #e4e4e7",
+              borderRadius: "12px",
               marginTop: "16px",
               padding: "16px 20px",
             }}
@@ -196,7 +196,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
@@ -210,9 +210,9 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                       fontSize: "10px",
                       letterSpacing: ".1em",
                       textTransform: "uppercase",
-                      color: "#3a3f48",
+                      color: "#2a2c31",
                       fontWeight: "700",
-                      borderBottom: "1px solid #f0ede4",
+                      borderBottom: "1px solid #efeff1",
                       paddingBottom: "6px",
                     }}
                   >
@@ -226,11 +226,11 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                         justifyContent: "space-between",
                         fontSize: "12.5px",
                         padding: "5px 0",
-                        color: "#6b6f78",
+                        color: "#697080",
                       }}
                     >
                       <span>{i.label}</span>
-                      <span style={{ color: "#a39d8f" }}>{i.count}</span>
+                      <span style={{ color: "#9a9ca3" }}>{i.count}</span>
                     </div>
                   ))}
                 </div>
@@ -244,14 +244,14 @@ export default function OpportunitiesView({ v }: { v: VM }) {
           {v.scanCompanies?.map((s, i) => (
             <div
               key={i}
-              style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "18px 20px" }}
+              style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "18px 20px" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "18px", flexWrap: "wrap" }}>
                 <div style={{ flex: "1", minWidth: "200px" }}>
                   <div
                     onClick={s.on}
                     style={{
-                      fontFamily: "'Source Serif 4',Georgia,serif",
+                      fontFamily: "'Archivo',system-ui,sans-serif",
                       fontSize: "18px",
                       fontWeight: "600",
                       cursor: "pointer",
@@ -263,7 +263,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   >
                     {s.name}
                   </div>
-                  <div style={{ fontSize: "12px", color: "#8a8474", marginTop: "2px" }}>{s.industry}</div>
+                  <div style={{ fontSize: "12px", color: "#73767a", marginTop: "2px" }}>{s.industry}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div
@@ -271,7 +271,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                       fontSize: "10px",
                       letterSpacing: ".12em",
                       textTransform: "uppercase",
-                      color: "#8a8474",
+                      color: "#73767a",
                       fontWeight: "700",
                     }}
                   >
@@ -279,7 +279,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   </div>
                   <div
                     style={{
-                      fontFamily: "'Source Serif 4',Georgia,serif",
+                      fontFamily: "'Archivo',system-ui,sans-serif",
                       fontSize: "24px",
                       fontWeight: "600",
                       color: s.dxFg,
@@ -293,13 +293,13 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                 {s.dims?.map((d, i) => (
                   <div key={i}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11.5px" }}>
-                      <span style={{ color: "#6b6f78" }}>{d.dim}</span>
+                      <span style={{ color: "#697080" }}>{d.dim}</span>
                       <span style={{ fontWeight: "600", color: d.fg }}>{d.val}</span>
                     </div>
                     <div
                       style={{
-                        background: "#f0ede4",
-                        borderRadius: "2px",
+                        background: "#efeff1",
+                        borderRadius: "999px",
                         height: "5px",
                         marginTop: "4px",
                         position: "relative",
@@ -313,14 +313,14 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                           bottom: "0",
                           width: d.w,
                           background: d.bar,
-                          borderRadius: "2px",
+                          borderRadius: "999px",
                         }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: "16px", borderTop: "1px solid #f0ede4" }}>
+              <div style={{ marginTop: "16px", borderTop: "1px solid #efeff1" }}>
                 {s.scans?.map((r, i) => (
                   <div
                     key={i}
@@ -329,7 +329,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                       gridTemplateColumns: "150px 90px 80px 1fr 1fr 1fr",
                       gap: "12px",
                       padding: "10px 0",
-                      borderBottom: "1px solid #f0ede4",
+                      borderBottom: "1px solid #efeff1",
                       alignItems: "start",
                     }}
                   >
@@ -353,22 +353,22 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                         textTransform: "uppercase",
                         color: "#fff",
                         background: r.sevFg,
-                        borderRadius: "3px",
+                        borderRadius: "999px",
                         padding: "3px 6px",
                         textAlign: "center",
                       }}
                     >
                       {r.severity}
                     </span>
-                    <span style={{ fontSize: "12px", color: "#3a3f48" }}>{r.problem}</span>
-                    <span style={{ fontSize: "12px", color: "#8a8474" }}>{r.evidence}</span>
-                    <span style={{ fontSize: "12px", color: "#7a5f24" }}>{r.opportunity}</span>
+                    <span style={{ fontSize: "12px", color: "#2a2c31" }}>{r.problem}</span>
+                    <span style={{ fontSize: "12px", color: "#73767a" }}>{r.evidence}</span>
+                    <span style={{ fontSize: "12px", color: "#b3105a" }}>{r.opportunity}</span>
                   </div>
                 ))}
               </div>
             </div>
           ))}
-          <div style={{ background: "#fff", border: "1px dashed #d8d2c2", borderRadius: "6px", padding: "16px 20px" }}>
+          <div style={{ background: "#fff", border: "1px dashed #d4d4d8", borderRadius: "12px", padding: "16px 20px" }}>
             <div
               style={{
                 fontSize: "10.5px",
@@ -387,11 +387,11 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   onClick={a.on}
                   style={{
                     fontSize: "12px",
-                    border: "1px solid #e6e2d8",
+                    border: "1px solid #e4e4e7",
                     borderRadius: "14px",
                     padding: "5px 12px",
                     cursor: "pointer",
-                    background: "#faf9f5",
+                    background: "#fafafa",
                   }}
                   className="hover-border-a8863d"
                   role="button"
@@ -403,7 +403,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
               ))}
             </div>
             {v.noUnscanned ? (
-              <div style={{ fontSize: "12.5px", color: "#8a8474", marginTop: "8px" }}>
+              <div style={{ fontSize: "12.5px", color: "#73767a", marginTop: "8px" }}>
                 Every active prospect has a digital scan.
               </div>
             ) : null}
@@ -412,7 +412,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
       ) : null}
       {v.oppTabMatrix ? (
         <>
-          <div style={{ fontSize: "13px", color: "#6b6f78", marginBottom: "14px" }}>
+          <div style={{ fontSize: "13px", color: "#697080", marginBottom: "14px" }}>
             Business impact against implementation complexity — what to pitch first.
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
@@ -421,8 +421,8 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                 key={i}
                 style={{
                   background: "#fff",
-                  border: "1px solid #e6e2d8",
-                  borderRadius: "6px",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
                   padding: "16px 18px",
                   minHeight: "180px",
                 }}
@@ -432,7 +432,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "baseline",
-                    borderBottom: "1px solid #f0ede4",
+                    borderBottom: "1px solid #efeff1",
                     paddingBottom: "8px",
                   }}
                 >
@@ -447,7 +447,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   >
                     {q.key}
                   </span>
-                  <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{q.note}</span>
+                  <span style={{ fontSize: "11.5px", color: "#73767a" }}>{q.note}</span>
                 </div>
                 {q.items?.map((i, idx) => (
                   <div
@@ -459,7 +459,7 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                       alignItems: "baseline",
                       gap: "10px",
                       padding: "9px 0",
-                      borderBottom: "1px solid #f0ede4",
+                      borderBottom: "1px solid #efeff1",
                       cursor: "pointer",
                     }}
                     className="hover-color-a8863d"
@@ -469,18 +469,18 @@ export default function OpportunitiesView({ v }: { v: VM }) {
                   >
                     <span style={{ flex: "1" }}>
                       <span style={{ display: "block", fontSize: "13px", fontWeight: "500" }}>{i.company}</span>
-                      <span style={{ display: "block", fontSize: "12px", color: "#8a8474", marginTop: "1px" }}>
+                      <span style={{ display: "block", fontSize: "12px", color: "#73767a", marginTop: "1px" }}>
                         {i.type}
                       </span>
                     </span>
-                    <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{i.score}</span>
-                    <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "14px", fontWeight: "600" }}>
+                    <span style={{ fontSize: "11.5px", color: "#73767a" }}>{i.score}</span>
+                    <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "14px", fontWeight: "600" }}>
                       {i.value}
                     </span>
                   </div>
                 ))}
                 {q.empty ? (
-                  <div style={{ fontSize: "12.5px", color: "#a39d8f", marginTop: "10px" }}>
+                  <div style={{ fontSize: "12.5px", color: "#9a9ca3", marginTop: "10px" }}>
                     Nothing in this quadrant.
                   </div>
                 ) : null}

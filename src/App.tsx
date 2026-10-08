@@ -30,7 +30,7 @@ interface Corrupt {
   backup: Envelope | null;
 }
 
-const GRADE: Record<string, [string, string]> = { A: ["#0c1220", "#ffffff"], B: ["#a8863d", "#ffffff"], C: ["#e6e2d8", "#3a3f48"], "—": ["#f0ede4", "#8a8474"] };
+const GRADE: Record<string, [string, string]> = { A: ["#0a0a0a", "#ffffff"], B: ["#e0176b", "#ffffff"], C: ["#e4e4e7", "#2a2c31"], "—": ["#efeff1", "#73767a"] };
 const VIEW_TITLES: Record<string, string> = {
   dashboard: "Daily Acquisition Command Center",
   queue: "Acquisition Priority Queue",
@@ -323,9 +323,9 @@ export default class App extends Component<AppProps, State> {
     const acqOf = (cid: string) => (acqAll.find((x) => x.c.id === cid) || { a: { total: 0 } }).a;
     const activeRanked = acqAll.filter((x) => x.c.stage !== "Won" && x.c.stage !== "Lost").sort((a, b) => b.a.total - a.a.total);
     const nb = (c: (typeof D.companies)[number]) => nextBest(D, c, T);
-    const readyFg = (pct: number) => (pct === 100 ? "#2e7d5b" : pct >= 60 ? "#a8863d" : "#b0453c");
+    const readyFg = (pct: number) => (pct === 100 ? "#2e7d5b" : pct >= 60 ? "#9a6200" : "#b0453c");
     const dueLabel = (d: string | null) => (!d ? "—" : d === T ? "Today" : d < T ? "Overdue" : fdate(d));
-    const dueColor = (d: string | null) => (!d ? "#8a8474" : d < T ? "#b0453c" : d === T ? "#a8863d" : "#8a8474");
+    const dueColor = (d: string | null) => (!d ? "#73767a" : d < T ? "#b0453c" : d === T ? "#9a6200" : "#73767a");
 
     // nav
     const counts: Record<string, number> = { outreach: followDue.length, tasks: tasksToday.length, queue: activeRanked.filter((x) => x.a.total >= 80).length };
@@ -337,7 +337,7 @@ export default class App extends Component<AppProps, State> {
         current: on,
         color: on ? "#ffffff" : "rgba(255,255,255,.62)",
         bg: on ? "rgba(255,255,255,.07)" : "transparent",
-        edge: on ? "#a8863d" : "transparent",
+        edge: on ? "#ff3d8a" : "transparent",
         on: go(id, { showBell: false } as Partial<State>),
       };
     });
@@ -358,18 +358,18 @@ export default class App extends Component<AppProps, State> {
       .map((name) => {
         const count = D.companies.filter((c) => c.stage === name).length;
         const on = go("pipeline", { pipeTab: "board" });
-        return count > 0 ? { name, count, on, bg: "#0c1220", border: "#0c1220", fg: "#ffffff", sub: "rgba(255,255,255,.55)" } : { name, count, on, bg: "#faf9f5", border: "#e6e2d8", fg: "#c6c0b0", sub: "#b8b2a2" };
+        return count > 0 ? { name, count, on, bg: "#0a0a0a", border: "#0a0a0a", fg: "#ffffff", sub: "rgba(255,255,255,.55)" } : { name, count, on, bg: "#fafafa", border: "#e4e4e7", fg: "#c4c5ca", sub: "#b4b6bc" };
       });
     const actions: { tag: string; tagFg: string; tagBg: string; text: string; company: string; on: () => void }[] = [];
     followDue.forEach((o) => {
       const c = companyOf(D, o.companyId);
-      if (c) actions.push({ tag: "Follow up", tagFg: "#7a5f24", tagBg: "#f6f0e0", text: "Touch " + (o.touch + 1) + " " + dueText(o.followUpDate), company: c.name, on: () => this.open(c.id, "followup") });
+      if (c) actions.push({ tag: "Follow up", tagFg: "#7a4d00", tagBg: "#fdf3dc", text: "Touch " + (o.touch + 1) + " " + dueText(o.followUpDate), company: c.name, on: () => this.open(c.id, "followup") });
     });
     meetingsToday.forEach((m) => {
       const c = companyOf(D, m.companyId);
       if (c) actions.push({ tag: "Meeting", tagFg: "#2e5b7d", tagBg: "#e6eef4", text: m.type + " at " + m.time, company: c.name, on: () => this.open(c.id, "discovery") });
     });
-    active.filter((c) => c.stage === "New").forEach((c) => actions.push({ tag: "Research", tagFg: "#3a3f48", tagBg: "#f0ede4", text: "New prospect needs research", company: c.name, on: () => this.open(c.id, "research") }));
+    active.filter((c) => c.stage === "New").forEach((c) => actions.push({ tag: "Research", tagFg: "#2a2c31", tagBg: "#efeff1", text: "New prospect needs research", company: c.name, on: () => this.open(c.id, "research") }));
     [...expiredProps, ...openProps.filter((p) => p.expiry && p.expiry <= addDays(T, 7))].forEach((p) => {
       const c = companyOf(D, p.companyId);
       if (c) actions.push({ tag: "Proposal", tagFg: "#8a3b34", tagBg: "#f6e6e4", text: (p.expiry < T ? "Proposal expired " : "Proposal expires ") + fdate(p.expiry), company: c.name, on: () => this.open(c.id, "proposal") });
@@ -379,7 +379,7 @@ export default class App extends Component<AppProps, State> {
       .slice(0, 3)
       .forEach((t) => {
         const c = companyOf(D, t.companyId);
-        if (c) actions.push({ tag: "Task", tagFg: "#3a3f48", tagBg: "#f0ede4", text: t.title, company: c.name, on: () => this.open(c.id, this.taskFocus(t)) });
+        if (c) actions.push({ tag: "Task", tagFg: "#2a2c31", tagBg: "#efeff1", text: t.title, company: c.name, on: () => this.open(c.id, this.taskFocus(t)) });
       });
     const priority = active
       .map((c) => {
@@ -426,7 +426,7 @@ export default class App extends Component<AppProps, State> {
           name: c.name,
           industry: c.industry || "Unknown",
           dm: dm ? dm.name : "Not identified",
-          dmFg: dm ? "#6b6f78" : "#b0453c",
+          dmFg: dm ? "#697080" : "#b0453c",
           score: s + "/25",
           grade: g,
           gradeBg: GRADE[g][0],
@@ -443,7 +443,7 @@ export default class App extends Component<AppProps, State> {
           hasStall: !!st,
           action: n.label,
           due: dueLabel(c.nextAction.due),
-          nextColor: dueColor(c.nextAction.due) === "#8a8474" ? "#6b6f78" : dueColor(c.nextAction.due),
+          nextColor: dueColor(c.nextAction.due) === "#73767a" ? "#697080" : dueColor(c.nextAction.due),
           value: o ? money(oppValueOf(D, c.id)) : "—",
           actionCta: n.label + " →",
           on: () => this.open(c.id),
@@ -451,7 +451,7 @@ export default class App extends Component<AppProps, State> {
           onMore: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.setState({ scoreFor: c.id })),
         };
       });
-    const savedViews = ["All", "Qualified", "Hot prospects", "Follow up today", "High value", "No response", "Proposal stage", "Won clients"].map((x) => ({ label: x, on: () => this.setState({ savedView: x }), bg: sv === x ? "#0c1220" : "#fff", fg: sv === x ? "#fff" : "#3a3f48", border: sv === x ? "#0c1220" : "#e6e2d8" }));
+    const savedViews = ["All", "Qualified", "Hot prospects", "Follow up today", "High value", "No response", "Proposal stage", "Won clients"].map((x) => ({ label: x, on: () => this.setState({ savedView: x }), bg: sv === x ? "#0a0a0a" : "#fff", fg: sv === x ? "#fff" : "#2a2c31", border: sv === x ? "#0a0a0a" : "#e4e4e7" }));
 
     // opportunities
     const oppRows = D.opportunities
@@ -463,7 +463,7 @@ export default class App extends Component<AppProps, State> {
           problems: o.problems,
           service: o.type || o.service,
           band: o.valueBand + " value · " + o.basis,
-          bandFg: o.basis === "Observed" ? "#2e7d5b" : o.basis === "Indicated" ? "#a8863d" : "#b0453c",
+          bandFg: o.basis === "Observed" ? "#2e7d5b" : o.basis === "Indicated" ? "#9a6200" : "#b0453c",
           value: money(o.estValue),
           score: oppScore(o),
           on: () => this.open(o.companyId, "opportunity"),
@@ -481,21 +481,21 @@ export default class App extends Component<AppProps, State> {
           name: c.name,
           dx: dx === null ? "Not scored" : dx + "/100",
           dxW: (dx || 0) + "%",
-          dxFg: dx === null ? "#8a8474" : dx < 40 ? "#8a3b34" : dx < 60 ? "#a8863d" : "#2e7d5b",
+          dxFg: dx === null ? "#73767a" : dx < 40 ? "#8a3b34" : dx < 60 ? "#9a6200" : "#2e7d5b",
           industry: c.industry || "Unknown",
           on: () => this.open(c.id, "assessment"),
-          dims: dxDims(D, c.id).map((d) => ({ dim: d.dim, val: d.assessed ? d.val : "—", w: (d.val || 0) + "%", fg: d.assessed ? ((d.val as number) < 40 ? "#b0453c" : (d.val as number) < 70 ? "#a8863d" : "#2e7d5b") : "#c6c0b0", bar: d.assessed ? ((d.val as number) < 40 ? "#b0453c" : (d.val as number) < 70 ? "#a8863d" : "#2e7d5b") : "#e6e2d8" })),
+          dims: dxDims(D, c.id).map((d) => ({ dim: d.dim, val: d.assessed ? d.val : "—", w: (d.val || 0) + "%", fg: d.assessed ? ((d.val as number) < 40 ? "#b0453c" : (d.val as number) < 70 ? "#9a6200" : "#2e7d5b") : "#c4c5ca", bar: d.assessed ? ((d.val as number) < 40 ? "#b0453c" : (d.val as number) < 70 ? "#9a6200" : "#2e7d5b") : "#e4e4e7" })),
           scans: scansOf(D, c.id)
             .slice()
             .sort((a, b) => sevRank(b.severity) - sevRank(a.severity))
-            .map((s) => ({ category: s.category, status: s.status, statusFg: ({ Excellent: "#2e7d5b", Good: "#2e7d5b", Average: "#a8863d", Weak: "#b0453c", Missing: "#8a3b34" } as Record<string, string>)[s.status] || "#6b6f78", severity: s.severity, sevFg: ({ Critical: "#8a3b34", High: "#b0453c", Medium: "#a8863d", Low: "#8a8474" } as Record<string, string>)[s.severity] || "#8a8474", problem: s.problem, evidence: s.evidence + " (" + (s.isDemo ? "demo" : s.confidence) + ")", opportunity: s.opportunity, impact: s.impact })),
+            .map((s) => ({ category: s.category, status: s.status, statusFg: ({ Excellent: "#2e7d5b", Good: "#2e7d5b", Average: "#9a6200", Weak: "#b0453c", Missing: "#8a3b34" } as Record<string, string>)[s.status] || "#697080", severity: s.severity, sevFg: ({ Critical: "#8a3b34", High: "#b0453c", Medium: "#9a6200", Low: "#73767a" } as Record<string, string>)[s.severity] || "#73767a", problem: s.problem, evidence: s.evidence + " (" + (s.isDemo ? "demo" : s.confidence) + ")", opportunity: s.opportunity, impact: s.impact })),
         };
       });
     const allScanned = active.filter((c) => scansOf(D, c.id).length === 0).map((c) => ({ name: c.name, on: () => this.open(c.id, "assessment") }));
     const quadDefs = [
       { key: "Quick Win", note: "High impact · low complexity — pitch first", fg: "#2e7d5b" },
-      { key: "Strategic", note: "High impact · high complexity — phase it", fg: "#a8863d" },
-      { key: "Low Priority", note: "Low impact · low complexity — bundle only", fg: "#6b6f78" },
+      { key: "Strategic", note: "High impact · high complexity — phase it", fg: "#9a6200" },
+      { key: "Low Priority", note: "Low impact · low complexity — bundle only", fg: "#697080" },
       { key: "Avoid", note: "Low impact · high complexity — decline", fg: "#b0453c" },
     ];
     const matrix = quadDefs.map((q) => {
@@ -532,7 +532,7 @@ export default class App extends Component<AppProps, State> {
       .sort((a, b) => (b.dateSent || b.createdAt || "").localeCompare(a.dateSent || a.createdAt || ""))
       .map((o) => {
         const c = companyOf(D, o.companyId);
-        return { company: c ? c.name : "", channel: o.channel, touchLabel: "T" + o.touch, message: o.message, date: o.dateSent ? fdate(o.dateSent) : o.status === "Scheduled" ? "Sched " + fdate(o.dateScheduled) : "Not sent", status: o.status + (o.outcome && o.outcome !== "Sent" && o.outcome !== o.status ? " · " + o.outcome : ""), statusFg: o.status === "Replied" ? "#2e7d5b" : o.status === "Sent" ? "#6b6f78" : "#a8863d", onOpen: () => this.open(o.companyId, o.dateSent ? "followup" : "outreach") };
+        return { company: c ? c.name : "", channel: o.channel, touchLabel: "T" + o.touch, message: o.message, date: o.dateSent ? fdate(o.dateSent) : o.status === "Scheduled" ? "Sched " + fdate(o.dateScheduled) : "Not sent", status: o.status + (o.outcome && o.outcome !== "Sent" && o.outcome !== o.status ? " · " + o.outcome : ""), statusFg: o.status === "Replied" ? "#2e7d5b" : o.status === "Sent" ? "#697080" : "#9a6200", onOpen: () => this.open(o.companyId, o.dateSent ? "followup" : "outreach") };
       });
 
     // pipeline
@@ -540,7 +540,7 @@ export default class App extends Component<AppProps, State> {
       const cards = D.companies.filter((c) => c.stage === stage);
       return {
         name: stage,
-        fg: stage === "Won" ? "#2e7d5b" : stage === "Lost" ? "#b0453c" : "#3a3f48",
+        fg: stage === "Won" ? "#2e7d5b" : stage === "Lost" ? "#b0453c" : "#2a2c31",
         count: cards.length,
         // Won = what was actually won; Lost carries no pipeline value; open stages = best opportunity value.
         total: stage === "Won" ? money(cards.reduce((a, c) => a + (outcomeOf(D, c.id)?.value || 0), 0)) : stage === "Lost" ? "—" : money(cards.reduce((a, c) => a + oppValueOf(D, c.id), 0)),
@@ -581,7 +581,7 @@ export default class App extends Component<AppProps, State> {
     const proposals = D.proposals.map((q) => {
       const c = companyOf(D, q.companyId);
       const st = A.effectiveProposalStatus(q, T);
-      return { company: c ? c.name : "", project: q.project, value: money(q.value), prob: Math.round(q.probability * 100) + "%", weighted: money(q.value * q.probability), expiry: q.expiry ? fdate(q.expiry) : "—", expiryFg: q.expiry && q.expiry <= addDays(T, 7) && ["Sent", "Viewed", "Negotiation"].includes(q.status) ? "#b0453c" : "#6b6f78", status: st, statusFg: ({ Accepted: "#2e7d5b", Rejected: "#b0453c", Expired: "#b0453c", Viewed: "#a8863d", Negotiation: "#a8863d" } as Record<string, string>)[st] || "#6b6f78", on: () => this.open(q.companyId, "proposal") };
+      return { company: c ? c.name : "", project: q.project, value: money(q.value), prob: Math.round(q.probability * 100) + "%", weighted: money(q.value * q.probability), expiry: q.expiry ? fdate(q.expiry) : "—", expiryFg: q.expiry && q.expiry <= addDays(T, 7) && ["Sent", "Viewed", "Negotiation"].includes(q.status) ? "#b0453c" : "#697080", status: st, statusFg: ({ Accepted: "#2e7d5b", Rejected: "#b0453c", Expired: "#b0453c", Viewed: "#9a6200", Negotiation: "#9a6200" } as Record<string, string>)[st] || "#697080", on: () => this.open(q.companyId, "proposal") };
     });
 
     // clients
@@ -605,15 +605,15 @@ export default class App extends Component<AppProps, State> {
         company: c ? c.name : "",
         type: t.type,
         priority: t.priority,
-        prioFg: t.priority === "High" ? "#b0453c" : t.priority === "Medium" ? "#a8863d" : "#8a8474",
+        prioFg: t.priority === "High" ? "#b0453c" : t.priority === "Medium" ? "#9a6200" : "#73767a",
         due: done ? (t.completedAt ? "Done " + fdate(t.completedAt) : "Done") : dueLabel(t.due),
         dueFg: done ? "#2e7d5b" : dueColor(t.due),
         // Done tasks and meeting tasks (rescheduled via the meeting) have nothing to push back.
         canReschedule: !done && !t.meetingId,
         check: done ? "✓" : "",
         circleBg: done ? "#2e7d5b" : "#fff",
-        circleBorder: done ? "#2e7d5b" : "#b8b2a2",
-        titleFg: done ? "#a39d8f" : "#10151e",
+        circleBorder: done ? "#2e7d5b" : "#b4b6bc",
+        titleFg: done ? "#9a9ca3" : "#0a0a0a",
         deco: done ? "line-through" : "none",
         doneAria: done ? "Reopen task" : isTouchFollowUp(t) ? "Done when the next touch is sent — opens the follow-up step" : t.meetingId ? "Done when the meeting is recorded — opens Discovery" : "Mark done",
         onDone: () => this.toggleTask(t.id),
@@ -623,8 +623,8 @@ export default class App extends Component<AppProps, State> {
     };
     const taskGroups = [
       { label: "Overdue", fg: "#b0453c", items: openTasks.filter((t) => t.due < T).map(mkTask) },
-      { label: "Due today", fg: "#a8863d", items: openTasks.filter((t) => t.due === T).map(mkTask) },
-      { label: "Upcoming", fg: "#3a3f48", items: openTasks.filter((t) => t.due > T).sort((a, b) => a.due.localeCompare(b.due)).map(mkTask) },
+      { label: "Due today", fg: "#9a6200", items: openTasks.filter((t) => t.due === T).map(mkTask) },
+      { label: "Upcoming", fg: "#2a2c31", items: openTasks.filter((t) => t.due > T).sort((a, b) => a.due.localeCompare(b.due)).map(mkTask) },
       { label: "Done", fg: "#2e7d5b", items: D.tasks.filter((t) => t.status === "Done").map((t, i) => ({ t, i })).sort((a, b) => (b.t.completedAt || "").localeCompare(a.t.completedAt || "") || b.i - a.i).slice(0, 30).map((x) => mkTask(x.t)) },
     ].map((g) => ({ ...g, count: g.items.length + (g.items.length === 1 ? " task" : " tasks"), empty: g.items.length === 0 }));
 
@@ -706,7 +706,7 @@ export default class App extends Component<AppProps, State> {
     ];
 
     // templates
-    const tplCats = ["All", "LinkedIn", "Email", "Discovery", "Proposal"].map((x) => ({ label: x, on: () => this.setState({ tplCat: x }), bg: S.tplCat === x ? "#0c1220" : "#fff", fg: S.tplCat === x ? "#fff" : "#3a3f48", border: S.tplCat === x ? "#0c1220" : "#e6e2d8" }));
+    const tplCats = ["All", "LinkedIn", "Email", "Discovery", "Proposal"].map((x) => ({ label: x, on: () => this.setState({ tplCat: x }), bg: S.tplCat === x ? "#0a0a0a" : "#fff", fg: S.tplCat === x ? "#fff" : "#2a2c31", border: S.tplCat === x ? "#0a0a0a" : "#e4e4e7" }));
     const tpls = D.templates
       .filter((t) => S.tplCat === "All" || t.category === S.tplCat)
       .map((t) => ({
@@ -759,7 +759,7 @@ export default class App extends Component<AppProps, State> {
       .filter((x) => x.stall || naOverdue(x.c) || daysSince(lastTouch(D, x.c.id), T) > 21)
       .map((x) => ({ ...rowFor(x), risk: x.stall ? "Stalled " + x.stall.days + " days in " + x.c.stage : naOverdue(x.c) ? "Next action overdue since " + fdate(x.c.nextAction.due) : "No activity for " + daysSince(lastTouch(D, x.c.id), T) + " days" }));
     const planSets: Record<string, ReturnType<typeof rowFor>[]> = { contact: contactNow, follow: followNow, research: researchNow, prepare: prepareNow, waiting, risk: atRisk };
-    const planTabs = ([["contact", "Contact now"], ["follow", "Follow up now"], ["research", "Research now"], ["prepare", "Prepare now"], ["waiting", "Waiting"], ["risk", "At risk"]] as [string, string][]).map(([k, label]) => ({ label, n: planSets[k].length, current: S.planTab === k, on: () => this.setState({ planTab: k }), bg: S.planTab === k ? "#a8863d" : "transparent", fg: S.planTab === k ? "#0c1220" : "#e8e6e0", border: S.planTab === k ? "#a8863d" : "rgba(255,255,255,.18)" }));
+    const planTabs = ([["contact", "Contact now"], ["follow", "Follow up now"], ["research", "Research now"], ["prepare", "Prepare now"], ["waiting", "Waiting"], ["risk", "At risk"]] as [string, string][]).map(([k, label]) => ({ label, n: planSets[k].length, current: S.planTab === k, on: () => this.setState({ planTab: k }), bg: S.planTab === k ? "#ffffff" : "transparent", fg: S.planTab === k ? "#0a0a0a" : "#e7e7ea", border: S.planTab === k ? "#ffffff" : "rgba(255,255,255,.18)" }));
     const planRows = planSets[S.planTab] || [];
     const planEmptyMsg = ({ contact: "Nothing is outreach-ready today — clear the Research now list first.", follow: "No follow-ups due today.", research: "No prospects are missing research or evidence.", prepare: "Nothing waiting on a strategy, proposal or meeting record.", waiting: "Nothing outstanding with prospects right now.", risk: "Nothing at risk — every prospect is moving." } as Record<string, string>)[S.planTab];
     const doneToday = {
@@ -775,7 +775,7 @@ export default class App extends Component<AppProps, State> {
     const targets = targetLabels.map(([k, label]) => {
       const goal = D.targets[k] || 0, done = doneToday[k] || 0;
       const p = goal ? Math.min(100, Math.round((done / goal) * 100)) : 0;
-      return { label, text: done + " / " + goal, w: p + "%", bar: p >= 100 ? "#2e7d5b" : p > 0 ? "#a8863d" : "#e6e2d8" };
+      return { label, text: done + " / " + goal, w: p + "%", bar: p >= 100 ? "#2e7d5b" : p > 0 ? "#e0176b" : "#e4e4e7" };
     });
     const topProspects = activeRanked.slice(0, 5).map(({ c, a }) => {
       const o = bestOpp(D, c.id), dm = dmOf(D, c.id), cts = contactsOf(D, c.id);
@@ -788,7 +788,7 @@ export default class App extends Component<AppProps, State> {
         opp: o ? o.type || o.service : "No opportunity recorded",
         value: o ? money(oppValueOf(D, c.id)) : "—",
         dm: dm ? dm.name + " · " + dm.title : cts.length ? "Not identified (" + cts[0].name + " is " + (cts[0].role || "unknown") + ")" : "Not identified",
-        dmFg: dm ? "#3a3f48" : "#b0453c",
+        dmFg: dm ? "#2a2c31" : "#b0453c",
         next: nb(c).label,
         nextFg: dueColor(c.nextAction.due),
         on: () => this.open(c.id),
@@ -879,7 +879,7 @@ export default class App extends Component<AppProps, State> {
         opp: o ? o.type || o.service : "—",
         value: o ? money(oppValueOf(D, c.id)) : "—",
         dm: dm ? dm.name : "Not identified",
-        dmFg: dm ? "#3a3f48" : "#b0453c",
+        dmFg: dm ? "#2a2c31" : "#b0453c",
         stage: c.stage,
         whyNow: whyNowTxt,
         action: n.label,
@@ -889,7 +889,7 @@ export default class App extends Component<AppProps, State> {
         onAction: (e: { stopPropagation: () => void }) => (e.stopPropagation(), this.openNext(c.id)),
       };
     });
-    const queueSorts = ["Smart (default)", "Acquisition score", "Action readiness", "Opportunity value", "Urgency", "Follow-up date", "Stage"].map((k) => ({ label: k, current: qs === k, on: () => this.setState({ queueSort: k }), bg: qs === k ? "#0c1220" : "#fff", fg: qs === k ? "#fff" : "#3a3f48", border: qs === k ? "#0c1220" : "#e6e2d8" }));
+    const queueSorts = ["Smart (default)", "Acquisition score", "Action readiness", "Opportunity value", "Urgency", "Follow-up date", "Stage"].map((k) => ({ label: k, current: qs === k, on: () => this.setState({ queueSort: k }), bg: qs === k ? "#0a0a0a" : "#fff", fg: qs === k ? "#fff" : "#2a2c31", border: qs === k ? "#0a0a0a" : "#e4e4e7" }));
 
     // campaigns
     // Campaigns = the defined ones plus every campaign name typed on a prospect.
@@ -916,7 +916,7 @@ export default class App extends Component<AppProps, State> {
     const bellItems: { tag: string; color: string; text: string; on: () => void }[] = [];
     followDue.forEach((o) => {
       const c = companyOf(D, o.companyId);
-      if (c) bellItems.push({ tag: "Follow-up due", color: "#a8863d", text: c.name + " — touch " + (o.touch + 1) + " " + dueText(o.followUpDate), on: () => this.open(c.id, "followup") });
+      if (c) bellItems.push({ tag: "Follow-up due", color: "#9a6200", text: c.name + " — touch " + (o.touch + 1) + " " + dueText(o.followUpDate), on: () => this.open(c.id, "followup") });
     });
     // Touch follow-up tasks are already listed above as "Follow-up due".
     openTasks.filter((t) => t.due < T && !isTouchFollowUp(t)).forEach((t) => {
@@ -1076,10 +1076,10 @@ export default class App extends Component<AppProps, State> {
       isProps: S.pipeTab === "props",
       setTabBoard: () => this.setState({ pipeTab: "board" }),
       setTabProps: () => this.setState({ pipeTab: "props" }),
-      tabBoardBg: S.pipeTab === "board" ? "#0c1220" : "#fff",
-      tabBoardFg: S.pipeTab === "board" ? "#fff" : "#3a3f48",
-      tabPropsBg: S.pipeTab === "props" ? "#0c1220" : "#fff",
-      tabPropsFg: S.pipeTab === "props" ? "#fff" : "#3a3f48",
+      tabBoardBg: S.pipeTab === "board" ? "#0a0a0a" : "#fff",
+      tabBoardFg: S.pipeTab === "board" ? "#fff" : "#2a2c31",
+      tabPropsBg: S.pipeTab === "props" ? "#0a0a0a" : "#fff",
+      tabPropsFg: S.pipeTab === "props" ? "#fff" : "#2a2c31",
       cols,
       allowDrop: (e: { preventDefault: () => void }) => e.preventDefault(),
       proposals,
@@ -1110,7 +1110,7 @@ export default class App extends Component<AppProps, State> {
       oppTabOpps: S.oppTab === "opportunities",
       oppTabScanner: S.oppTab === "scanner",
       oppTabMatrix: S.oppTab === "matrix",
-      oppTabs: ([["opportunities", "Opportunities"], ["scanner", "Digital Opportunity Scanner"], ["matrix", "Opportunity Matrix"]] as [string, string][]).map(([k, label]) => ({ label, current: S.oppTab === k, on: () => this.setState({ oppTab: k }), bg: S.oppTab === k ? "#0c1220" : "#fff", fg: S.oppTab === k ? "#fff" : "#3a3f48" })),
+      oppTabs: ([["opportunities", "Opportunities"], ["scanner", "Digital Opportunity Scanner"], ["matrix", "Opportunity Matrix"]] as [string, string][]).map(([k, label]) => ({ label, current: S.oppTab === k, on: () => this.setState({ oppTab: k }), bg: S.oppTab === k ? "#0a0a0a" : "#fff", fg: S.oppTab === k ? "#fff" : "#2a2c31" })),
       scanCompanies,
       allScanned,
       noUnscanned: allScanned.length === 0,
@@ -1150,8 +1150,8 @@ export default class App extends Component<AppProps, State> {
       audit: S.audit ? "on" : "off",
       toggleAudit: () => this.setState((s) => ({ audit: !s.audit })),
       auditLabel: S.audit ? "On" : "Off",
-      auditBg: S.audit ? "#0c1220" : "#fff",
-      auditFg: S.audit ? "#fff" : "#3a3f48",
+      auditBg: S.audit ? "#0a0a0a" : "#fff",
+      auditFg: S.audit ? "#fff" : "#2a2c31",
       runTest: this.runSelfTest,
       selfTest: S.selfTest,
     };

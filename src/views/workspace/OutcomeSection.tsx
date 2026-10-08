@@ -92,7 +92,7 @@ export default function OutcomeSection({ d }: { d: DetailModel }) {
             role="radio"
             aria-checked={kind === k}
             onClick={() => setKind(k)}
-            style={{ border: "1px solid " + (kind === k ? C.navy : C.line), background: kind === k ? C.navy : "#fff", color: kind === k ? "#fff" : C.greyDark, borderRadius: "4px", padding: "8px 18px", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+            style={{ border: "1px solid " + (kind === k ? C.navy : C.line), background: kind === k ? C.navy : "#fff", color: kind === k ? "#fff" : C.greyDark, borderRadius: "8px", padding: "8px 18px", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
           >
             {k}
           </button>

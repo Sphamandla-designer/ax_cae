@@ -6,24 +6,25 @@ export default function DashboardView({ v }: { v: VM }) {
   return (
     <>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "16px" }}>
-        <div style={{ fontSize: "13px", color: "#6b6f78" }}>
+        <div style={{ fontSize: "13px", color: "#697080" }}>
           What should you do next to get a client — {v.todayLabelReal}
         </div>
-        <div style={{ fontSize: "10.5px", letterSpacing: ".12em", textTransform: "uppercase", color: "#a8863d" }}>
+        <div style={{ fontSize: "10.5px", letterSpacing: ".12em", textTransform: "uppercase", color: "#e0176b" }}>
           Find → Qualify → Diagnose → Outreach → Discovery → Proposal → Won
         </div>
       </div>
       <div
+        className="ax-dark"
         style={{
-          background: "#0c1220",
-          borderRadius: "6px",
-          padding: "20px 22px",
+          background: "#0a0a0a",
+          borderRadius: "20px",
+          padding: "22px 24px",
           color: "#fff",
           marginBottom: "16px",
         }}
       >
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "22px", fontWeight: "600" }}>
+          <div style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "22px", fontWeight: "600" }}>
             Today’s Acquisition Plan
           </div>
           <div
@@ -31,7 +32,7 @@ export default function DashboardView({ v }: { v: VM }) {
               fontSize: "11px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "700",
             }}
           >
@@ -42,14 +43,14 @@ export default function DashboardView({ v }: { v: VM }) {
           {v.planCounts?.map((p, i) => (
             <div
               key={i}
-              style={{ border: "1px solid rgba(255,255,255,.12)", borderRadius: "5px", padding: "12px 14px" }}
+              style={{ border: "1px solid rgba(255,255,255,.12)", borderRadius: "10px", padding: "12px 14px" }}
             >
               <div
                 style={{
                   fontSize: "10px",
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: "#a8863d",
+                  color: "#e0176b",
                   fontWeight: "700",
                 }}
               >
@@ -57,7 +58,7 @@ export default function DashboardView({ v }: { v: VM }) {
               </div>
               <div
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "24px",
                   fontWeight: "600",
                   marginTop: "4px",
@@ -80,7 +81,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 gap: "7px",
                 fontSize: "12px",
                 padding: "7px 13px",
-                borderRadius: "4px",
+                borderRadius: "999px",
                 cursor: "pointer",
                 fontWeight: "600",
                 border: `1px solid ${t.border ?? ""}`,
@@ -96,7 +97,7 @@ export default function DashboardView({ v }: { v: VM }) {
             </div>
           ))}
         </div>
-        <div style={{ background: "#fff", borderRadius: "5px", marginTop: "12px", overflowX: "auto" }}>
+        <div style={{ background: "#fff", borderRadius: "10px", marginTop: "12px", overflowX: "auto" }}>
           {v.planRows?.map((p, i) => (
             <div
               key={i}
@@ -107,7 +108,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 gap: "10px",
                 padding: "11px 16px",
                 minWidth: "820px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
                 cursor: "pointer",
                 alignItems: "center",
               }}
@@ -116,14 +117,14 @@ export default function DashboardView({ v }: { v: VM }) {
               tabIndex={0}
               onKeyDown={activate}
             >
-              <span style={{ fontSize: "13.5px", fontWeight: "600", color: "#10151e" }}>{p.name}</span>
+              <span style={{ fontSize: "13.5px", fontWeight: "600", color: "#0a0a0a" }}>{p.name}</span>
               <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
                 <span
                   style={{
-                    fontFamily: "'Source Serif 4',Georgia,serif",
+                    fontFamily: "'Archivo',system-ui,sans-serif",
                     fontSize: "15px",
                     fontWeight: "600",
-                    color: "#10151e",
+                    color: "#0a0a0a",
                   }}
                 >
                   {p.acq}
@@ -136,7 +137,7 @@ export default function DashboardView({ v }: { v: VM }) {
                     fontWeight: "700",
                     color: p.bandFg,
                     background: p.bandBg,
-                    borderRadius: "3px",
+                    borderRadius: "999px",
                     padding: "2px 5px",
                   }}
                 >
@@ -145,21 +146,21 @@ export default function DashboardView({ v }: { v: VM }) {
               </span>
               <span style={{ fontSize: "12px", fontWeight: "600", color: p.readyFg }}>{p.readiness}</span>
               <span>
-                <span style={{ display: "block", fontSize: "12.5px", color: "#6b6f78" }}>
+                <span style={{ display: "block", fontSize: "12.5px", color: "#697080" }}>
                   {p.stage} · {p.value}
                 </span>
                 <span style={{ display: "block", fontSize: "11.5px", color: "#b0453c", fontWeight: "600" }}>
                   {p.stallLabel}
                 </span>
               </span>
-              <span style={{ fontSize: "12.5px", color: "#10151e", fontWeight: "500" }}>{p.action}</span>
+              <span style={{ fontSize: "12.5px", color: "#0a0a0a", fontWeight: "500" }}>{p.action}</span>
               <button
                 onClick={p.onAction}
                 style={{
-                  border: "1px solid #0c1220",
-                  background: "#0c1220",
+                  border: "1px solid #0a0a0a",
+                  background: "#0a0a0a",
                   color: "#fff",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   padding: "6px 8px",
                   fontSize: "11px",
                   fontWeight: "600",
@@ -172,7 +173,7 @@ export default function DashboardView({ v }: { v: VM }) {
             </div>
           ))}
           {v.isWaitingTab ? (
-            <div style={{ padding: "10px 16px", fontSize: "11.5px", color: "#8a8474", background: "#faf9f5" }}>
+            <div style={{ padding: "10px 16px", fontSize: "11.5px", color: "#73767a", background: "#fafafa" }}>
               Waiting on:{" "}
               {v.planRows?.map((p, i) => (
                 <span key={i} style={{ marginRight: "12px" }}>
@@ -192,7 +193,7 @@ export default function DashboardView({ v }: { v: VM }) {
             </div>
           ) : null}
           {v.planEmpty ? (
-            <div style={{ padding: "14px 16px", fontSize: "12.5px", color: "#8a8474" }}>{v.planEmptyMsg}</div>
+            <div style={{ padding: "14px 16px", fontSize: "12.5px", color: "#73767a" }}>{v.planEmptyMsg}</div>
           ) : null}
         </div>
         <div style={{ marginTop: "18px", borderTop: "1px solid rgba(255,255,255,.12)", paddingTop: "14px" }}>
@@ -201,7 +202,7 @@ export default function DashboardView({ v }: { v: VM }) {
               fontSize: "10.5px",
               letterSpacing: ".14em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "700",
             }}
           >
@@ -217,7 +218,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 <div
                   style={{
                     background: "rgba(255,255,255,.12)",
-                    borderRadius: "2px",
+                    borderRadius: "999px",
                     height: "5px",
                     marginTop: "5px",
                     position: "relative",
@@ -231,7 +232,7 @@ export default function DashboardView({ v }: { v: VM }) {
                       bottom: "0",
                       width: t.w,
                       background: t.bar,
-                      borderRadius: "2px",
+                      borderRadius: "999px",
                     }}
                   />
                 </div>
@@ -245,7 +246,7 @@ export default function DashboardView({ v }: { v: VM }) {
               fontSize: "10.5px",
               letterSpacing: ".14em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "700",
             }}
           >
@@ -270,9 +271,9 @@ export default function DashboardView({ v }: { v: VM }) {
             >
               <span
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "14px",
-                  color: "#a8863d",
+                  color: "#e0176b",
                   width: "20px",
                   flex: "none",
                 }}
@@ -285,11 +286,11 @@ export default function DashboardView({ v }: { v: VM }) {
           ))}
         </div>
       </div>
-      <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", marginBottom: "16px" }}>
+      <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", marginBottom: "16px" }}>
         <div
           style={{
             padding: "14px 18px",
-            borderBottom: "1px solid #f0ede4",
+            borderBottom: "1px solid #efeff1",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -300,13 +301,13 @@ export default function DashboardView({ v }: { v: VM }) {
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
             Top prospects by acquisition score
           </span>
-          <span style={{ fontSize: "11.5px", color: "#8a8474" }}>Click a score to see how it was calculated</span>
+          <span style={{ fontSize: "11.5px", color: "#73767a" }}>Click a score to see how it was calculated</span>
         </div>
         <div style={{ overflowX: "auto" }}>
           {v.topProspects?.map((p, i) => (
@@ -320,7 +321,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 gap: "12px",
                 padding: "12px 18px",
                 minWidth: "880px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
                 cursor: "pointer",
                 alignItems: "center",
               }}
@@ -337,7 +338,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 tabIndex={0}
                 onKeyDown={activate}
               >
-                <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "17px", fontWeight: "600" }}>
+                <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "17px", fontWeight: "600" }}>
                   {p.acq}
                 </span>
                 <span
@@ -348,15 +349,15 @@ export default function DashboardView({ v }: { v: VM }) {
                     fontWeight: "700",
                     color: p.bandFg,
                     background: p.bandBg,
-                    borderRadius: "3px",
+                    borderRadius: "999px",
                     padding: "3px 6px",
                   }}
                 >
                   {p.band}
                 </span>
               </span>
-              <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{p.opp}</span>
-              <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "13.5px", fontWeight: "600" }}>
+              <span style={{ fontSize: "12.5px", color: "#697080" }}>{p.opp}</span>
+              <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "13.5px", fontWeight: "600" }}>
                 {p.value}
               </span>
               <span style={{ fontSize: "12.5px", color: p.dmFg }}>{p.dm}</span>
@@ -374,15 +375,15 @@ export default function DashboardView({ v }: { v: VM }) {
           alignItems: "start",
         }}
       >
-        <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px" }}>
+        <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px" }}>
           <div
             style={{
               padding: "14px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
@@ -396,7 +397,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 gap: "12px",
                 alignItems: "center",
                 padding: "11px 18px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
               }}
             >
               <span
@@ -407,17 +408,17 @@ export default function DashboardView({ v }: { v: VM }) {
                 onKeyDown={activate}
               >
                 <span style={{ display: "block", fontSize: "13.5px", fontWeight: "500" }}>{o.company}</span>
-                <span style={{ display: "block", fontSize: "12px", color: "#8a8474", marginTop: "2px" }}>
+                <span style={{ display: "block", fontSize: "12px", color: "#73767a", marginTop: "2px" }}>
                   {o.detail}
                 </span>
               </span>
               <button
                 onClick={o.onGen}
                 style={{
-                  border: "1px solid #0c1220",
-                  background: "#0c1220",
+                  border: "1px solid #0a0a0a",
+                  background: "#0a0a0a",
                   color: "#fff",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   padding: "6px 11px",
                   fontSize: "11.5px",
                   fontWeight: "600",
@@ -431,20 +432,20 @@ export default function DashboardView({ v }: { v: VM }) {
             </div>
           ))}
           {v.noOutreachToday ? (
-            <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#8a8474" }}>
+            <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#73767a" }}>
               No outreach queued for today.
             </div>
           ) : null}
         </div>
-        <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px" }}>
+        <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px" }}>
           <div
             style={{
               padding: "14px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
@@ -454,7 +455,7 @@ export default function DashboardView({ v }: { v: VM }) {
             <div
               key={i}
               onClick={r.on}
-              style={{ padding: "11px 18px", borderBottom: "1px solid #f0ede4", cursor: "pointer" }}
+              style={{ padding: "11px 18px", borderBottom: "1px solid #efeff1", cursor: "pointer" }}
               className="hover-bg-faf9f5"
               role="button"
               tabIndex={0}
@@ -462,12 +463,12 @@ export default function DashboardView({ v }: { v: VM }) {
             >
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontSize: "13.5px", fontWeight: "500" }}>{r.company}</span>
-                <span style={{ fontSize: "12px", color: "#8a8474" }}>{r.pct} complete</span>
+                <span style={{ fontSize: "12px", color: "#73767a" }}>{r.pct} complete</span>
               </div>
               <div
                 style={{
-                  background: "#f0ede4",
-                  borderRadius: "2px",
+                  background: "#efeff1",
+                  borderRadius: "999px",
                   height: "5px",
                   marginTop: "6px",
                   position: "relative",
@@ -480,16 +481,16 @@ export default function DashboardView({ v }: { v: VM }) {
                     top: "0",
                     bottom: "0",
                     width: r.w,
-                    background: "#a8863d",
-                    borderRadius: "2px",
+                    background: "#e0176b",
+                    borderRadius: "999px",
                   }}
                 />
               </div>
-              <div style={{ fontSize: "12px", color: "#8a8474", marginTop: "5px" }}>Missing: {r.missing}</div>
+              <div style={{ fontSize: "12px", color: "#73767a", marginTop: "5px" }}>Missing: {r.missing}</div>
             </div>
           ))}
           {v.noResearch ? (
-            <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#8a8474" }}>
+            <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#73767a" }}>
               All active profiles complete.
             </div>
           ) : null}
@@ -498,8 +499,8 @@ export default function DashboardView({ v }: { v: VM }) {
       <div
         style={{
           background: "#fff",
-          border: "1px solid #e6e2d8",
-          borderRadius: "6px",
+          border: "1px solid #e4e4e7",
+          borderRadius: "12px",
           marginBottom: "16px",
           overflowX: "auto",
         }}
@@ -507,11 +508,11 @@ export default function DashboardView({ v }: { v: VM }) {
         <div
           style={{
             padding: "14px 18px",
-            borderBottom: "1px solid #f0ede4",
+            borderBottom: "1px solid #efeff1",
             fontSize: "10.5px",
             letterSpacing: ".12em",
             textTransform: "uppercase",
-            color: "#a8863d",
+            color: "#e0176b",
             fontWeight: "600",
           }}
         >
@@ -527,7 +528,7 @@ export default function DashboardView({ v }: { v: VM }) {
               gap: "12px",
               minWidth: "760px",
               padding: "11px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               cursor: "pointer",
               alignItems: "center",
             }}
@@ -540,20 +541,20 @@ export default function DashboardView({ v }: { v: VM }) {
             <span
               style={{
                 fontSize: "11px",
-                border: "1px solid #e6e2d8",
-                borderRadius: "3px",
+                border: "1px solid #e4e4e7",
+                borderRadius: "999px",
                 padding: "3px 8px",
-                color: "#3a3f48",
-                background: "#faf9f5",
+                color: "#2a2c31",
+                background: "#fafafa",
                 justifySelf: "start",
               }}
             >
               {r.stage}
             </span>
-            <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{r.opp}</span>
+            <span style={{ fontSize: "12.5px", color: "#697080" }}>{r.opp}</span>
             <span
               style={{
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "14px",
                 fontWeight: "600",
                 textAlign: "right",
@@ -561,7 +562,7 @@ export default function DashboardView({ v }: { v: VM }) {
             >
               {r.value}
             </span>
-            <span style={{ fontSize: "12px", color: "#8a8474", textAlign: "right" }}>acq {r.acq}</span>
+            <span style={{ fontSize: "12px", color: "#73767a", textAlign: "right" }}>acq {r.acq}</span>
           </div>
         ))}
       </div>
@@ -573,8 +574,8 @@ export default function DashboardView({ v }: { v: VM }) {
             onClick={k.on}
             style={{
               background: "#fff",
-              border: "1px solid #e6e2d8",
-              borderRadius: "6px",
+              border: "1px solid #e4e4e7",
+              borderRadius: "12px",
               padding: "14px 16px",
               cursor: "pointer",
             }}
@@ -588,7 +589,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#8a8474",
+                color: "#73767a",
                 fontWeight: "600",
               }}
             >
@@ -596,7 +597,7 @@ export default function DashboardView({ v }: { v: VM }) {
             </div>
             <div
               style={{
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "26px",
                 fontWeight: "600",
                 marginTop: "6px",
@@ -604,15 +605,15 @@ export default function DashboardView({ v }: { v: VM }) {
             >
               {k.value}
             </div>
-            <div style={{ fontSize: "11.5px", color: "#8a8474", marginTop: "2px" }}>{k.sub}</div>
+            <div style={{ fontSize: "11.5px", color: "#73767a", marginTop: "2px" }}>{k.sub}</div>
           </div>
         ))}
       </div>
       <div
         style={{
           background: "#fff",
-          border: "1px solid #e6e2d8",
-          borderRadius: "6px",
+          border: "1px solid #e4e4e7",
+          borderRadius: "12px",
           marginTop: "16px",
           padding: "16px 18px",
         }}
@@ -622,7 +623,7 @@ export default function DashboardView({ v }: { v: VM }) {
             fontSize: "10.5px",
             letterSpacing: ".12em",
             textTransform: "uppercase",
-            color: "#a8863d",
+            color: "#e0176b",
             fontWeight: "600",
           }}
         >
@@ -637,7 +638,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 flex: "1",
                 textAlign: "center",
                 padding: "10px 4px",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 cursor: "pointer",
                 background: s.bg,
                 border: `1px solid ${s.border ?? ""}`,
@@ -649,7 +650,7 @@ export default function DashboardView({ v }: { v: VM }) {
             >
               <div
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "20px",
                   fontWeight: "600",
                   color: s.fg,
@@ -682,11 +683,11 @@ export default function DashboardView({ v }: { v: VM }) {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px" }}>
+          <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px" }}>
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -697,13 +698,13 @@ export default function DashboardView({ v }: { v: VM }) {
                   fontSize: "10.5px",
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: "#a8863d",
+                  color: "#e0176b",
                   fontWeight: "600",
                 }}
               >
                 Today’s actions
               </span>
-              <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{v.actionCount} items</span>
+              <span style={{ fontSize: "11.5px", color: "#73767a" }}>{v.actionCount} items</span>
             </div>
             {v.actions?.map((a, i) => (
               <div
@@ -714,7 +715,7 @@ export default function DashboardView({ v }: { v: VM }) {
                   alignItems: "center",
                   gap: "12px",
                   padding: "11px 18px",
-                  borderBottom: "1px solid #f0ede4",
+                  borderBottom: "1px solid #efeff1",
                   cursor: "pointer",
                 }}
                 className="hover-bg-faf9f5"
@@ -730,7 +731,7 @@ export default function DashboardView({ v }: { v: VM }) {
                     fontWeight: "700",
                     color: a.tagFg,
                     background: a.tagBg,
-                    borderRadius: "3px",
+                    borderRadius: "999px",
                     padding: "3px 7px",
                     flex: "none",
                     width: "74px",
@@ -740,20 +741,20 @@ export default function DashboardView({ v }: { v: VM }) {
                   {a.tag}
                 </span>
                 <span style={{ fontSize: "13.5px", flex: "1" }}>{a.text}</span>
-                <span style={{ fontSize: "12px", color: "#8a8474" }}>{a.company}</span>
-                <span style={{ color: "#a8863d", fontSize: "13px" }}>→</span>
+                <span style={{ fontSize: "12px", color: "#73767a" }}>{a.company}</span>
+                <span style={{ color: "#e0176b", fontSize: "13px" }}>→</span>
               </div>
             ))}
           </div>
-          <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px" }}>
+          <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px" }}>
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
@@ -768,7 +769,7 @@ export default function DashboardView({ v }: { v: VM }) {
                   alignItems: "center",
                   gap: "12px",
                   padding: "11px 18px",
-                  borderBottom: "1px solid #f0ede4",
+                  borderBottom: "1px solid #efeff1",
                   cursor: "pointer",
                 }}
                 className="hover-bg-faf9f5"
@@ -780,7 +781,7 @@ export default function DashboardView({ v }: { v: VM }) {
                   style={{
                     width: "26px",
                     height: "26px",
-                    borderRadius: "3px",
+                    borderRadius: "999px",
                     background: p.gradeBg,
                     color: p.gradeFg,
                     display: "flex",
@@ -796,14 +797,14 @@ export default function DashboardView({ v }: { v: VM }) {
                 <span style={{ flex: "1", minWidth: "0" }}>
                   {" "}
                   <span style={{ display: "block", fontSize: "13.5px", fontWeight: "500" }}>{p.name}</span>{" "}
-                  <span style={{ display: "block", fontSize: "11.5px", color: "#8a8474", marginTop: "1px" }}>
+                  <span style={{ display: "block", fontSize: "11.5px", color: "#73767a", marginTop: "1px" }}>
                     {p.meta}
                   </span>{" "}
                 </span>
-                <span style={{ fontSize: "12px", color: "#6b6f78", textAlign: "right" }}>{p.next}</span>
+                <span style={{ fontSize: "12px", color: "#697080", textAlign: "right" }}>{p.next}</span>
                 <span
                   style={{
-                    fontFamily: "'Source Serif 4',Georgia,serif",
+                    fontFamily: "'Archivo',system-ui,sans-serif",
                     fontSize: "14px",
                     fontWeight: "600",
                     width: "88px",
@@ -817,13 +818,13 @@ export default function DashboardView({ v }: { v: VM }) {
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ background: "#0c1220", borderRadius: "6px", color: "#e8e6e0", padding: "16px 18px" }}>
+          <div style={{ background: "#0a0a0a", borderRadius: "12px", color: "#e7e7ea", padding: "16px 18px" }}>
             <div
               style={{
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
@@ -843,7 +844,7 @@ export default function DashboardView({ v }: { v: VM }) {
                 <span style={{ fontSize: "12.5px", color: "rgba(255,255,255,.65)" }}>{f.label}</span>
                 <span
                   style={{
-                    fontFamily: "'Source Serif 4',Georgia,serif",
+                    fontFamily: "'Archivo',system-ui,sans-serif",
                     fontSize: "19px",
                     fontWeight: "600",
                     color: "#fff",
@@ -857,37 +858,37 @@ export default function DashboardView({ v }: { v: VM }) {
               Weighted = proposal value × probability
             </div>
           </div>
-          <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px" }}>
+          <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px" }}>
             <div
               style={{
                 padding: "14px 18px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "600",
               }}
             >
               Recent activity
             </div>
             {v.activity?.map((ac, i) => (
-              <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid #f0ede4" }}>
+              <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid #efeff1" }}>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                   <span
                     style={{
                       fontSize: "10px",
                       letterSpacing: ".1em",
                       textTransform: "uppercase",
-                      color: "#8a8474",
+                      color: "#73767a",
                       fontWeight: "600",
                     }}
                   >
                     {ac.kind}
                   </span>
-                  <span style={{ fontSize: "11px", color: "#a39d8f" }}>{ac.when}</span>
+                  <span style={{ fontSize: "11px", color: "#9a9ca3" }}>{ac.when}</span>
                 </div>
-                <div style={{ fontSize: "12.5px", marginTop: "3px", color: "#3a3f48" }}>{ac.text}</div>
+                <div style={{ fontSize: "12.5px", marginTop: "3px", color: "#2a2c31" }}>{ac.text}</div>
               </div>
             ))}
           </div>

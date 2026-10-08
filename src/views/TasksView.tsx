@@ -8,12 +8,12 @@ export default function TasksView({ v }: { v: VM }) {
       {v.taskGroups?.map((g, i) => (
         <div
           key={i}
-          style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", marginBottom: "16px" }}
+          style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", marginBottom: "16px" }}
         >
           <div
             style={{
               padding: "13px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               display: "flex",
               justifyContent: "space-between",
             }}
@@ -29,7 +29,7 @@ export default function TasksView({ v }: { v: VM }) {
             >
               {g.label}
             </span>
-            <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{g.count}</span>
+            <span style={{ fontSize: "11.5px", color: "#73767a" }}>{g.count}</span>
           </div>
           {g.items?.map((t, i) => (
             <div
@@ -39,7 +39,7 @@ export default function TasksView({ v }: { v: VM }) {
                 alignItems: "center",
                 gap: "12px",
                 padding: "11px 18px",
-                borderBottom: "1px solid #f0ede4",
+                borderBottom: "1px solid #efeff1",
               }}
             >
               <span
@@ -71,7 +71,7 @@ export default function TasksView({ v }: { v: VM }) {
               <span
                 data-click="1"
                 onClick={t.onOpen}
-                style={{ fontSize: "12px", color: "#8a8474", cursor: "pointer", textDecoration: "underline" }}
+                style={{ fontSize: "12px", color: "#73767a", cursor: "pointer", textDecoration: "underline" }}
                 className="hover-color-a8863d"
                 role="button"
                 tabIndex={0}
@@ -83,13 +83,13 @@ export default function TasksView({ v }: { v: VM }) {
               <button
                 onClick={t.onReschedule}
                 style={{
-                  border: "1px solid #e6e2d8",
+                  border: "1px solid #e4e4e7",
                   background: "#fff",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   padding: "4px 9px",
                   fontSize: "10.5px",
                   cursor: "pointer",
-                  color: "#3a3f48",
+                  color: "#2a2c31",
                 }}
                 className="hover-bg-f6f4ef"
               >
@@ -102,9 +102,9 @@ export default function TasksView({ v }: { v: VM }) {
                   letterSpacing: ".06em",
                   textTransform: "uppercase",
                   fontWeight: "700",
-                  color: "#3a3f48",
-                  background: "#f0ede4",
-                  borderRadius: "3px",
+                  color: "#2a2c31",
+                  background: "#efeff1",
+                  borderRadius: "999px",
                   padding: "3px 7px",
                 }}
               >
@@ -119,7 +119,7 @@ export default function TasksView({ v }: { v: VM }) {
             </div>
           ))}
           {g.empty ? (
-            <div style={{ padding: "12px 18px", fontSize: "12.5px", color: "#8a8474" }}>Nothing here.</div>
+            <div style={{ padding: "12px 18px", fontSize: "12.5px", color: "#73767a" }}>Nothing here.</div>
           ) : null}
         </div>
       ))}

@@ -4,22 +4,22 @@ import type { VM } from "../vm";
 export default function CampaignsView({ v }: { v: VM }) {
   return (
     <>
-      <div style={{ fontSize: "13px", color: "#6b6f78", marginBottom: "14px" }}>
+      <div style={{ fontSize: "13px", color: "#697080", marginBottom: "14px" }}>
         Which acquisition plays actually work — {v.unassignedCount} prospects not yet assigned to a campaign.
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
         {v.campaigns?.map((c, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "18px 20px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "18px 20px" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "18px", fontWeight: "600" }}>
+              <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "18px", fontWeight: "600" }}>
                 {c.name}
               </span>
               <span
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "17px",
                   fontWeight: "600",
                   color: "#2e7d5b",
@@ -29,14 +29,14 @@ export default function CampaignsView({ v }: { v: VM }) {
               </span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px", marginTop: "10px" }}>
-              <div style={{ fontSize: "12.5px", color: "#6b6f78" }}>
-                <b style={{ color: "#3a3f48" }}>Target</b> · {c.target}
+              <div style={{ fontSize: "12.5px", color: "#697080" }}>
+                <b style={{ color: "#2a2c31" }}>Target</b> · {c.target}
               </div>
-              <div style={{ fontSize: "12.5px", color: "#6b6f78" }}>
-                <b style={{ color: "#3a3f48" }}>Offer</b> · {c.offer}
+              <div style={{ fontSize: "12.5px", color: "#697080" }}>
+                <b style={{ color: "#2a2c31" }}>Offer</b> · {c.offer}
               </div>
-              <div style={{ fontSize: "12.5px", color: "#6b6f78" }}>
-                <b style={{ color: "#3a3f48" }}>Goal</b> · {c.goal}
+              <div style={{ fontSize: "12.5px", color: "#697080" }}>
+                <b style={{ color: "#2a2c31" }}>Goal</b> · {c.goal}
               </div>
             </div>
             <div
@@ -45,7 +45,7 @@ export default function CampaignsView({ v }: { v: VM }) {
                 gridTemplateColumns: "repeat(6,1fr)",
                 gap: "8px",
                 marginTop: "14px",
-                borderTop: "1px solid #f0ede4",
+                borderTop: "1px solid #efeff1",
                 paddingTop: "12px",
               }}
             >
@@ -56,13 +56,13 @@ export default function CampaignsView({ v }: { v: VM }) {
                       fontSize: "9.5px",
                       letterSpacing: ".08em",
                       textTransform: "uppercase",
-                      color: "#8a8474",
+                      color: "#73767a",
                       fontWeight: "700",
                     }}
                   >
                     {s.k}
                   </div>
-                  <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "18px", fontWeight: "600" }}>
+                  <div style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "18px", fontWeight: "600" }}>
                     {s.v}
                   </div>
                 </div>
@@ -74,7 +74,7 @@ export default function CampaignsView({ v }: { v: VM }) {
                 justifyContent: "space-between",
                 marginTop: "12px",
                 fontSize: "12px",
-                color: "#8a8474",
+                color: "#73767a",
               }}
             >
               <span>{c.conv}</span>

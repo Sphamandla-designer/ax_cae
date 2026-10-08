@@ -47,8 +47,8 @@ export default function AssessmentSection({ d }: { d: DetailModel }) {
                 <span>{x.dim}</span>
                 <strong>{x.assessed ? x.val : "Not assessed"}</strong>
               </div>
-              <div style={{ background: C.lineSoft, height: "4px", borderRadius: "2px", marginTop: "4px", position: "relative" }}>
-                {x.assessed ? <div style={{ position: "absolute", inset: 0, width: x.val + "%", background: (x.val as number) < 40 ? C.red : (x.val as number) < 70 ? C.gold : C.green, borderRadius: "2px" }} /> : null}
+              <div style={{ background: C.lineSoft, height: "4px", borderRadius: "999px", marginTop: "4px", position: "relative" }}>
+                {x.assessed ? <div style={{ position: "absolute", inset: 0, width: x.val + "%", background: (x.val as number) < 40 ? C.red : (x.val as number) < 70 ? C.gold : C.green, borderRadius: "999px" }} /> : null}
               </div>
             </div>
           ))}

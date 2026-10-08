@@ -33,12 +33,12 @@ export default function ProspectsView({ v }: { v: VM }) {
           value={v.fIndustry}
           onChange={v.setFIndustry}
           style={{
-            border: "1px solid #e6e2d8",
-            borderRadius: "4px",
+            border: "1px solid #e4e4e7",
+            borderRadius: "8px",
             padding: "7px 10px",
             fontSize: "12.5px",
             background: "#fff",
-            color: "#10151e",
+            color: "#0a0a0a",
           }}
         >
           {v.industryFilterOpts?.map((o, i) => (
@@ -51,12 +51,12 @@ export default function ProspectsView({ v }: { v: VM }) {
           value={v.fStage}
           onChange={v.setFStage}
           style={{
-            border: "1px solid #e6e2d8",
-            borderRadius: "4px",
+            border: "1px solid #e4e4e7",
+            borderRadius: "8px",
             padding: "7px 10px",
             fontSize: "12.5px",
             background: "#fff",
-            color: "#10151e",
+            color: "#0a0a0a",
           }}
         >
           {v.stageFilterOpts?.map((o, i) => (
@@ -69,12 +69,12 @@ export default function ProspectsView({ v }: { v: VM }) {
           value={v.fGrade}
           onChange={v.setFGrade}
           style={{
-            border: "1px solid #e6e2d8",
-            borderRadius: "4px",
+            border: "1px solid #e4e4e7",
+            borderRadius: "8px",
             padding: "7px 10px",
             fontSize: "12.5px",
             background: "#fff",
-            color: "#10151e",
+            color: "#0a0a0a",
           }}
         >
           {v.gradeFilterOpts?.map((o, i) => (
@@ -87,12 +87,12 @@ export default function ProspectsView({ v }: { v: VM }) {
           value={v.fSource}
           onChange={v.setFSource}
           style={{
-            border: "1px solid #e6e2d8",
-            borderRadius: "4px",
+            border: "1px solid #e4e4e7",
+            borderRadius: "8px",
             padding: "7px 10px",
             fontSize: "12.5px",
             background: "#fff",
-            color: "#10151e",
+            color: "#0a0a0a",
           }}
         >
           {v.sourceFilterOpts?.map((o, i) => (
@@ -103,7 +103,7 @@ export default function ProspectsView({ v }: { v: VM }) {
         </select>
         <div
           onClick={v.clearFilters}
-          style={{ fontSize: "12px", color: "#a8863d", cursor: "pointer" }}
+          style={{ fontSize: "12px", color: "#e0176b", cursor: "pointer" }}
           role="button"
           tabIndex={0}
           onKeyDown={activate}
@@ -111,9 +111,9 @@ export default function ProspectsView({ v }: { v: VM }) {
           Clear
         </div>
         <div style={{ flex: "1" }} />
-        <div style={{ fontSize: "12.5px", color: "#8a8474" }}>{v.prospectCount} prospects</div>
+        <div style={{ fontSize: "12.5px", color: "#73767a" }}>{v.prospectCount} prospects</div>
       </div>
-      <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", overflowX: "auto" }}>
+      <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", overflowX: "auto" }}>
         <div
           style={{
             display: "grid",
@@ -122,8 +122,8 @@ export default function ProspectsView({ v }: { v: VM }) {
             gap: "10px",
             minWidth: "1180px",
             padding: "10px 18px",
-            borderBottom: "1px solid #e6e2d8",
-            background: "#faf9f5",
+            borderBottom: "1px solid #e4e4e7",
+            background: "#fafafa",
           }}
         >
           <span
@@ -131,7 +131,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -142,7 +142,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -153,7 +153,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -164,7 +164,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -175,7 +175,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
               textAlign: "right",
             }}
@@ -187,7 +187,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -198,7 +198,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -209,7 +209,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
             }}
           >
@@ -220,7 +220,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               fontSize: "10px",
               letterSpacing: ".1em",
               textTransform: "uppercase",
-              color: "#8a8474",
+              color: "#73767a",
               fontWeight: "700",
               textAlign: "right",
             }}
@@ -239,7 +239,7 @@ export default function ProspectsView({ v }: { v: VM }) {
               gap: "10px",
               minWidth: "1180px",
               padding: "12px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               cursor: "pointer",
               alignItems: "center",
             }}
@@ -250,12 +250,12 @@ export default function ProspectsView({ v }: { v: VM }) {
           >
             <span>
               <span style={{ display: "block", fontSize: "13.5px", fontWeight: "500" }}>{p.name}</span>
-              <span style={{ display: "block", fontSize: "11.5px", color: "#8a8474", marginTop: "1px" }}>
+              <span style={{ display: "block", fontSize: "11.5px", color: "#73767a", marginTop: "1px" }}>
                 {p.industry} <span style={{ color: "#b0453c", fontWeight: "600" }}>{p.stallLabel}</span>
               </span>
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <span style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "15px", fontWeight: "600" }}>
+              <span style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "15px", fontWeight: "600" }}>
                 {p.acq}
               </span>
               <span
@@ -266,7 +266,7 @@ export default function ProspectsView({ v }: { v: VM }) {
                   fontWeight: "700",
                   color: p.bandFg,
                   background: p.bandBg,
-                  borderRadius: "3px",
+                  borderRadius: "999px",
                   padding: "2px 5px",
                 }}
               >
@@ -274,10 +274,10 @@ export default function ProspectsView({ v }: { v: VM }) {
               </span>
             </span>
             <span style={{ fontSize: "12.5px", fontWeight: "700", color: p.readyFg }}>{p.readiness}</span>
-            <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{p.opp}</span>
+            <span style={{ fontSize: "12.5px", color: "#697080" }}>{p.opp}</span>
             <span
               style={{
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "13.5px",
                 fontWeight: "600",
                 textAlign: "right",
@@ -289,11 +289,11 @@ export default function ProspectsView({ v }: { v: VM }) {
               <span
                 style={{
                   fontSize: "11px",
-                  border: "1px solid #e6e2d8",
-                  borderRadius: "3px",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "999px",
                   padding: "3px 8px",
-                  color: "#3a3f48",
-                  background: "#faf9f5",
+                  color: "#2a2c31",
+                  background: "#fafafa",
                 }}
               >
                 {p.stage}
@@ -301,17 +301,17 @@ export default function ProspectsView({ v }: { v: VM }) {
             </span>
             <span style={{ fontSize: "12.5px", color: p.dmFg }}>{p.dm}</span>
             <span>
-              <span style={{ display: "block", fontSize: "12.5px", color: "#10151e", fontWeight: "500" }}>
+              <span style={{ display: "block", fontSize: "12.5px", color: "#0a0a0a", fontWeight: "500" }}>
                 {p.action}
               </span>
               <button
                 onClick={p.onAction}
                 style={{
                   marginTop: "4px",
-                  border: "1px solid #0c1220",
-                  background: "#0c1220",
+                  border: "1px solid #0a0a0a",
+                  background: "#0a0a0a",
                   color: "#fff",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   padding: "4px 9px",
                   fontSize: "10.5px",
                   fontWeight: "600",

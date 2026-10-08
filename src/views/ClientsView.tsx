@@ -9,14 +9,14 @@ export default function ClientsView({ v }: { v: VM }) {
         {v.clientStats?.map((s, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "14px 16px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "14px 16px" }}
           >
             <div
               style={{
                 fontSize: "10.5px",
                 letterSpacing: ".12em",
                 textTransform: "uppercase",
-                color: "#8a8474",
+                color: "#73767a",
                 fontWeight: "600",
               }}
             >
@@ -24,7 +24,7 @@ export default function ClientsView({ v }: { v: VM }) {
             </div>
             <div
               style={{
-                fontFamily: "'Source Serif 4',Georgia,serif",
+                fontFamily: "'Archivo',system-ui,sans-serif",
                 fontSize: "24px",
                 fontWeight: "600",
                 marginTop: "6px",
@@ -39,13 +39,13 @@ export default function ClientsView({ v }: { v: VM }) {
         {v.clients?.map((c, i) => (
           <div
             key={i}
-            style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "18px 20px" }}
+            style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "18px 20px" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span
                 onClick={c.on}
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "18px",
                   fontWeight: "600",
                   cursor: "pointer",
@@ -59,7 +59,7 @@ export default function ClientsView({ v }: { v: VM }) {
               </span>
               <span
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "18px",
                   fontWeight: "600",
                   color: "#2e7d5b",
@@ -68,16 +68,16 @@ export default function ClientsView({ v }: { v: VM }) {
                 {c.revenue}
               </span>
             </div>
-            <div style={{ fontSize: "12px", color: "#8a8474", marginTop: "3px" }}>{c.meta}</div>
+            <div style={{ fontSize: "12px", color: "#73767a", marginTop: "3px" }}>{c.meta}</div>
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
               {c.services?.map((s, i) => (
                 <span
                   key={i}
                   style={{
                     fontSize: "11px",
-                    background: "#f0ede4",
-                    color: "#3a3f48",
-                    borderRadius: "3px",
+                    background: "#efeff1",
+                    color: "#2a2c31",
+                    borderRadius: "999px",
                     padding: "3px 8px",
                   }}
                 >
@@ -85,24 +85,24 @@ export default function ClientsView({ v }: { v: VM }) {
                 </span>
               ))}
             </div>
-            <div style={{ marginTop: "14px", borderTop: "1px solid #f0ede4", paddingTop: "12px" }}>
+            <div style={{ marginTop: "14px", borderTop: "1px solid #efeff1", paddingTop: "12px" }}>
               <div
                 style={{
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#a8863d",
+                  color: "#e0176b",
                   fontWeight: "700",
                 }}
               >
                 Growth opportunities
               </div>
               {c.growth?.map((g, i) => (
-                <div key={i} style={{ fontSize: "12.5px", marginTop: "7px", color: "#3a3f48" }}>
+                <div key={i} style={{ fontSize: "12.5px", marginTop: "7px", color: "#2a2c31" }}>
                   ↗ {g}
                 </div>
               ))}
-              <div style={{ fontSize: "11.5px", color: "#8a8474", marginTop: "10px" }}>{c.referral}</div>
+              <div style={{ fontSize: "11.5px", color: "#73767a", marginTop: "10px" }}>{c.referral}</div>
             </div>
           </div>
         ))}

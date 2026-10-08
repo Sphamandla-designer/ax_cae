@@ -1,4 +1,5 @@
 import type { VM } from "../vm";
+import axMark from "../assets/ax-mark-reversed.png";
 import { C } from "./ui";
 
 export default function Sidebar({ v }: { v: VM }) {
@@ -10,22 +11,21 @@ export default function Sidebar({ v }: { v: VM }) {
         width: "230px",
         flex: "none",
         background: C.navy,
-        color: "#e8e6e0",
+        color: "#e7e7ea",
         display: "flex",
         flexDirection: "column",
       }}
     >
       <div style={{ padding: "22px 20px 18px 20px", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-        <div style={{ fontFamily: C.serif, fontSize: "19px", fontWeight: 600, letterSpacing: ".01em", color: "#fff" }}>
-          AX—Channels
-        </div>
+        <img src={axMark} alt="AX-Channels" width={58} height={28} style={{ display: "block" }} />
         <div
           style={{
+            fontFamily: C.mono,
             fontSize: "10px",
-            letterSpacing: ".18em",
+            letterSpacing: ".1em",
             textTransform: "uppercase",
-            color: C.gold,
-            marginTop: "5px",
+            color: "rgba(255,255,255,.62)",
+            marginTop: "12px",
           }}
         >
           Client Acquisition Engine
@@ -53,7 +53,7 @@ export default function Sidebar({ v }: { v: VM }) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "8px 12px",
-              borderRadius: "4px",
+              borderRadius: "8px",
               cursor: "pointer",
               fontSize: "13.5px",
               color: n.color,
@@ -94,9 +94,9 @@ export default function Sidebar({ v }: { v: VM }) {
             letterSpacing: ".1em",
             textTransform: "uppercase",
             color: v.isDemo ? C.gold : "#8fd1b3",
-            border: "1px solid " + (v.isDemo ? "rgba(168,134,61,.55)" : "rgba(143,209,179,.55)"),
+            border: "1px solid " + (v.isDemo ? "rgba(224,23,107,.55)" : "rgba(143,209,179,.55)"),
             background: "transparent",
-            borderRadius: "3px",
+            borderRadius: "999px",
             padding: "4px 9px",
             cursor: "pointer",
             fontFamily: "inherit",

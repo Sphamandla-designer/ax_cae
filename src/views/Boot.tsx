@@ -17,7 +17,7 @@ export function Recovery({
     <div
       style={{
         minHeight: "100vh",
-        background: "#f6f4ef",
+        background: "#f4f4f5",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

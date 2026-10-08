@@ -1,49 +1,58 @@
-// Shared building blocks in the AX-Channels visual language (navy #0c1220, gold #a8863d, warm greys).
+// Shared building blocks in the AX-Channels design system (axchannels.co.za — assets/css/home.css):
+// ink #0a0a0a on white, magenta accent #e0176b, cool neutrals, Archivo + JetBrains Mono, pill buttons.
+// "gold*" names are kept for compatibility: C.gold is the brand accent; goldText/goldBg are the amber "needs attention" state.
 import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from "react";
 
 export const C = {
-  navy: "#0c1220",
-  ink: "#10151e",
-  gold: "#a8863d",
-  goldText: "#7a5f24",
-  grey: "#8a8474",
-  greyDark: "#3a3f48",
-  greyMid: "#6b6f78",
-  line: "#e6e2d8",
-  lineSoft: "#f0ede4",
-  paper: "#faf9f5",
+  navy: "#0a0a0a",
+  ink: "#0a0a0a",
+  gold: "#e0176b",
+  goldText: "#7a4d00",
+  grey: "#73767a",
+  greyDark: "#2a2c31",
+  greyMid: "#697080",
+  line: "#e4e4e7",
+  lineSoft: "#efeff1",
+  paper: "#fafafa",
   green: "#2e7d5b",
   greenBg: "#e8f2ec",
   red: "#b0453c",
   redDark: "#8a3b34",
   redBg: "#f6e6e4",
-  goldBg: "#f6f0e0",
-  serif: "'Source Serif 4',Georgia,serif",
+  goldBg: "#fdf3dc",
+  serif: "'Archivo',system-ui,sans-serif",
+  mono: "'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace",
+  accentDark: "#ff3d8a",
+  accentBg: "#fde8f1",
+  cyan: "#5cd1f0",
 };
 
+// Labels and eyebrows use the brand's mono caption style (JetBrains Mono, uppercase, tracked).
 export const labelStyle: CSSProperties = {
+  fontFamily: C.mono,
+  fontSize: "10.5px",
+  letterSpacing: ".08em",
+  textTransform: "uppercase",
+  color: C.grey,
+  fontWeight: 500,
+};
+export const eyebrow: CSSProperties = {
+  fontFamily: C.mono,
   fontSize: "10.5px",
   letterSpacing: ".1em",
   textTransform: "uppercase",
-  color: C.grey,
-  fontWeight: 700,
-};
-export const eyebrow: CSSProperties = {
-  fontSize: "10.5px",
-  letterSpacing: ".12em",
-  textTransform: "uppercase",
   color: C.gold,
-  fontWeight: 600,
+  fontWeight: 500,
 };
 export const inputStyle: CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
   marginTop: "5px",
   border: "1px solid " + C.line,
-  borderRadius: "4px",
+  borderRadius: "8px",
   padding: "9px 12px",
   fontSize: "13px",
-  background: C.paper,
+  background: "#fff",
   color: C.ink,
 };
 
@@ -63,7 +72,7 @@ export function Card({
   return (
     <section
       id={id}
-      style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "6px", padding: "16px 20px", ...style }}
+      style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "12px", padding: "18px 20px", ...style }}
     >
       {title || aside ? (
         <div
@@ -239,17 +248,18 @@ export function Check({
 
 type BtnKind = "primary" | "secondary" | "danger" | "gold" | "quiet";
 const BTN: Record<BtnKind, CSSProperties> = {
+  // Brand pills: black on light surfaces, magenta for the one action that matters most.
   primary: { background: C.navy, color: "#fff", border: "1px solid " + C.navy },
-  gold: { background: C.gold, color: C.navy, border: "1px solid " + C.gold },
+  gold: { background: C.gold, color: "#fff", border: "1px solid " + C.gold },
   secondary: { background: "#fff", color: C.greyDark, border: "1px solid " + C.line },
   danger: { background: "#fff", color: C.redDark, border: "1px solid #e3c3bf" },
   quiet: { background: "transparent", color: C.gold, border: "1px solid transparent", textDecoration: "underline" },
 };
 const HOVER: Record<BtnKind, string> = {
-  primary: "hover-bg-a8863d",
-  gold: "hover-bg-ffffff",
-  secondary: "hover-bg-f6f4ef",
-  danger: "hover-bg-f6e6e4",
+  primary: "ax-btn ax-btn--dark",
+  gold: "ax-btn ax-btn--accent",
+  secondary: "ax-btn hover-bg-f6f4ef",
+  danger: "ax-btn hover-bg-f6e6e4",
   quiet: "",
 };
 
@@ -282,10 +292,10 @@ export function Button({
       className={disabled ? undefined : HOVER[kind]}
       style={{
         ...BTN[kind],
-        borderRadius: "4px",
-        padding: small ? "6px 11px" : "9px 16px",
-        fontSize: small ? "11.5px" : "12.5px",
-        fontWeight: 600,
+        borderRadius: "999px",
+        padding: small ? "6px 13px" : "10px 20px",
+        fontSize: small ? "11.5px" : "13px",
+        fontWeight: 500,
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.45 : 1,
         whiteSpace: "nowrap",
@@ -344,13 +354,14 @@ export function Badge({ value, title }: { value: string; title?: string }) {
       style={{
         display: "inline-block",
         fontSize: "9.5px",
-        letterSpacing: ".07em",
+        fontFamily: C.mono,
+        letterSpacing: ".04em",
         textTransform: "uppercase",
-        fontWeight: 700,
+        fontWeight: 500,
         color: fg,
         background: bg,
-        borderRadius: "3px",
-        padding: "2px 6px",
+        borderRadius: "999px",
+        padding: "2px 8px",
         whiteSpace: "nowrap",
       }}
     >
@@ -362,7 +373,7 @@ export function Badge({ value, title }: { value: string; title?: string }) {
 type NoticeKind = "error" | "warn" | "info" | "success";
 const NOTICE: Record<NoticeKind, [string, string, string]> = {
   error: [C.redDark, C.redBg, "#e3c3bf"],
-  warn: [C.goldText, C.goldBg, "#e0cf9e"],
+  warn: [C.goldText, C.goldBg, "#efd59a"],
   info: [C.greyDark, C.paper, C.line],
   success: [C.green, C.greenBg, "#bcdccb"],
 };
@@ -384,7 +395,7 @@ export function Notice({
       style={{
         background: bg,
         border: "1px solid " + border,
-        borderRadius: "5px",
+        borderRadius: "10px",
         padding: "10px 14px",
         color: fg,
         fontSize: "12.5px",
@@ -502,7 +513,7 @@ export function Modal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(12,18,32,.55)",
+        background: "rgba(10,10,10,.55)",
         zIndex: 100,
         display: "flex",
         alignItems: "flex-start",
@@ -519,10 +530,10 @@ export function Modal({
         tabIndex={-1}
         style={{
           background: "#fff",
-          borderRadius: "8px",
+          borderRadius: "16px",
           width: "100%",
           maxWidth: width + "px",
-          boxShadow: "0 20px 60px rgba(12,18,32,.35)",
+          boxShadow: "0 20px 60px rgba(10,10,10,.35)",
           outline: "none",
         }}
       >

@@ -1,18 +1,18 @@
 /* Hover states from the design's style-hover attributes (dc-runtime applies them with !important). */
-.hover-bg-0c1220-color-ffffff:hover{background:#0c1220 !important;color:#ffffff !important}
-.hover-bg-a8863d:hover{background:#a8863d !important}
+.hover-bg-0c1220-color-ffffff:hover{background:#0a0a0a !important;color:#ffffff !important}
+.hover-bg-a8863d:hover{background:#e0176b !important}
 .hover-bg-e8f2ec:hover{background:#e8f2ec !important}
 .hover-bg-f6e6e4:hover{background:#f6e6e4 !important}
 .hover-bg-f6e6e4-color-8a3b34:hover{background:#f6e6e4 !important;color:#8a3b34 !important}
-.hover-bg-f6f0e0:hover{background:#f6f0e0 !important}
-.hover-bg-f6f4ef:hover{background:#f6f4ef !important}
-.hover-bg-faf9f5:hover{background:#faf9f5 !important}
+.hover-bg-f6f0e0:hover{background:#fde8f1 !important}
+.hover-bg-f6f4ef:hover{background:#f4f4f5 !important}
+.hover-bg-faf9f5:hover{background:#fafafa !important}
 .hover-bg-fff:hover{background:#fff !important}
-.hover-bg-ffffff-color-0c1220:hover{background:#ffffff !important;color:#0c1220 !important}
-.hover-border-a8863d:hover{border-color:#a8863d !important}
-.hover-border-a8863d-bg-f6f0e0:hover{border-color:#a8863d !important;background:#f6f0e0 !important}
-.hover-color-10151e:hover{color:#10151e !important}
-.hover-color-a8863d:hover{color:#a8863d !important}
+.hover-bg-ffffff-color-0c1220:hover{background:#ffffff !important;color:#0a0a0a !important}
+.hover-border-a8863d:hover{border-color:#e0176b !important}
+.hover-border-a8863d-bg-f6f0e0:hover{border-color:#e0176b !important;background:#fde8f1 !important}
+.hover-color-10151e:hover{color:#0a0a0a !important}
+.hover-color-a8863d:hover{color:#e0176b !important}
 .hover-color-fff:hover{color:#fff !important}
 .hover-color-ffffff:hover{color:#ffffff !important}
 .hover-bg-ffffff:hover{background:#ffffff !important}

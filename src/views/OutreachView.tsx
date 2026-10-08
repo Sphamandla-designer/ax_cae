@@ -7,8 +7,8 @@ export default function OutreachView({ v }: { v: VM }) {
     <>
       <div
         style={{
-          background: "#0c1220",
-          borderRadius: "6px",
+          background: "#0a0a0a",
+          borderRadius: "12px",
           padding: "16px 20px",
           marginBottom: "16px",
           display: "flex",
@@ -23,7 +23,7 @@ export default function OutreachView({ v }: { v: VM }) {
                 fontSize: "10px",
                 letterSpacing: ".14em",
                 textTransform: "uppercase",
-                color: "#a8863d",
+                color: "#e0176b",
                 fontWeight: "700",
               }}
             >
@@ -34,11 +34,11 @@ export default function OutreachView({ v }: { v: VM }) {
           </div>
         ))}
       </div>
-      <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", marginBottom: "16px" }}>
+      <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", marginBottom: "16px" }}>
         <div
           style={{
             padding: "14px 18px",
-            borderBottom: "1px solid #f0ede4",
+            borderBottom: "1px solid #efeff1",
             display: "flex",
             justifyContent: "space-between",
           }}
@@ -48,13 +48,13 @@ export default function OutreachView({ v }: { v: VM }) {
               fontSize: "10.5px",
               letterSpacing: ".12em",
               textTransform: "uppercase",
-              color: "#a8863d",
+              color: "#e0176b",
               fontWeight: "600",
             }}
           >
             Follow-ups due today
           </span>
-          <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{v.dueCount} due</span>
+          <span style={{ fontSize: "11.5px", color: "#73767a" }}>{v.dueCount} due</span>
         </div>
         {v.followUpsDue?.map((f, i) => (
           <div
@@ -64,7 +64,7 @@ export default function OutreachView({ v }: { v: VM }) {
               alignItems: "center",
               gap: "14px",
               padding: "12px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
             }}
           >
             <div style={{ flex: "1", minWidth: "0" }}>
@@ -78,7 +78,7 @@ export default function OutreachView({ v }: { v: VM }) {
               >
                 {f.company}
               </div>
-              <div style={{ fontSize: "12px", color: "#8a8474", marginTop: "2px" }}>{f.detail}</div>
+              <div style={{ fontSize: "12px", color: "#73767a", marginTop: "2px" }}>{f.detail}</div>
             </div>
             <button
               onClick={f.onDone}
@@ -86,7 +86,7 @@ export default function OutreachView({ v }: { v: VM }) {
                 border: "1px solid #2e7d5b",
                 color: "#2e7d5b",
                 background: "#fff",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 12px",
                 fontSize: "11.5px",
                 fontWeight: "600",
@@ -99,10 +99,10 @@ export default function OutreachView({ v }: { v: VM }) {
             <button
               onClick={f.onResched}
               style={{
-                border: "1px solid #e6e2d8",
-                color: "#3a3f48",
+                border: "1px solid #e4e4e7",
+                color: "#2a2c31",
                 background: "#fff",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 12px",
                 fontSize: "11.5px",
                 cursor: "pointer",
@@ -114,10 +114,10 @@ export default function OutreachView({ v }: { v: VM }) {
             <button
               onClick={f.onSkip}
               style={{
-                border: "1px solid #e6e2d8",
-                color: "#8a8474",
+                border: "1px solid #e4e4e7",
+                color: "#73767a",
                 background: "#fff",
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 12px",
                 fontSize: "11.5px",
                 cursor: "pointer",
@@ -129,20 +129,20 @@ export default function OutreachView({ v }: { v: VM }) {
           </div>
         ))}
         {v.noDue ? (
-          <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#8a8474" }}>
+          <div style={{ padding: "14px 18px", fontSize: "12.5px", color: "#73767a" }}>
             Nothing due today. Check upcoming follow-ups below.
           </div>
         ) : null}
       </div>
-      <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", overflowX: "auto" }}>
+      <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", overflowX: "auto" }}>
         <div
           style={{
             padding: "14px 18px",
-            borderBottom: "1px solid #f0ede4",
+            borderBottom: "1px solid #efeff1",
             fontSize: "10.5px",
             letterSpacing: ".12em",
             textTransform: "uppercase",
-            color: "#a8863d",
+            color: "#e0176b",
             fontWeight: "600",
           }}
         >
@@ -157,7 +157,7 @@ export default function OutreachView({ v }: { v: VM }) {
               gap: "10px",
               minWidth: "920px",
               padding: "11px 18px",
-              borderBottom: "1px solid #f0ede4",
+              borderBottom: "1px solid #efeff1",
               alignItems: "center",
             }}
           >
@@ -176,18 +176,18 @@ export default function OutreachView({ v }: { v: VM }) {
                 fontSize: "11px",
                 letterSpacing: ".05em",
                 textTransform: "uppercase",
-                color: "#3a3f48",
-                background: "#f0ede4",
-                borderRadius: "3px",
+                color: "#2a2c31",
+                background: "#efeff1",
+                borderRadius: "999px",
                 padding: "3px 6px",
                 textAlign: "center",
               }}
             >
               {o.channel}
             </span>
-            <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{o.touchLabel}</span>
-            <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{o.message}</span>
-            <span style={{ fontSize: "11.5px", color: "#8a8474" }}>{o.date}</span>
+            <span style={{ fontSize: "11.5px", color: "#73767a" }}>{o.touchLabel}</span>
+            <span style={{ fontSize: "12.5px", color: "#697080" }}>{o.message}</span>
+            <span style={{ fontSize: "11.5px", color: "#73767a" }}>{o.date}</span>
             <span style={{ fontSize: "10.5px", fontWeight: "700", color: o.statusFg, textAlign: "right" }}>
               {o.status}
             </span>

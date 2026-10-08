@@ -28,7 +28,7 @@ export default function Topbar({ v }: { v: VM }) {
           display: "none",
           background: "none",
           border: "1px solid " + C.line,
-          borderRadius: "4px",
+          borderRadius: "8px",
           padding: "6px 9px",
           fontSize: "16px",
           cursor: "pointer",
@@ -65,10 +65,10 @@ export default function Topbar({ v }: { v: VM }) {
             width: "100%",
             boxSizing: "border-box",
             border: "1px solid " + C.line,
-            borderRadius: "4px",
+            borderRadius: "8px",
             padding: "7px 12px",
             fontSize: "13px",
-            background: "#f6f4ef",
+            background: "#f4f4f5",
             color: C.ink,
           }}
         />
@@ -83,8 +83,8 @@ export default function Topbar({ v }: { v: VM }) {
               right: 0,
               background: "#fff",
               border: "1px solid " + C.line,
-              borderRadius: "5px",
-              boxShadow: "0 8px 24px rgba(16,21,30,.08)",
+              borderRadius: "10px",
+              boxShadow: "0 8px 24px rgba(10,10,10,.08)",
               overflow: "hidden",
             }}
           >
@@ -134,7 +134,7 @@ export default function Topbar({ v }: { v: VM }) {
             width: "34px",
             height: "34px",
             border: "1px solid " + C.line,
-            borderRadius: "4px",
+            borderRadius: "8px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -175,8 +175,8 @@ export default function Topbar({ v }: { v: VM }) {
               maxWidth: "calc(100vw - 32px)",
               background: "#fff",
               border: "1px solid " + C.line,
-              borderRadius: "6px",
-              boxShadow: "0 10px 28px rgba(16,21,30,.1)",
+              borderRadius: "12px",
+              boxShadow: "0 10px 28px rgba(10,10,10,.1)",
               overflow: "hidden",
             }}
           >
@@ -239,7 +239,7 @@ export default function Topbar({ v }: { v: VM }) {
           background: C.navy,
           color: "#fff",
           border: "none",
-          borderRadius: "4px",
+          borderRadius: "8px",
           padding: "9px 16px",
           fontSize: "13px",
           fontWeight: 500,

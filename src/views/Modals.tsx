@@ -76,7 +76,7 @@ export function ResponseModal({
               border: "1px solid " + (choice === x ? C.navy : C.line),
               background: choice === x ? C.navy : "#fff",
               color: choice === x ? "#fff" : C.greyDark,
-              borderRadius: "4px",
+              borderRadius: "8px",
               padding: "6px 11px",
               fontSize: "12px",
               cursor: "pointer",
@@ -138,7 +138,7 @@ export function ScoreModal({ db, cid, today, onClose }: { db: Db; cid: string; t
             style={{
               background: C.lineSoft,
               height: "5px",
-              borderRadius: "2px",
+              borderRadius: "999px",
               marginTop: "5px",
               position: "relative",
             }}
@@ -149,7 +149,7 @@ export function ScoreModal({ db, cid, today, onClose }: { db: Db; cid: string; t
                 inset: 0,
                 width: Math.round((p.val / p.max) * 100) + "%",
                 background: p.val / p.max >= 0.7 ? C.green : p.val / p.max >= 0.4 ? C.gold : C.red,
-                borderRadius: "2px",
+                borderRadius: "999px",
               }}
             />
           </div>

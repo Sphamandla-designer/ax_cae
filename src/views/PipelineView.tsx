@@ -11,12 +11,12 @@ export default function PipelineView({ v }: { v: VM }) {
           style={{
             fontSize: "12.5px",
             padding: "7px 14px",
-            borderRadius: "4px",
+            borderRadius: "8px",
             cursor: "pointer",
             fontWeight: "600",
             background: v.tabBoardBg,
             color: v.tabBoardFg,
-            border: "1px solid #e6e2d8",
+            border: "1px solid #e4e4e7",
           }}
           role="button"
           tabIndex={0}
@@ -29,12 +29,12 @@ export default function PipelineView({ v }: { v: VM }) {
           style={{
             fontSize: "12.5px",
             padding: "7px 14px",
-            borderRadius: "4px",
+            borderRadius: "8px",
             cursor: "pointer",
             fontWeight: "600",
             background: v.tabPropsBg,
             color: v.tabPropsFg,
-            border: "1px solid #e6e2d8",
+            border: "1px solid #e4e4e7",
           }}
           role="button"
           tabIndex={0}
@@ -43,7 +43,7 @@ export default function PipelineView({ v }: { v: VM }) {
           Proposals
         </div>
         <div style={{ flex: "1" }} />
-        <div style={{ fontSize: "12px", color: "#8a8474" }}>Drag cards between stages</div>
+        <div style={{ fontSize: "12px", color: "#73767a" }}>Drag cards between stages</div>
       </div>
       {v.isBoard ? (
         <div
@@ -57,8 +57,8 @@ export default function PipelineView({ v }: { v: VM }) {
               style={{
                 width: "216px",
                 flex: "none",
-                background: "#efece4",
-                borderRadius: "6px",
+                background: "#efeff1",
+                borderRadius: "12px",
                 padding: "10px",
                 minHeight: "220px",
               }}
@@ -82,7 +82,7 @@ export default function PipelineView({ v }: { v: VM }) {
                 >
                   {col.name}
                 </span>
-                <span style={{ fontSize: "11px", color: "#8a8474" }}>
+                <span style={{ fontSize: "11px", color: "#73767a" }}>
                   {col.count} · {col.total}
                 </span>
               </div>
@@ -95,8 +95,8 @@ export default function PipelineView({ v }: { v: VM }) {
                     onClick={card.on}
                     style={{
                       background: "#fff",
-                      border: "1px solid #e6e2d8",
-                      borderRadius: "5px",
+                      border: "1px solid #e4e4e7",
+                      borderRadius: "10px",
                       padding: "11px 12px",
                       cursor: "grab",
                     }}
@@ -111,7 +111,7 @@ export default function PipelineView({ v }: { v: VM }) {
                         style={{
                           width: "20px",
                           height: "20px",
-                          borderRadius: "3px",
+                          borderRadius: "999px",
                           background: card.gradeBg,
                           color: card.gradeFg,
                           display: "flex",
@@ -125,7 +125,7 @@ export default function PipelineView({ v }: { v: VM }) {
                         {card.grade}
                       </span>
                     </div>
-                    <div style={{ fontSize: "11.5px", color: "#8a8474", marginTop: "4px" }}>{card.service}</div>
+                    <div style={{ fontSize: "11.5px", color: "#73767a", marginTop: "4px" }}>{card.service}</div>
                     <div
                       style={{
                         display: "flex",
@@ -135,7 +135,7 @@ export default function PipelineView({ v }: { v: VM }) {
                       }}
                     >
                       <span
-                        style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: "13.5px", fontWeight: "600" }}
+                        style={{ fontFamily: "'Archivo',system-ui,sans-serif", fontSize: "13.5px", fontWeight: "600" }}
                       >
                         {card.value}
                       </span>
@@ -144,9 +144,9 @@ export default function PipelineView({ v }: { v: VM }) {
                     <div
                       style={{
                         fontSize: "11.5px",
-                        color: "#3a3f48",
+                        color: "#2a2c31",
                         marginTop: "6px",
-                        borderTop: "1px solid #f0ede4",
+                        borderTop: "1px solid #efeff1",
                         paddingTop: "6px",
                       }}
                     >
@@ -158,10 +158,10 @@ export default function PipelineView({ v }: { v: VM }) {
                         style={{
                           marginTop: "8px",
                           width: "100%",
-                          background: "#0c1220",
+                          background: "#0a0a0a",
                           color: "#fff",
                           border: "none",
-                          borderRadius: "4px",
+                          borderRadius: "8px",
                           padding: "7px 0",
                           fontSize: "11.5px",
                           fontWeight: "600",
@@ -182,13 +182,13 @@ export default function PipelineView({ v }: { v: VM }) {
       {v.isProps ? (
         <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "16px" }}>
-            <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "14px 16px" }}>
+            <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "14px 16px" }}>
               <div
                 style={{
                   fontSize: "10.5px",
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "600",
                 }}
               >
@@ -196,7 +196,7 @@ export default function PipelineView({ v }: { v: VM }) {
               </div>
               <div
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "24px",
                   fontWeight: "600",
                   marginTop: "6px",
@@ -205,13 +205,13 @@ export default function PipelineView({ v }: { v: VM }) {
                 {v.pTotal}
               </div>
             </div>
-            <div style={{ background: "#0c1220", borderRadius: "6px", padding: "14px 16px", color: "#fff" }}>
+            <div style={{ background: "#0a0a0a", borderRadius: "12px", padding: "14px 16px", color: "#fff" }}>
               <div
                 style={{
                   fontSize: "10.5px",
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: "#a8863d",
+                  color: "#e0176b",
                   fontWeight: "600",
                 }}
               >
@@ -219,7 +219,7 @@ export default function PipelineView({ v }: { v: VM }) {
               </div>
               <div
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "24px",
                   fontWeight: "600",
                   marginTop: "6px",
@@ -228,13 +228,13 @@ export default function PipelineView({ v }: { v: VM }) {
                 {v.wTotal}
               </div>
             </div>
-            <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", padding: "14px 16px" }}>
+            <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "14px 16px" }}>
               <div
                 style={{
                   fontSize: "10.5px",
                   letterSpacing: ".12em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "600",
                 }}
               >
@@ -242,7 +242,7 @@ export default function PipelineView({ v }: { v: VM }) {
               </div>
               <div
                 style={{
-                  fontFamily: "'Source Serif 4',Georgia,serif",
+                  fontFamily: "'Archivo',system-ui,sans-serif",
                   fontSize: "24px",
                   fontWeight: "600",
                   marginTop: "6px",
@@ -253,7 +253,7 @@ export default function PipelineView({ v }: { v: VM }) {
               </div>
             </div>
           </div>
-          <div style={{ background: "#fff", border: "1px solid #e6e2d8", borderRadius: "6px", overflowX: "auto" }}>
+          <div style={{ background: "#fff", border: "1px solid #e4e4e7", borderRadius: "12px", overflowX: "auto" }}>
             <div
               style={{
                 display: "grid",
@@ -261,8 +261,8 @@ export default function PipelineView({ v }: { v: VM }) {
                 gap: "10px",
                 minWidth: "1040px",
                 padding: "10px 18px",
-                borderBottom: "1px solid #e6e2d8",
-                background: "#faf9f5",
+                borderBottom: "1px solid #e4e4e7",
+                background: "#fafafa",
               }}
             >
               <span
@@ -270,7 +270,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                 }}
               >
@@ -281,7 +281,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                 }}
               >
@@ -292,7 +292,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                   textAlign: "right",
                 }}
@@ -304,7 +304,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                   textAlign: "center",
                 }}
@@ -316,7 +316,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                   textAlign: "right",
                 }}
@@ -328,7 +328,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                 }}
               >
@@ -339,7 +339,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   fontSize: "10px",
                   letterSpacing: ".1em",
                   textTransform: "uppercase",
-                  color: "#8a8474",
+                  color: "#73767a",
                   fontWeight: "700",
                   textAlign: "right",
                 }}
@@ -356,7 +356,7 @@ export default function PipelineView({ v }: { v: VM }) {
                   gap: "10px",
                   minWidth: "1040px",
                   padding: "12px 18px",
-                  borderBottom: "1px solid #f0ede4",
+                  borderBottom: "1px solid #efeff1",
                   alignItems: "center",
                 }}
               >
@@ -370,10 +370,10 @@ export default function PipelineView({ v }: { v: VM }) {
                 >
                   {q.company}
                 </span>
-                <span style={{ fontSize: "12.5px", color: "#6b6f78" }}>{q.project}</span>
+                <span style={{ fontSize: "12.5px", color: "#697080" }}>{q.project}</span>
                 <span
                   style={{
-                    fontFamily: "'Source Serif 4',Georgia,serif",
+                    fontFamily: "'Archivo',system-ui,sans-serif",
                     fontSize: "13.5px",
                     fontWeight: "600",
                     textAlign: "right",
@@ -381,14 +381,14 @@ export default function PipelineView({ v }: { v: VM }) {
                 >
                   {q.value}
                 </span>
-                <span style={{ fontSize: "12.5px", textAlign: "center", color: "#6b6f78" }}>{q.prob}</span>
+                <span style={{ fontSize: "12.5px", textAlign: "center", color: "#697080" }}>{q.prob}</span>
                 <span
                   style={{
-                    fontFamily: "'Source Serif 4',Georgia,serif",
+                    fontFamily: "'Archivo',system-ui,sans-serif",
                     fontSize: "13.5px",
                     fontWeight: "600",
                     textAlign: "right",
-                    color: "#7a5f24",
+                    color: "#b3105a",
                   }}
                 >
                   {q.weighted}

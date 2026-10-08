@@ -55,7 +55,7 @@ export default function ContactsSection({ d }: { d: DetailModel }) {
         title="Contacts"
         aside={
           <span style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <span style={{ fontSize: "10.5px", letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 700, color: dm ? C.green : C.red, background: dm ? C.greenBg : C.redBg, borderRadius: "3px", padding: "3px 8px" }}>
+            <span style={{ fontSize: "10.5px", letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 700, color: dm ? C.green : C.red, background: dm ? C.greenBg : C.redBg, borderRadius: "999px", padding: "3px 8px" }}>
               Decision-maker identified: {dm ? "YES" : "NO"}
             </span>
             {!editId ? (

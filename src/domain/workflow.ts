@@ -178,9 +178,9 @@ export function steps13(db: Db, c: Company, today: string): StepDef[] {
 export type StepStatus = "COMPLETE" | "IN PROGRESS" | "BLOCKED" | "READY" | "LOCKED";
 export const STATUS_COLORS: Record<StepStatus, [string, string, string]> = {
   COMPLETE: ["#2e7d5b", "#e8f2ec", "#bcdccb"],
-  "IN PROGRESS": ["#a8863d", "#f6f0e0", "#e0cf9e"],
-  READY: ["#0c1220", "#ffffff", "#0c1220"],
-  LOCKED: ["#a39d8f", "#faf9f5", "#e6e2d8"],
+  "IN PROGRESS": ["#9a6200", "#fdf3dc", "#efd59a"],
+  READY: ["#0a0a0a", "#ffffff", "#0a0a0a"],
+  LOCKED: ["#9a9ca3", "#fafafa", "#e4e4e7"],
   BLOCKED: ["#8a3b34", "#f6e6e4", "#e3c3bf"],
 };
 
@@ -342,8 +342,8 @@ export function acq(db: Db, c: Company, today: string) {
   const recency = dsl <= 3 ? 10 : dsl <= 7 ? 8 : dsl <= 14 ? 6 : dsl <= 30 ? 4 : 2;
   const total = lead + opp + access + urgency + fit + value + recency;
   const band = total >= 80 ? "Priority" : total >= 60 ? "Pursue" : total >= 40 ? "Nurture" : "Low priority";
-  const bandColor = total >= 80 ? "#8a3b34" : total >= 60 ? "#a8863d" : total >= 40 ? "#6b6f78" : "#a39d8f";
-  const bandBg = total >= 80 ? "#f6e6e4" : total >= 60 ? "#f6f0e0" : total >= 40 ? "#f0ede4" : "#f6f4ef";
+  const bandColor = total >= 80 ? "#8a3b34" : total >= 60 ? "#9a6200" : total >= 40 ? "#697080" : "#9a9ca3";
+  const bandBg = total >= 80 ? "#f6e6e4" : total >= 60 ? "#fdf3dc" : total >= 40 ? "#efeff1" : "#f4f4f5";
   const parts = [
     { label: "Lead quality", val: lead, max: 25 },
     { label: "Opportunity strength", val: opp, max: 25 },
@@ -391,7 +391,7 @@ export function dxConfidence(db: Db, cid: string) {
   const dims = dxDims(db, cid), n = dims.filter((d) => d.assessed).length, total = dims.length;
   const pct = Math.round((n / total) * 100);
   const label = n === 0 ? "None" : n <= 2 ? "Low" : pct >= 100 ? "High" : pct >= 63 ? "Medium" : "Low";
-  return { n, total, pct, label, fg: label === "High" ? "#2e7d5b" : label === "Medium" ? "#a8863d" : "#b0453c" };
+  return { n, total, pct, label, fg: label === "High" ? "#2e7d5b" : label === "Medium" ? "#9a6200" : "#b0453c" };
 }
 
 export function whyConfidence(db: Db, c: Company) {
@@ -399,7 +399,7 @@ export function whyConfidence(db: Db, c: Company) {
   const sigObs = signalsOf(db, c.id).filter((s) => s.confidence === "Observed").length;
   const pts = (obs >= 3 ? 2 : obs >= 1 ? 1 : 0) + (sigObs >= 1 ? 1 : 0) + (oppsOf(db, c.id).some(isValidOpportunity) ? 1 : 0) + (dmOf(db, c.id) ? 1 : 0) + (researchCheck(db, c).ok ? 1 : 0);
   const label = pts >= 5 ? "High" : pts >= 3 ? "Medium" : scans.length === 0 ? "Insufficient" : "Low";
-  return { label, fg: label === "High" ? "#2e7d5b" : label === "Medium" ? "#a8863d" : "#b0453c", insufficient: label === "Insufficient" };
+  return { label, fg: label === "High" ? "#2e7d5b" : label === "Medium" ? "#9a6200" : "#b0453c", insufficient: label === "Insufficient" };
 }
 
 export function whyNow(db: Db, cid: string) {

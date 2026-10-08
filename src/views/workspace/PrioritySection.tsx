@@ -36,7 +36,7 @@ export default function PrioritySection({ d }: { d: DetailModel }) {
                   aria-checked={c.scores[k] === n}
                   aria-label={`${label}: ${n}`}
                   onClick={() => setScore(k, n)}
-                  style={{ width: "22px", height: "22px", borderRadius: "11px", border: "1px solid " + (n <= c.scores[k] ? C.navy : "#d8d2c2"), background: n <= c.scores[k] ? C.navy : "#fff", cursor: "pointer", padding: 0 }}
+                  style={{ width: "22px", height: "22px", borderRadius: "11px", border: "1px solid " + (n <= c.scores[k] ? C.navy : "#d4d4d8"), background: n <= c.scores[k] ? C.navy : "#fff", cursor: "pointer", padding: 0 }}
                 />
               ))}
             </span>

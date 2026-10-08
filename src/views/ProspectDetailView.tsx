@@ -40,10 +40,10 @@ import ResearchSection from "./workspace/ResearchSection";
 import StrategySection from "./workspace/StrategySection";
 
 const GRADE_COLORS: Record<string, [string, string]> = {
-  A: ["#0c1220", "#ffffff"],
-  B: ["#a8863d", "#ffffff"],
-  C: ["#e6e2d8", "#3a3f48"],
-  "—": ["#f0ede4", "#8a8474"],
+  A: ["#0a0a0a", "#ffffff"],
+  B: ["#e0176b", "#ffffff"],
+  C: ["#e4e4e7", "#2a2c31"],
+  "—": ["#efeff1", "#73767a"],
 };
 
 function Section({ d, onDelete }: { d: DetailModel; onDelete: () => void }) {
@@ -210,7 +210,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                   alignItems: "center",
                   gap: "7px",
                   padding: "7px 11px",
-                  borderRadius: "4px",
+                  borderRadius: "8px",
                   cursor: "pointer",
                   border: "1px solid " + (active ? C.gold : border),
                   background: bg,
@@ -276,7 +276,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
         style={{
           background: "#fff",
           border: "1px solid " + C.line,
-          borderRadius: "6px",
+          borderRadius: "12px",
           padding: "20px 22px",
           display: "flex",
           alignItems: "center",
@@ -296,7 +296,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
             textAlign: "center",
             cursor: "pointer",
             background: a.bandBg,
-            borderRadius: "5px",
+            borderRadius: "10px",
             padding: "10px 16px",
             border: "none",
             fontFamily: "inherit",
@@ -344,7 +344,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
               style={{
                 width: "28px",
                 height: "28px",
-                borderRadius: "3px",
+                borderRadius: "999px",
                 background: gBg,
                 color: gFg,
                 display: "flex",
@@ -393,7 +393,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                 display: "block",
                 marginTop: "6px",
                 border: "1px solid " + C.line,
-                borderRadius: "4px",
+                borderRadius: "8px",
                 padding: "6px 10px",
                 fontSize: "12.5px",
                 background: C.paper,
@@ -427,7 +427,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
         className="cae-nba"
         style={{
           background: C.navy,
-          borderRadius: "6px",
+          borderRadius: "12px",
           marginTop: "14px",
           padding: "16px 22px",
           display: "flex",
@@ -456,7 +456,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
           style={{
             fontSize: "12.5px",
             color:
-              c.nextAction.due && c.nextAction.due < today ? "#e08e85" : c.nextAction.due === today ? "#d9b96a" : "rgba(255,255,255,.6)",
+              c.nextAction.due && c.nextAction.due < today ? "#e08e85" : c.nextAction.due === today ? "#f2b84b" : "rgba(255,255,255,.6)",
           }}
         >
           {!c.nextAction.due
@@ -486,7 +486,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
           style={{
             background: "#fff",
             border: "2px solid " + C.navy,
-            borderRadius: "6px",
+            borderRadius: "12px",
             padding: "18px 22px",
             minWidth: 0,
           }}
@@ -582,7 +582,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                   fontSize: "11.5px",
                   background: C.navy,
                   color: "#fff",
-                  borderRadius: "3px",
+                  borderRadius: "999px",
                   padding: "4px 9px",
                 }}
               >
@@ -594,7 +594,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                     textTransform: "uppercase",
                     fontWeight: 700,
                     color:
-                      x.confidence === "Observed" ? "#8fd1b3" : x.confidence === "Indicated" ? "#d9b96a" : "#e08e85",
+                      x.confidence === "Observed" ? "#8fd1b3" : x.confidence === "Indicated" ? "#f2b84b" : "#e08e85",
                   }}
                 >
                   {c.isDemo ? "demo" : x.confidence}
@@ -602,7 +602,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
               </span>
             ))}
             {signalsOf(db, c.id).length === 0 ? (
-              <span style={{ fontSize: "12.5px", color: "#a39d8f" }}>
+              <span style={{ fontSize: "12.5px", color: "#9a9ca3" }}>
                 No signals recorded — add them under Company.
               </span>
             ) : null}
@@ -614,7 +614,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
             style={{
               background: "#fff",
               border: "2px solid " + (r.ready ? C.green : C.red),
-              borderRadius: "6px",
+              borderRadius: "12px",
               padding: "16px 20px",
             }}
           >
@@ -639,7 +639,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                 fontWeight: 700,
                 color: r.ready ? C.green : C.red,
                 background: r.ready ? C.greenBg : C.redBg,
-                borderRadius: "3px",
+                borderRadius: "999px",
                 padding: "6px 10px",
                 marginTop: "10px",
                 textAlign: "center",
@@ -678,7 +678,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
             </ul>
           </section>
           <section
-            style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "6px", padding: "16px 20px" }}
+            style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "12px", padding: "16px 20px" }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <h3 style={{ ...eyebrow, margin: 0 }}>Profile completeness</h3>
@@ -730,7 +730,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
           <div
             id="cae-workspace"
             tabIndex={-1}
-            style={{ background: C.navy, borderRadius: "6px", padding: "12px 18px", color: "#fff", outline: "none" }}
+            style={{ background: C.navy, borderRadius: "12px", padding: "12px 18px", color: "#fff", outline: "none" }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
               <span
@@ -755,7 +755,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
                   fontWeight: 700,
                   color: cfg,
                   background: cbg,
-                  borderRadius: "3px",
+                  borderRadius: "999px",
                   padding: "4px 9px",
                 }}
               >
@@ -769,7 +769,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
               </div>
             ) : null}
             {cur.missing.length && cur.status !== "COMPLETE" ? (
-              <div style={{ fontSize: "12px", color: "#e8c98a", marginTop: "6px" }}>
+              <div style={{ fontSize: "12px", color: "#f2b84b", marginTop: "6px" }}>
                 Required to complete: {cur.missing.join(" · ")}
               </div>
             ) : null}
@@ -787,7 +787,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", minWidth: 0 }}>
-          <section style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "6px" }}>
+          <section style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "12px" }}>
             <h3 style={{ ...eyebrow, margin: 0, padding: "14px 20px", borderBottom: "1px solid " + C.lineSoft }}>
               Open tasks
             </h3>
@@ -825,7 +825,7 @@ export default function ProspectDetailView({ v }: { v: VM }) {
               <div style={{ padding: "12px 20px", fontSize: "12.5px", color: C.grey }}>No open tasks.</div>
             ) : null}
           </section>
-          <section style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "6px" }}>
+          <section style={{ background: "#fff", border: "1px solid " + C.line, borderRadius: "12px" }}>
             <h3 style={{ ...eyebrow, margin: 0, padding: "14px 20px", borderBottom: "1px solid " + C.lineSoft }}>
               Activity timeline
             </h3>
